@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+# pycharm files
+.idea/
+
+# py cache
+__pycache__/
+
+# ignore tex files
+*.log
+*.synctex.gz
+*.aux
+*.out
+*.bak
+*.bbl
+*.blg
+*.dvi
+
