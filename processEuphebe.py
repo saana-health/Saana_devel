@@ -4,7 +4,7 @@ import pdb
 from difflib import SequenceMatcher
 
 def similar(a,b):
-    return SequenceMatcher(None,a,b).ratio() > 0.75
+    return SequenceMatcher(None,a,b).ratio() > 0.76
 
 class Meal:
     def __init__(self,name = '', ingredients = [], nutrition = {}, type = '', suppliderID = '',price = 0):
@@ -15,11 +15,17 @@ class Meal:
         self.supplierID = suppliderID
         self.price = price
 
+    def __str__(self):
+        return str(self.name)
+
+    def __eq__(self,other):
+        return self.name == other.name
+
 def processMenu(filename):
     '''
 
     :param filename (str): csv filename to open
-    :return:
+    :return: [str]
 
     !! not stable for 'treatment drugs' (name field contains multiple names)
     '''
@@ -78,6 +84,14 @@ def processNutrition(filename):
     return items
 
 def mapToMeal(menus,items):
+    '''
+
+    :param menus: [str]
+    :param items: [Meal()]
+    :return: { str: [Meal()]}
+    '''
+    #TODO: permutation of 'and', '&'
+    #TODO: if a menu should include more than what is already included
     bucket = [x for x in items]
     mapped = {}
     cnt = 0
@@ -85,31 +99,48 @@ def mapToMeal(menus,items):
     for item in items:
         found = False
         temp = []
-        for menu_temp in menus:
-            for menu in menu_temp.split(' with | and | & '):
-
+        for menu_full in menus:
+            for menu in menu_full.replace(' and ',' with ').replace(' & ', ' with ').replace(' w/ ',' with ').split(' with '):
+                #print(menu)
                 if similar(item.name,menu):
-                    temp.append(menu)
+                    temp.append(menu_full)
                     if found:
                         print('>> {} mapped with {}'.format(item.name,temp))
                         cnt2 += 1
                     try:
-                        mapped[menu].append(item)
+                        if item not in mapped[menu_full]:
+                            mapped[menu_full].append(item)
                     except:
-                        mapped[menu] = [item]
+                        mapped[menu_full] = [item]
                     found = True
         if not found:
             print('Following item not found: {}'.format(item.name))
             cnt +=1
     print('{}/{} not found'.format(cnt,len(items)))
     print('{}/{} found twice'.format(cnt2,len(items)))
-    pdb.set_trace()
     return mapped
 
+def combine_nutrition(meals_list):
+    #TODO: figure out return and input val
+    new_list = []
+    for nutrition_dict in meals_list:
+        new_dict = {}
+        for key in nutrition_dict.keys():
+            val = nutrition_dict[key]
 
+            try:
+                new_dict[key] += val
+            except:
+                new_dict[key] = val
+        new_list.append(new_dict)
 
+    return new_list
 
 if __name__ == "__main__":
     menus = processMenu('menu.csv')
     items = processNutrition('nutrition.csv')
-    mapToMeal(menus, items)
+    mapped = mapToMeal(menus, items)
+#    combined = combine_nutrition(items[0],items[1])
+    pdb.set_trace()
+
+
