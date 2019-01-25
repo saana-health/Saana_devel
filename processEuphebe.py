@@ -1,4 +1,5 @@
 import csv
+import pickle
 import pprint
 import pdb
 from difflib import SequenceMatcher
@@ -68,7 +69,7 @@ def processNutrition(filename):
             #start of new item
             if is_name:
                 is_name = False
-                new_item = Meal(name=name)
+                new_item = Meal(name=name, suppliderID='Euphebe')
 
             #ingredient
             elif name:
@@ -172,6 +173,8 @@ def combine_nutrition(mapped):
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
+
+    pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
     return new_list
 
 if __name__ == "__main__":
