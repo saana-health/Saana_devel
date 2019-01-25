@@ -64,8 +64,7 @@ def processNutrition(filename):
                 is_name = False
                 new_item = Meal(name=name)
 
-
-            #empty line
+            #ingredient
             elif name:
                 if name == 'Total':
                     for j in range(1,len(row)):
@@ -73,7 +72,7 @@ def processNutrition(filename):
                 else:
                     ingredients.append(name.replace('  ',''))
 
-            #ingredient
+            #empty line
             else:
                 is_name = True
                 new_item.ingredients = ingredients
@@ -120,27 +119,41 @@ def mapToMeal(menus,items):
     print('{}/{} found twice'.format(cnt2,len(items)))
     return mapped
 
-def combine_nutrition(meals_list):
+def combine_nutrition(mapped):
+    '''
+
+    :param mapped: {menu_name(str): [Meal()]}
+    :return: [Meals()]
+    '''
     #TODO: figure out return and input val
     new_list = []
-    for nutrition_dict in meals_list:
-        new_dict = {}
-        for key in nutrition_dict.keys():
-            val = nutrition_dict[key]
-
-            try:
-                new_dict[key] += val
-            except:
-                new_dict[key] = val
-        new_list.append(new_dict)
-
+    for menu_name in mapped.keys():
+        new_meal = Meal(name = menu_name)
+        new_nutrition = {}
+        new_ingredients = []
+        for item in mapped[menu_name]:
+            for ingredient in item.ingredients:
+                if ingredient not in new_ingredients:
+                    new_ingredients.append(ingredient)
+            for nutrition in item.nutrition.keys():
+                try:
+                    new_nutrition[nutrition] += float(item.nutrition[nutrition])
+                except:
+                    try:
+                        new_nutrition[nutrition] = float(item.nutrition[nutrition])
+                    except:
+                        pass
+        new_meal.nutrition = new_nutrition
+        new_meal.ingredients = new_ingredients
+        new_list.append(new_meal)
     return new_list
 
 if __name__ == "__main__":
     menus = processMenu('menu.csv')
     items = processNutrition('nutrition.csv')
     mapped = mapToMeal(menus, items)
-#    combined = combine_nutrition(items[0],items[1])
+    combined = combine_nutrition(mapped)
     pdb.set_trace()
+
 
 
