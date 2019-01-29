@@ -1832,121 +1832,121 @@ g3
 g5
 F0.0
 sg6
-F82.04
+F162.64
 sg7
-F178.03
+F319.82
 sg8
 F0.0
 sg9
-F0.3
+F0.6599999999999999
 sg10
-F231.14
+F435.57
 sg11
-F11.23
+F34.510000000000005
 sg12
-F0.29
+F0.49
 sg13
-F5.68
+F16.45
 sg14
-F0.31
+F0.64
 sg15
-F0.12
+F0.25
 sg16
-F1.15
+F2.2199999999999998
 sg17
 F0.0
 sg18
-F48.37
+F61.54
 sg19
-F23.62
+F875.77
 sg20
-F0.53
+F0.61
 sg21
-F0.12
+F0.13
 sg22
-F263.4
+F616.0999999999999
 sg23
 F0.0
 sg24
-F11.29
+F26.09
 sg25
 F0.0
 sg26
-F0.49
+F3.51
 sg27
 F0.0
 sg28
 F0.0
 sg29
-F272.48
+F10494.439999999999
 sg30
-F0.65
+F1.5899999999999999
 sg31
 F0.0
 sg32
-F5.44
+F6.9
 sg33
-F5.83
+F14.3
 sg34
 F0.0
 sg35
-F8.59
+F34.09
 sg36
-F0.6
+F2.28
 sg37
-F2.62
+F2.8200000000000003
 sg38
-F0.97
+F3.08
 sg39
-F2.18
+F3.9800000000000004
 sg40
-F64.6
+F94.24
 sg41
-F47.24
+F1751.54
 sg42
 F0.0
 sg43
-F1.74
+F1.8599999999999999
 sg44
-F155.75
+F249.47
 sg45
-F7.99
+F19.98
 sg46
-F0.65
+F0.74
 sg47
-F1.0
+F2.0
 sg48
-F0.72
+F1.71
 sg49
-F2.82
+F4.949999999999999
 sg50
-F211.2
+F453.08
 sg51
-F154.59
+F342.64
 sg52
-F1.25
+F2.76
 sg53
-F1.63
+F3.62
 sg54
 F0.99
 sg55
-F38.03
+F84.22
 sg56
-F4.47
+F7.359999999999999
 sg57
-F12.51
+F22.049999999999997
 sg58
-F77.88
+F142.89999999999998
 sg59
-F3.25
+F4.73
 sg60
-F472.45
+F17515.47
 sg61
-F9.34
+F12.69
 sg62
-F816.5
+F1671.94
 sg63
-F155.75
+F249.47
 ssg64
 g65
 sg66
@@ -1975,19 +1975,33 @@ aS'oil, olive'
 p335
 aS'sea salt'
 p336
+aS'sweet potatoes, fresh, cubes'
+p337
+aS'oil, coconut'
+p338
+aS'oregano, ground'
+p339
+aS'chili powder, Eagle, food service'
+p340
+aS'paprika, ground'
+p341
+aS'garlic powder'
+p342
+aS'parsnips, fresh, sliced'
+p343
 asg91
 I0
 sg92
 g65
 sg93
 S"Rachel's Veggie Burger with Roasted Sweet potato and parsnip fries (GF)"
-p337
+p344
 sba(imodel
 Meal
-p338
-(dp339
+p345
+(dp346
 g3
-(dp340
+(dp347
 g5
 F0.0
 sg6
@@ -2109,54 +2123,54 @@ F22.240000000000002
 ssg64
 g65
 sg66
-(lp341
+(lp348
 S'turmeric, ground'
-p342
-aS'cayenne chili pepper, dried, ground'
-p343
-aS'spinach, baby, fresh'
-p344
-aS'garlic cloves, fresh'
-p345
-aS'ginger root, fresh'
-p346
-aS'serrano peppers, fresh'
-p347
-aS'spice blend, garam masala'
-p348
-aS'coriander, ground leaves'
 p349
-aS'cumin seeds, ground'
+aS'cayenne chili pepper, dried, ground'
 p350
-aS'coconut milk, canned'
+aS'spinach, baby, fresh'
 p351
-aS'tofu, extra firm, Nasoya'
+aS'garlic cloves, fresh'
 p352
-aS'oil, olive'
+aS'ginger root, fresh'
 p353
-aS'onion, yellow, fresh'
+aS'serrano peppers, fresh'
 p354
-aS'sea salt'
+aS'spice blend, garam masala'
 p355
-aS'cardamom, ground'
+aS'coriander, ground leaves'
 p356
-aS'rice, brown, dry, long grain'
+aS'cumin seeds, ground'
 p357
-aS'water, tap'
+aS'coconut milk, canned'
 p358
+aS'tofu, extra firm, Nasoya'
+p359
+aS'oil, olive'
+p360
+aS'onion, yellow, fresh'
+p361
+aS'sea salt'
+p362
+aS'cardamom, ground'
+p363
+aS'rice, brown, dry, long grain'
+p364
+aS'water, tap'
+p365
 asg91
 I0
 sg92
 g65
 sg93
 S'Saag no Paneer with Cardamom Rice (GF)'
-p359
+p366
 sba(imodel
 Meal
-p360
-(dp361
+p367
+(dp368
 g3
-(dp362
+(dp369
 g5
 F0.0
 sg6
@@ -2278,42 +2292,42 @@ F4.54
 ssg64
 g65
 sg66
-(lp363
+(lp370
 S'olive oil'
-p364
-aS'white onion'
-p365
-aS'Yukon Gold potatoes'
-p366
-aS'carrots'
-p367
-aS'garlic'
-p368
-aS'red lentils'
-p369
-aS'Organic vegetable stock'
-p370
-aS'lemon juice'
 p371
-aS'coriander'
+aS'white onion'
 p372
-aS'cumin'
+aS'Yukon Gold potatoes'
 p373
-aS'sea salt'
+aS'carrots'
 p374
+aS'garlic'
+p375
+aS'red lentils'
+p376
+aS'Organic vegetable stock'
+p377
+aS'lemon juice'
+p378
+aS'coriander'
+p379
+aS'cumin'
+p380
+aS'sea salt'
+p381
 asg91
 I0
 sg92
 g65
 sg93
 S'Lemony Red Lentil Soup'
-p375
+p382
 sba(imodel
 Meal
-p376
-(dp377
+p383
+(dp384
 g3
-(dp378
+(dp385
 g5
 F0.0
 sg6
@@ -2435,50 +2449,50 @@ F101.56
 ssg64
 g65
 sg66
-(lp379
+(lp386
 S'Green Lentil Penne'
-p380
-aS'black pepper, ground'
-p381
-aS'broccoli florets, fresh'
-p382
-aS'broth, vegetable, low sodium'
-p383
-aS'cashews, raw, whole'
-p384
-aS'water, tap'
-p385
-aS'cauliflower florets, fresh'
-p386
-aS'garlic cloves, fresh'
 p387
-aS'garlic powder'
+aS'black pepper, ground'
 p388
-aS'lemon juice, fresh'
+aS'broccoli florets, fresh'
 p389
-aS'nutritional yeast'
+aS'broth, vegetable, low sodium'
 p390
-aS'oil, olive'
+aS'cashews, raw, whole'
 p391
-aS'onion powder'
+aS'water, tap'
 p392
-aS'peas, green, frozen'
+aS'cauliflower florets, fresh'
 p393
-aS'sea salt'
+aS'garlic cloves, fresh'
 p394
+aS'garlic powder'
+p395
+aS'lemon juice, fresh'
+p396
+aS'nutritional yeast'
+p397
+aS'oil, olive'
+p398
+aS'onion powder'
+p399
+aS'peas, green, frozen'
+p400
+aS'sea salt'
+p401
 asg91
 I0
 sg92
 g65
 sg93
 S'Cauliflower Alfredo with Green Lentil Penne (GF)'
-p395
+p402
 sba(imodel
 Meal
-p396
-(dp397
+p403
+(dp404
 g3
-(dp398
+(dp405
 g5
 F0.0
 sg6
@@ -2600,58 +2614,58 @@ F325.46000000000004
 ssg64
 g65
 sg66
-(lp399
+(lp406
 S'oil, olive'
-p400
-aS'garlic, minced'
-p401
-aS'mushrooms, crimini, fresh'
-p402
-aS'chili peppers, powder'
-p403
-aS'spinach, baby, fresh'
-p404
-aS'jalapeno peppers, fresh'
-p405
-aS'lemon juice, fresh'
-p406
-aS'cilantro, fresh, leaves'
 p407
-aS'black beans, dry'
+aS'garlic, minced'
 p408
-aS'miso'
+aS'mushrooms, crimini, fresh'
 p409
-aS'nutritional yeast'
+aS'chili peppers, powder'
 p410
-aS'tortilla, 100% whole wheat, medium'
+aS'spinach, baby, fresh'
 p411
-aS'sea salt'
+aS'jalapeno peppers, fresh'
 p412
-aS'cumin seeds, ground'
+aS'lemon juice, fresh'
 p413
-aS'avocado, California, fresh'
+aS'cilantro, fresh, leaves'
 p414
-aS'sea salt, california'
+aS'black beans, dry'
 p415
-aS'juice, lime, fresh'
+aS'miso'
 p416
-aS'shallots, fresh, chopped'
+aS'nutritional yeast'
 p417
-aS'tomatillos, crushed'
+aS'tortilla, 100% whole wheat, medium'
 p418
+aS'sea salt'
+p419
+aS'cumin seeds, ground'
+p420
+aS'avocado, California, fresh'
+p421
+aS'sea salt, california'
+p422
+aS'juice, lime, fresh'
+p423
+aS'shallots, fresh, chopped'
+p424
+aS'tomatillos, crushed'
+p425
 asg91
 I0
 sg92
 g65
 sg93
 S'Lunchtime Rita with Green Salsa'
-p419
+p426
 sba(imodel
 Meal
-p420
-(dp421
+p427
+(dp428
 g3
-(dp422
+(dp429
 g5
 F0.0
 sg6
@@ -2773,62 +2787,62 @@ F110.5
 ssg64
 g65
 sg66
-(lp423
+(lp430
 S'oil, coconut'
-p424
-aS'onion, white, fresh, chopped'
-p425
-aS'ginger root, fresh, 1" sliced'
-p426
-aS'garlic, minced'
-p427
-aS'carrots, fresh'
-p428
-aS'peas, snow, fresh'
-p429
-aS'broccoli florets, fresh'
-p430
-aS'coconut milk, canned'
 p431
-aS'water, generic'
+aS'onion, white, fresh, chopped'
 p432
-aS'kale, fresh, chopped'
+aS'ginger root, fresh, 1" sliced'
 p433
-aS'vinegar, brown rice, organic'
+aS'garlic, minced'
 p434
-aS'soy sauce, tamari'
+aS'carrots, fresh'
 p435
-aS'tofu, super firm, Nasoya, cubed'
+aS'peas, snow, fresh'
 p436
-aS'arrowroot flour'
+aS'broccoli florets, fresh'
 p437
-aS'cilantro, fresh, leaves'
+aS'coconut milk, canned'
 p438
-aS'curry paste, green'
+aS'water, generic'
 p439
-aS'sweet potatoes, fresh, cubes'
+aS'kale, fresh, chopped'
 p440
-aS'sea salt'
+aS'vinegar, brown rice, organic'
 p441
-aS'rice, brown, dry, long grain'
+aS'soy sauce, tamari'
 p442
-aS'lemongrass, fresh, chopped'
+aS'tofu, super firm, Nasoya, cubed'
 p443
-aS'water, tap'
+aS'arrowroot flour'
 p444
+aS'cilantro, fresh, leaves'
+p445
+aS'curry paste, green'
+p446
+aS'sweet potatoes, fresh, cubes'
+p447
+aS'sea salt'
+p448
+aS'rice, brown, dry, long grain'
+p449
+aS'lemongrass, fresh, chopped'
+p450
+aS'water, tap'
+p451
 asg91
 I0
 sg92
 g65
 sg93
 S'Thai Coconut Green Curry with Lemongrass Rice (GF)'
-p445
+p452
 sba(imodel
 Meal
-p446
-(dp447
+p453
+(dp454
 g3
-(dp448
+(dp455
 g5
 F0.0
 sg6
@@ -2950,203 +2964,223 @@ F217.83
 ssg64
 g65
 sg66
-(lp449
+(lp456
 S'yellow bell pepper'
-p450
-aS'red bell pepper'
-p451
-aS'olive oil '
-p452
-aS'eggplant'
-p453
-aS'black pepper'
-p454
-aS'sweet potatoes'
-p455
-aS'zucchini'
-p456
-aS'white onion'
 p457
-aS'bay leaf'
+aS'red bell pepper'
 p458
-aS'thyme'
+aS'olive oil '
 p459
-aS'cherry tomatoes'
+aS'eggplant'
 p460
-aS'chickpea flour'
+aS'black pepper'
 p461
-aS'water'
+aS'sweet potatoes'
 p462
-aS'nutritional yeast'
+aS'zucchini'
 p463
-aS'baking powde'
+aS'white onion'
 p464
-aS'turmeric'
+aS'bay leaf'
 p465
-aS'almond flour'
+aS'thyme'
 p466
-aS'sea salt'
+aS'cherry tomatoes'
 p467
-aS'bell pepper'
+aS'chickpea flour'
 p468
-aS'shallots'
+aS'water'
 p469
-aS'garlic'
+aS'nutritional yeast'
 p470
-aS'lime juice'
+aS'baking powde'
 p471
-aS'olive oil'
+aS'turmeric'
 p472
+aS'almond flour'
+p473
+aS'sea salt'
+p474
+aS'bell pepper'
+p475
+aS'shallots'
+p476
+aS'garlic'
+p477
+aS'lime juice'
+p478
+aS'olive oil'
+p479
 asg91
 I0
 sg92
 g65
 sg93
 S'Veggie Brunch Pie with Roasted Red Pepper Sauce (GF)'
-p473
+p480
 sba(imodel
 Meal
-p474
-(dp475
+p481
+(dp482
 g3
-(dp476
+(dp483
 g5
 F0.0
 sg6
-F0.0
+F78.45
 sg7
-F0.0
+F184.66
 sg8
-F0.0
+F0.05
 sg9
-F0.0
+F0.29
 sg10
-F80.0
+F592.52
 sg11
-F0.0
+F18.72
 sg12
-F0.0
+F0.35
 sg13
-F2.0
+F14.31
 sg14
-F0.0
+F0.55
 sg15
-F0.0
+F0.39
 sg16
-F0.0
+F1.88
 sg17
 F0.0
 sg18
-F9.0
+F248.34
 sg19
-F0.0
+F47.18
 sg20
-F0.0
+F1.11
 sg21
-F0.0
+F0.05
 sg22
-F10.0
+F766.2
 sg23
 F0.0
 sg24
-F0.0
+F98.34
 sg25
-F0.0
+F1446.79
 sg26
-F0.0
+F0.93
 sg27
-F0.0
+F36.2
 sg28
 F0.0
 sg29
-F0.0
+F12.35
 sg30
-F0.0
+F4.1
 sg31
 F0.0
 sg32
-F1.0
+F27.63
 sg33
-F0.0
+F36.87
 sg34
 F0.0
 sg35
-F12.0
+F37.47
 sg36
-F0.0
+F0.88
 sg37
-F0.0
+F14.47
 sg38
-F0.0
+F0.57
 sg39
-F0.0
+F1.3
 sg40
-F0.0
+F58.56
 sg41
-F0.0
+F94.36
 sg42
 F0.0
 sg43
-F0.0
+F1.77
 sg44
-F0.0
+F222.96
 sg45
-F0.0
+F2.54
 sg46
-F0.0
+F4.72
 sg47
-F1.0
+F2.0
 sg48
-F0.0
+F6.56
 sg49
-F0.0
+F10.86
 sg50
-F37.0
+F417.99
 sg51
-F0.0
+F244.83
 sg52
-F0.0
+F9.0
 sg53
-F0.0
+F3.89
 sg54
-F0.0
+F1.01
 sg55
-F16.0
+F64.28999999999999
 sg56
-F0.0
+F3.09
 sg57
-F2.0
+F12.51
 sg58
-F0.0
+F50.1
 sg59
-F0.0
+F5.53
 sg60
-F0.0
+F943.6
 sg61
-F2.0
+F20.56
 sg62
-F0.0
+F549.48
 sg63
-F0.0
+F201.62
 ssg64
 g65
 sg66
-(lp477
+(lp484
 S'tortilla, yellow corn, 6"'
-p478
+p485
+aS'chickpeas, dry'
+p486
+aS'mushrooms, maitake, fresh, diced'
+p487
+aS'poblano peppers, fresh, sliced'
+p488
+aS'onion, white, fresh, chopped'
+p489
+aS'garlic, minced'
+p490
+aS'spinach, baby, fresh'
+p491
+aS'oil, olive'
+p492
+aS'water, tap'
+p493
+aS'cashews, raw, whole'
+p494
+aS'sea salt'
+p495
 asg91
 I0
 sg92
 g65
 sg93
 S'Chickpea and Maitake Tacos with Corn Tortillas (GF)'
-p479
+p496
 sba(imodel
 Meal
-p480
-(dp481
+p497
+(dp498
 g3
-(dp482
+(dp499
 g5
 F0.0
 sg6
@@ -3268,44 +3302,44 @@ F150.36
 ssg64
 g65
 sg66
-(lp483
+(lp500
 S'oil, olive, pure'
-p484
+p501
 aS'onion, yellow, fresh'
-p485
+p502
 aS'cauliflower florets, fresh'
-p486
+p503
 aS'broccoli florets, fresh'
-p487
+p504
 aS'carrots, fresh'
-p488
+p505
 aS'stock, vegetable, organic'
-p489
+p506
 aS'mustard, dijon'
-p490
+p507
 aS'paprika, ground'
-p491
+p508
 aS'cashews, raw, whole'
-p492
+p509
 aS'water, tap'
-p493
+p510
 aS'black pepper, ground'
-p494
+p511
 aS'sea salt'
-p495
+p512
 asg91
 I0
 sg92
 g65
 sg93
 S'Creamy Broccoli Soup (GF)'
-p496
+p513
 sba(imodel
 Meal
-p497
-(dp498
+p514
+(dp515
 g3
-(dp499
+(dp516
 g5
 F2.31
 sg6
@@ -3427,54 +3461,54 @@ F118.33
 ssg64
 g65
 sg66
-(lp500
+(lp517
 S'porcini mushrooms'
-p501
+p518
 aS'wild rice'
-p502
+p519
 aS'quinoa'
-p503
+p520
 aS'kale'
-p504
+p521
 aS'olive oil '
-p505
+p522
 aS'shallots'
-p506
+p523
 aS'garlic'
-p507
+p524
 aS'crimini mushrooms'
-p508
+p525
 aS'celery'
-p509
+p526
 aS'carrots'
-p510
+p527
 aS'white cooking wine'
-p511
+p528
 aS'thyme'
-p512
+p529
 aS'sage'
-p513
+p530
 aS'parsley'
-p514
+p531
 aS'pecans'
-p515
+p532
 aS'walnut oil'
-p516
+p533
 aS'sea salt'
-p517
+p534
 asg91
 I0
 sg92
 g65
 sg93
 S'"Not-so-Stuffing" Quinoa Salad'
-p518
+p535
 sba(imodel
 Meal
-p519
-(dp520
+p536
+(dp537
 g3
-(dp521
+(dp538
 g5
 F0.0
 sg6
@@ -3596,64 +3630,229 @@ F328.65
 ssg64
 g65
 sg66
-(lp522
+(lp539
 S'chickpeas, dry'
-p523
-aS'parsnips, fresh, sliced'
-p524
-aS'kale, fresh, chopped'
-p525
-aS'brussels sprouts, fresh'
-p526
-aS'garlic cloves, fresh'
-p527
-aS'miso'
-p528
-aS'lemon juice, fresh'
-p529
-aS'vinegar, balsamic'
-p530
-aS'mustard, dijon'
-p531
-aS'plum paste, pickled, umeboshi'
-p532
-aS'soy sauce, tamari'
-p533
-aS'tofu, extra firm, Nasoya'
-p534
-aS'oil, olive'
-p535
-aS'seaweed, nori, fresh'
-p536
-aS'black pepper, ground'
-p537
-aS'water, tap'
-p538
-aS'sea salt'
-p539
-aS'bread, sprouted whole grain & seed, Ezekiel 4:9'
 p540
-aS'garlic powder'
+aS'parsnips, fresh, sliced'
 p541
-aS'nutritional yeast'
+aS'kale, fresh, chopped'
 p542
-aS'basil, dried, leaves'
+aS'brussels sprouts, fresh'
 p543
-aS'oregano, dried, leaves'
+aS'garlic cloves, fresh'
 p544
+aS'miso'
+p545
+aS'lemon juice, fresh'
+p546
+aS'vinegar, balsamic'
+p547
+aS'mustard, dijon'
+p548
+aS'plum paste, pickled, umeboshi'
+p549
+aS'soy sauce, tamari'
+p550
+aS'tofu, extra firm, Nasoya'
+p551
+aS'oil, olive'
+p552
+aS'seaweed, nori, fresh'
+p553
+aS'black pepper, ground'
+p554
+aS'water, tap'
+p555
+aS'sea salt'
+p556
+aS'bread, sprouted whole grain & seed, Ezekiel 4:9'
+p557
+aS'garlic powder'
+p558
+aS'nutritional yeast'
+p559
+aS'basil, dried, leaves'
+p560
+aS'oregano, dried, leaves'
+p561
 asg91
 I0
 sg92
 g65
 sg93
 S'Chickpea Caesar Salad with Herbed Garlic Croutons'
-p545
+p562
 sba(imodel
 Meal
-p546
-(dp547
+p563
+(dp564
 g3
-(dp548
+(dp565
+g5
+F0.0
+sg6
+F161.01
+sg7
+F321.46
+sg8
+F0.02
+sg9
+F0.42
+sg10
+F318.45
+sg11
+F17.93
+sg12
+F0.53
+sg13
+F8.51
+sg14
+F0.5
+sg15
+F0.2
+sg16
+F2.06
+sg17
+F0.0
+sg18
+F25.09
+sg19
+F317.66
+sg20
+F0.43
+sg21
+F0.17
+sg22
+F770.0
+sg23
+F0.0
+sg24
+F10.39
+sg25
+F0.0
+sg26
+F1.46
+sg27
+F0.0
+sg28
+F0.0
+sg29
+F2422.5
+sg30
+F0.46
+sg31
+F0.0
+sg32
+F2.82
+sg33
+F4.16
+sg34
+F0.0
+sg35
+F4.3
+sg36
+F0.76
+sg37
+F1.23
+sg38
+F1.17
+sg39
+F4.95
+sg40
+F103.65
+sg41
+F635.32
+sg42
+F0.13
+sg43
+F3.56
+sg44
+F303.93
+sg45
+F3.48
+sg46
+F0.59
+sg47
+F1.0
+sg48
+F1.21
+sg49
+F4.58
+sg50
+F483.05
+sg51
+F121.8
+sg52
+F1.7
+sg53
+F3.59
+sg54
+F0.84
+sg55
+F57.77
+sg56
+F8.76
+sg57
+F20.98
+sg58
+F147.75
+sg59
+F6.99
+sg60
+F6353.2
+sg61
+F17.16
+sg62
+F1447.86
+sg63
+F265.81
+ssg64
+g65
+sg66
+(lp566
+S'oil, olive'
+p567
+aS'onion, white, fresh, chopped'
+p568
+aS'garlic, minced'
+p569
+aS'carrots, fresh, chopped'
+p570
+aS'cumin seeds, ground'
+p571
+aS'tomatoes, crushed, canned'
+p572
+aS'tomato sauce, canned'
+p573
+aS'broth, vegetable, organic'
+p574
+aS'bay leaf, dried'
+p575
+aS'sage, fresh'
+p576
+aS'spinach, baby, fresh'
+p577
+aS'lemon juice, fresh'
+p578
+aS'black pepper, ground'
+p579
+aS'beans, small white, dry'
+p580
+aS'sea salt'
+p581
+asg91
+I0
+sg92
+g65
+sg93
+S'Tomato & Cannellini Bean Soup (GF)'
+p582
+sba(imodel
+Meal
+p583
+(dp584
+g3
+(dp585
 g5
 F0.0
 sg6
@@ -3775,54 +3974,221 @@ F82.78999999999999
 ssg64
 g65
 sg66
-(lp549
-g413
-ag414
+(lp586
+g420
+ag421
 aS'garlic, minced'
-p550
-ag415
+p587
+ag422
 aS'cilantro, fresh, leaves'
-p551
-ag416
+p588
+ag423
 aS'jalapeno peppers, fresh'
-p552
-ag417
-ag418
+p589
+ag424
+ag425
 aS'sea salt'
-p553
+p590
 aS'oil, coconut'
-p554
+p591
 aS'sweet potatoes, fresh, cubes'
-p555
+p592
 aS'black beans, dry'
-p556
+p593
 aS'onion, yellow, fresh, chopped'
-p557
+p594
 aS'chili powder, Eagle, food service'
-p558
+p595
 aS'tofu, extra firm, Nasoya'
-p559
+p596
 aS'spinach, baby, fresh'
-p560
+p597
 aS'bell pepper, red, fresh, chopped'
-p561
+p598
 aS'turmeric, ground'
-p562
+p599
 aS'Alvarado Street Bakery Sprouted Whole Wheat Tortilla'
-p563
+p600
 asg91
 I0
 sg92
 g65
 sg93
 S'Hippie Brunch Burrito with Green Salsa'
-p564
+p601
 sba(imodel
 Meal
-p565
-(dp566
+p602
+(dp603
 g3
-(dp567
+(dp604
+g5
+F4.46
+sg6
+F109.77
+sg7
+F76.12
+sg8
+F0.0
+sg9
+F0.34
+sg10
+F425.39
+sg11
+F19.54
+sg12
+F0.52
+sg13
+F10.01
+sg14
+F0.1
+sg15
+F0.43
+sg16
+F0.51
+sg17
+F0.0
+sg18
+F82.87
+sg19
+F63.89
+sg20
+F0.55
+sg21
+F0.1
+sg22
+F761.7
+sg23
+F0.66
+sg24
+F13.16
+sg25
+F0.0
+sg26
+F0.4
+sg27
+F0.0
+sg28
+F0.0
+sg29
+F686.49
+sg30
+F1.02
+sg31
+F0.0
+sg32
+F9.29
+sg33
+F9.18
+sg34
+F0.0
+sg35
+F51.21
+sg36
+F0.33
+sg37
+F4.46
+sg38
+F1.06
+sg39
+F0.35
+sg40
+F63.73
+sg41
+F127.79
+sg63
+F68.02
+sg43
+F1.89
+sg44
+F68.02
+sg45
+F4.21
+sg46
+F0.96
+sg47
+F1.0
+sg48
+F0.3
+sg49
+F2.53
+sg50
+F593.06
+sg51
+F125.36
+sg52
+F2.24
+sg53
+F1.36
+sg54
+F0.78
+sg55
+F73.41
+sg56
+F1.22
+sg57
+F10.38
+sg58
+F35.55
+sg59
+F2.63
+sg60
+F1277.86
+sg61
+F9.89
+sg62
+F552.57
+ssg64
+g65
+sg66
+(lp605
+S'wine, cooking, white'
+p606
+aS'onion, white, fresh, chopped'
+p607
+aS'celery, fresh, stalk'
+p608
+aS'garlic, minced'
+p609
+aS'onion, cippolini, fresh, peeled, medium'
+p610
+aS'fennel, fresh, bulb'
+p611
+aS'arugula, fresh, chopped'
+p612
+aS'lemon juice, fresh'
+p613
+aS'oil, olive'
+p614
+aS'nutritional yeast'
+p615
+aS'broth, vegetable'
+p616
+aS'beans, small white, dry'
+p617
+aS'cashews, raw, whole'
+p618
+aS'water, tap'
+p619
+aS'rice, brown, dry, short grain'
+p620
+aS'Euphebe Organic Vegetable Stock'
+p621
+aS'sea salt, california'
+p622
+asg91
+I0
+sg92
+g65
+sg93
+S'Fennel & Arugula Farrotto (GF)'
+p623
+sba(imodel
+Meal
+p624
+(dp625
+g3
+(dp626
 g5
 F0.0
 sg6
@@ -3944,52 +4310,52 @@ F41.48
 ssg64
 g65
 sg66
-(lp568
+(lp627
 S'white onion'
-p569
+p628
 aS'tomatoes'
-p570
+p629
 aS'kalamata olives'
-p571
+p630
 aS'kalamata olive juice'
-p572
+p631
 aS'capers'
-p573
+p632
 aS'caper juice'
-p574
+p633
 aS'garlic'
-p575
+p634
 aS'olive oil'
-p576
+p635
 aS'chili pepper flakes'
-p577
+p636
 aS'parsley'
-p578
+p637
 aS'white beans'
-p579
+p638
 aS'seaweed'
-p580
+p639
 aS'red bell pepper'
-p581
+p640
 aS'carrots'
-p582
+p641
 aS'water'
-p583
+p642
 aS'sea salt'
-p584
+p643
 asg91
 I0
 sg92
 g65
 sg93
 S'Penne w/ Puttanesca'
-p585
+p644
 sba(imodel
 Meal
-p586
-(dp587
+p645
+(dp646
 g3
-(dp588
+(dp647
 g5
 F0.0
 sg6
@@ -4111,58 +4477,58 @@ F210.65
 ssg64
 g65
 sg66
-(lp589
+(lp648
 S'brussels sprouts'
-p590
+p649
 aS'shiitake mushrooms'
-p591
+p650
 aS'sweet potatoes'
-p592
+p651
 aS'kale'
-p593
+p652
 aS'garlic '
-p594
+p653
 aS'white onion'
-p595
+p654
 aS'white beans'
-p596
+p655
 aS'Gluten free tamari'
-p597
+p656
 aS'olive oil'
-p598
+p657
 aS'black pepper'
-p599
+p658
 aS'rosemary'
-p600
+p659
 aS'cashews'
-p601
+p660
 aS'water'
-p602
+p661
 aS'lemon juice'
-p603
+p662
 aS'nutritional yeast'
-p604
+p663
 aS'apple cider vinegar'
-p605
+p664
 aS'nutmeg'
-p606
+p665
 aS'sea salt'
-p607
+p666
 aS'pecans'
-p608
+p667
 asg91
 I0
 sg92
 g65
 sg93
 S'Brussels Sprouts Gratin with Toasted Pecans (GF)'
-p609
+p668
 sba(imodel
 Meal
-p610
-(dp611
+p669
+(dp670
 g3
-(dp612
+(dp671
 g5
 F2.97
 sg6
@@ -4284,54 +4650,54 @@ F25.79
 ssg64
 g65
 sg66
-(lp613
+(lp672
 S'oil, olive'
-p614
+p673
 aS'onion, yellow, fresh, chopped'
-p615
+p674
 aS'garlic, minced'
-p616
+p675
 aS'celery, fresh, stalk'
-p617
+p676
 aS'carrots, fresh'
-p618
+p677
 aS'tempeh'
-p619
+p678
 aS'mushrooms, crimini, fresh'
-p620
+p679
 aS'black pepper, ground'
-p621
+p680
 aS'nutmeg, ground'
-p622
+p681
 aS'tomatoes, crushed, canned'
-p623
+p682
 aS'tomato sauce'
-p624
+p683
 aS'wine, white, chardonnay'
-p625
+p684
 aS'cashews, raw, whole'
-p626
+p685
 aS'bay leaf, dried'
-p627
+p686
 aS'water, tap'
-p628
+p687
 aS'sea salt'
-p629
+p688
 aS'Spelt pasta'
-p630
+p689
 asg91
 I0
 sg92
 g65
 sg93
 S'Marcella Inspired Bolognese with Spelt Fusilli'
-p631
+p690
 sba(imodel
 Meal
-p632
-(dp633
+p691
+(dp692
 g3
-(dp634
+(dp693
 g5
 F0.0
 sg6
@@ -4453,46 +4819,46 @@ F270.7
 ssg64
 g65
 sg66
-(lp635
+(lp694
 S'oil, coconut'
-p636
+p695
 aS'onion, white, fresh, chopped'
-p637
+p696
 aS'garlic, minced'
-p638
+p697
 aS'ginger root, fresh'
-p639
+p698
 aS'sweet potatoes, fresh, cubes'
-p640
+p699
 aS'tomato sauce'
-p641
+p700
 aS'spice blend, curry, powder'
-p642
+p701
 aS'coconut milk, canned, light'
-p643
+p702
 aS'kale, fresh, chopped'
-p644
+p703
 aS'beans, small white, dry'
-p645
+p704
 aS'water, tap'
-p646
+p705
 aS'sea salt, california'
-p647
+p706
 aS'quinoa, tricolor, dry'
-p648
+p707
 asg91
 I0
 sg92
 g65
 sg93
 S'White Bean Korma with Tricolor Quinoa (GF)'
-p649
+p708
 sba(imodel
 Meal
-p650
-(dp651
+p709
+(dp710
 g3
-(dp652
+(dp711
 g5
 F0.0
 sg6
@@ -4614,62 +4980,62 @@ F378.24
 ssg64
 g65
 sg66
-(lp653
+(lp712
 S'oil, olive'
-p654
+p713
 aS'onion, yellow, fresh, chopped'
-p655
+p714
 aS'garlic, minced'
-p656
+p715
 aS'ginger root, fresh'
-p657
+p716
 aS'jalapeno peppers, fresh'
-p658
+p717
 aS'coriander seed, ground'
-p659
+p718
 aS'cumin seeds, ground'
-p660
+p719
 aS'cayenne chili pepper, dried, ground'
-p661
+p720
 aS'turmeric, ground'
-p662
+p721
 aS'paprika, ground'
-p663
+p722
 aS'spice blend, garam masala'
-p664
+p723
 aS'tomatoes, crushed'
-p665
+p724
 aS'chickpeas, dry'
-p666
+p725
 aS'cauliflower florets, fresh'
-p667
+p726
 aS'spinach, baby, fresh'
-p668
+p727
 aS'lemon juice, fresh'
-p669
+p728
 aS'water, tap'
-p670
+p729
 aS'sea salt'
-p671
+p730
 aS'rice, brown'
-p672
+p731
 aS'cumin seeds'
-p673
+p732
 aS'peas, green, frozen'
-p674
+p733
 asg91
 I0
 sg92
 g65
 sg93
 S'Chana Masala with Indian-Spiced Rice (GF)'
-p675
+p734
 sba(imodel
 Meal
-p676
-(dp677
+p735
+(dp736
 g3
-(dp678
+(dp737
 g5
 F0.0
 sg6
@@ -4791,58 +5157,58 @@ F111.01
 ssg64
 g65
 sg66
-(lp679
+(lp738
 S'tricolor quinoa'
-p680
+p739
 aS'brown rice'
-p681
+p740
 aS'cauliflower'
-p682
+p741
 aS'celery root'
-p683
+p742
 aS'kohlrabi'
-p684
+p743
 aS'brussels sprouts'
-p685
+p744
 aS'winter squash'
-p686
+p745
 aS'kale'
-p687
+p746
 aS'apple'
-p688
+p747
 aS'red onion'
-p689
+p748
 aS'dried cranberries'
-p690
+p749
 aS'almonds'
-p691
+p750
 aS'pumpkin seeds'
-p692
+p751
 aS'pecans'
-p693
+p752
 aS'almond oil'
-p694
+p753
 aS'balsamic vinegar'
-p695
+p754
 aS'lemon juice'
-p696
+p755
 aS'parsley'
-p697
+p756
 aS'sea salt'
-p698
+p757
 asg91
 I0
 sg92
 g65
 sg93
 S'Harvest Grain Bowl (GF)'
-p699
+p758
 sba(imodel
 Meal
-p700
-(dp701
+p759
+(dp760
 g3
-(dp702
+(dp761
 g5
 F0.0
 sg6
@@ -4964,48 +5330,48 @@ F78.24000000000001
 ssg64
 g65
 sg66
-(lp703
+(lp762
 S'stock, vegetable, organic'
-p704
+p763
 aS'cauliflower florets, fresh'
-p705
+p764
 aS'vinegar, white wine'
-p706
+p765
 aS'oil, olive, pure'
-p707
+p766
 aS'onion, yellow, fresh'
-p708
+p767
 aS'garlic cloves, fresh'
-p709
+p768
 aS'celery, fresh, diced'
-p710
+p769
 aS'wheat, farro, dry'
-p711
+p770
 aS'black pepper, ground'
-p712
+p771
 aS'parsley, fresh, chopped'
-p713
+p772
 aS'cannellini beans, dry'
-p714
+p773
 aS'lemon juice, fresh'
-p715
+p774
 aS'nutritional yeast'
-p716
+p775
 aS'cashews, raw, whole'
-p717
+p776
 aS'water, tap'
-p718
+p777
 aS'sea salt'
-p719
+p778
 aS'almonds, slivered'
-p720
+p779
 aS'cayenne chili pepper, dried, ground'
-p721
+p780
 asg91
 I0
 sg92
 g65
 sg93
 S'Cauliflower Farrotto with Spicy Almonds'
-p722
+p781
 sba.

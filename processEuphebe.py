@@ -30,7 +30,7 @@ def processMenu(filename):
 
 def processNutrition(filename):
     '''
-    This function loads nutrition.csv ('nutrition sheet') and processes the info into a list of Meal() objects
+    This function loads nutrition.csv ('nutrition sheet') and processes the info (nutrition + ingredients) into a list of Meal() objects
 
     :param filename (str): to open:
     :return [Meal()]
@@ -66,7 +66,6 @@ def processNutrition(filename):
                 #this row is for ingredient
                 else:
                     ingredients.append(name.replace('  ',''))
-
             #empty line: update Meal()
             else:
                 is_name = True
@@ -75,6 +74,11 @@ def processNutrition(filename):
                 items.append(new_item)
                 ingredients = []
                 nutritions = {}
+            if i == len(reader_list)-1:
+                new_item.ingredients = ingredients
+                new_item.nutrition = nutritions
+                items.append(new_item)
+
     return items
 
 def mapToMeal(menus,items):
@@ -85,10 +89,12 @@ def mapToMeal(menus,items):
     One technique is used to map better: menus names are often concatenation of item names, with 'with', 'and'. '&' or 'w/' keywords. \
     Thus menu names are broken down into a list of phrases using .split(). As a result, occasionally item with such keywords are not mappend. \
     Redunancy is taken care of.
+
     #TODO: print mapped values and allow user input to test if they are correct and if anything is missing
     #TODO: print unmapped values and allow user input to manually map
     #TODO: permutation of 'and', '&'
     #TODO: if a menu should include more than what is already included
+
     :param menus: [menu_name(str)]
     :param items: [Meal()]
     :return: { str: [Meal()]}
@@ -96,6 +102,7 @@ def mapToMeal(menus,items):
 
     bucket = [x for x in items]
     mapped = {}
+    not_found = []
     cnt = 0
     cnt2 = 0
 
@@ -112,7 +119,7 @@ def mapToMeal(menus,items):
                     temp.append(menu_full)
                     # an item mapped to multiple menus - this is possible
                     if found:
-                        print('>> {} mapped with {}'.format(item.name,temp))
+                        print('>> While processing menu {}, {} mapped with {}'.format(menu_full, item.name,temp))
                         cnt2 += 1
                     try:
                         if item not in mapped[menu_full]:
@@ -123,11 +130,31 @@ def mapToMeal(menus,items):
         # an item mapped to nothing - this is wrong.
         if not found:
             print('Following item not found: {}'.format(item.name))
+            not_found.append(item)
             cnt +=1
 
     # print number of one to many mapped items and unmapped items
     print('{}/{} not found'.format(cnt,len(items)))
     print('{}/{} found twice'.format(cnt2,len(items)))
+    return mapped, not_found
+
+def manual_input(menus, not_found,mapped):
+    left_over = not_found[:]
+    for each in not_found:
+        for menu in menus:
+            if SequenceMatcher(None,menu,each.name).ratio() > 0.5:
+                print('----------------------')
+                x = input('Is "{}" part of "{}"? [Yes: 1 / No: 0]: '.format(each, menu))
+                if x:
+                    try:
+                        mapped[menu].append(each)
+                    except:
+                        mapped[menu] = [each]
+                    left_over.remove(each)
+                else:
+                    print('no')
+    if left_over:
+        print("{} still not found".format(left_over))
     return mapped
 
 def combine_nutrition(mapped):
@@ -160,7 +187,7 @@ def combine_nutrition(mapped):
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
 
-    # saves into .p file
+    ## saves into .p file
     pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
 
     return new_list
@@ -168,8 +195,6 @@ def combine_nutrition(mapped):
 if __name__ == "__main__":
     menus = processMenu(PATH+'menu.csv')
     items = processNutrition(PATH+'nutrition.csv')
-    mapped = mapToMeal(menus, items)
-    combined = combine_nutrition(mapped)
-
-
-
+    mapped, not_found = mapToMeal(menus, items)
+    newly_mapped = manual_input(menus,not_found,mapped)
+    combined = combine_nutrition(newly_mapped)
