@@ -1,5 +1,8 @@
 import csv
 import pprint
+import os
+
+PATH = os.path.join(os.getcwd(),'csv/')
 
 def processFoodMatrixCSV(filename):
     '''
@@ -13,7 +16,7 @@ def processFoodMatrixCSV(filename):
     '''
     columns= []
     master_dict = {}
-    with open('Food Tags Matrix.csv') as csvfile:
+    with open(PATH+'Food_Tags_Matrix.csv') as csvfile:
         reader_list = list(csv.reader(csvfile))
         if not columns:
             for each in reader_list[1]:

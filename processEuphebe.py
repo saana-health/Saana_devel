@@ -2,28 +2,14 @@ import csv
 import pickle
 import pprint
 import pdb
+import os
+from model import Meal
 from difflib import SequenceMatcher
+
+PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
 def similar(a,b):
     return SequenceMatcher(None,a,b).ratio() > 0.76
-
-class Meal:
-    '''
-    This class should follow the db schema designed for meal info
-    '''
-    def __init__(self,name = '', ingredients = [], nutrition = {}, type = '', suppliderID = '',price = 0):
-        self.name = name
-        self.ingredients = ingredients
-        self.nutrition = nutrition
-        self.type = type
-        self.supplierID = suppliderID
-        self.price = price
-
-    def __str__(self):
-        return str(self.name)
-
-    def __eq__(self,other):
-        return self.name == other.name
 
 def processMenu(filename):
     '''
@@ -174,12 +160,14 @@ def combine_nutrition(mapped):
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
 
-    pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
+    # saves into .p file
+    #pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
+
     return new_list
 
 if __name__ == "__main__":
-    menus = processMenu('menu.csv')
-    items = processNutrition('nutrition.csv')
+    menus = processMenu(PATH+'menu.csv')
+    items = processNutrition(PATH+'nutrition.csv')
     mapped = mapToMeal(menus, items)
     combined = combine_nutrition(mapped)
 
