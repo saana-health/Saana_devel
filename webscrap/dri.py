@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 import time
 import pdb
 
-def submit_form(male, age, height_ft, height_in, weight, acitivty):
+def submit_form(male, age, height_ft, height_in, weight, activity, pregnancy = ''):
     #form page
     driver = webdriver.Chrome()
     driver.get("https://fnic.nal.usda.gov/fnic/dri-calculator/index.php")
@@ -19,6 +19,10 @@ def submit_form(male, age, height_ft, height_in, weight, acitivty):
     age_field = driver.find_element_by_id('AGE')
     age_field.send_keys(age)
 
+    if not male:
+        preg = Select(driver.find_element_by_id('F_STATUS'))
+        preg.select_by_value(pregnancy)
+
     height_ft_field = driver.find_element_by_id('HEIGHT_FEET')
     height_ft_field.send_keys(height_ft)
 
@@ -29,26 +33,28 @@ def submit_form(male, age, height_ft, height_in, weight, acitivty):
     weight_field.send_keys(weight)
 
     select = Select(driver.find_element_by_id('ACTIVITY'))
-    select.select_by_value('Sedentary')
+    select.select_by_value(activity)
 
     button = driver.find_element_by_name('submit')
 
     button.click()
 
     # new page
-    time.sleep(1)
+    # time.sleep(0.01)
     tb = driver.find_elements_by_tag_name('td')
 
-    calorie = int(tb[6].text.replace('kcal/day',''))
-    carb_l = tb[8].text.split(' ')
+    calorie = int(tb[7-male].text.replace('kcal/day',''))
+    carb_l = tb[9-male].text.split(' ')
     carb = (int(carb_l[0]),int(carb_l[2]))
-    fiber = int(tb[10].text.replace('grams',''))
-    protein = int(tb[12].text.replace('grams',''))
-    fat_l = tb[14].text.split(' ')
+    fiber = int(tb[11-male].text.replace('grams',''))
+    protein = int(tb[13-male].text.replace('grams',''))
+    fat_l = tb[15-male].text.split(' ')
     fat = (int(fat_l[0]),int(fat_l[2]))
+
+    driver.close()
 
     return calorie, carb, fiber, protein, fat
 
 if __name__ == "__main__":
-    calorie, carb, fiber, proetin, fat = submit_form(True, 20, 5, 8, 120,'Sedentary')
+    calorie, carb, fiber, protein, fat = submit_form(False, 20, 5, 8, 120,'Sedentary','pregnant1st')
     pdb.set_trace()

@@ -60,7 +60,7 @@ def processNutrition(filename):
             #ingredient
             elif name:
                 #this row is for processing nutrition info
-                if name == 'Total':
+                if name.lower() == 'total':
                     for j in range(1,len(row)):
                         nutritions[columns[j]] = row[j]
                 #this row is for ingredient
@@ -161,7 +161,7 @@ def combine_nutrition(mapped):
         new_list.append(new_meal)
 
     # saves into .p file
-    #pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
+    pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
 
     return new_list
 
