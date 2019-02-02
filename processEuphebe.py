@@ -62,7 +62,12 @@ def processNutrition(filename):
                 #this row is for processing nutrition info
                 if name.lower() == 'total':
                     for j in range(1,len(row)):
-                        nutritions[columns[j]] = row[j]
+                        # skip if empty or zero or not a number
+                        if row[j] not in ['','0','Serving','--']:
+                            try:
+                                nutritions[columns[j]] = float(row[j])
+                            except:
+                                print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
                 #this row is for ingredient
                 else:
                     ingredients.append(name.replace('  ',''))
@@ -176,19 +181,18 @@ def combine_nutrition(mapped):
                 if ingredient not in new_ingredients:
                     new_ingredients.append(ingredient)
             for nutrition in item.nutrition.keys():
+                # Add value if already exist
                 try:
                     new_nutrition[nutrition] += float(item.nutrition[nutrition])
+                # Create a new key/value if doesnt exist
                 except:
-                    try:
-                        new_nutrition[nutrition] = float(item.nutrition[nutrition])
-                    except:
-                        pass
+                    new_nutrition[nutrition] = float(item.nutrition[nutrition])
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
 
     ## saves into .p file
-    pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
+    #pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
 
     return new_list
 
@@ -198,3 +202,5 @@ if __name__ == "__main__":
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
+    pdb.set_trace()
+

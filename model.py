@@ -18,6 +18,10 @@ class Meal:
 
     __repr__ = __str__
 
+class Patient:
+    def __init__(self, name = '', weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
+        pass
+
 class Tag:
     '''
     This class should follow the db schema designed for tag info
