@@ -28,7 +28,6 @@ class Optimizer:
         This function gets patient info and filters out all meals avoids and prioritized ingredients/nutritions
         :return: [Meal()] - a list of filtered meals
         '''
-        #TODO: input as patient ID and search for that patient
         # patient_collection = db.patients
         # patient = patient_collection.find_one()
         patient = self.patient
@@ -62,15 +61,19 @@ class Optimizer:
             new = False
             ingredients = meal.ingredients
             nutritions = meal.nutrition
+            # Matching part below should be gone once mapping is done in the preliminary part
             for avoid in avoids:
                 if new:
                     break
+                pdb.set_trace()
                 for ingredient in ingredients:
-                    if SequenceMatcher(None,ingredient,avoid).ratio()>0.6:
+                    if SequenceMatcher(None,ingredient.lower(),avoid.lower()).ratio()>0.6:
+                        print(ingredient,avoid,SequenceMatcher(None,ingredient.lower(),avoid.lower()).ratio())
                         new = True
                         break
                 for nutrition in nutritions:
-                    if SequenceMatcher(None,nutrition,avoid).ratio() > 0.6:
+                    if SequenceMatcher(None,nutrition.lower(),avoid.lower()).ratio() > 0.6:
+                        print(nutrition,avoid,SequenceMatcher(None,nutrition.lower(),avoid.lower()).ratio())
                         new = True
                         break
             ## This is for appending if not found in avoids
@@ -119,7 +122,7 @@ class Optimizer:
                     if val[i-1] + K[i-1][w-wt[i-1]][0] >  K[i-1][w][0]:
                         K[i][w][1] = K[i-1][w-wt[i-1]][1][:]+[i-1]
                     else:
-                            K[i][w][1] = K[i-1][w][1][:]
+                        K[i][w][1] = K[i-1][w][1][:]
 
                 else:
                     K[i][w][0] = K[i-1][w][0]

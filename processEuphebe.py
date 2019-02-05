@@ -5,6 +5,7 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
+import re
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
@@ -46,6 +47,7 @@ def processNutrition(filename):
 
         #first row
         columns = [x for x in list(reader_list[0])]
+        units = [re.search('\(.*\)',columns[y]).group()[1:-1] if re.search('\(.*\)',columns[y]) else '' for y in range(len(columns))]
 
         # loop through each row starting 3rd row
         for i in range(2,len(reader_list)):
@@ -55,7 +57,7 @@ def processNutrition(filename):
             #start of new item
             if is_name:
                 is_name = False
-                new_item = Meal(name=name, suppliderID='Euphebe')
+                new_item = Meal(name=name, supplierID='Euphebe')
 
             #ingredient
             elif name:
@@ -65,7 +67,7 @@ def processNutrition(filename):
                         # skip if empty or zero or not a number
                         if row[j] not in ['','0','Serving','--']:
                             try:
-                                nutritions[columns[j]] = float(row[j])
+                                nutritions[columns[j].split('(')[0]] = str(float(row[j])) + ' ' + units[j]
                             except:
                                 print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
                 #this row is for ingredient
@@ -83,7 +85,7 @@ def processNutrition(filename):
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
-
+    pdb.set_trace()
     return items
 
 def mapToMeal(menus,items):

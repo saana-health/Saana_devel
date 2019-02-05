@@ -44,4 +44,3 @@ def add_meals(pickle_name):
 if __name__ == "__main__":
     add_tags(processFoodMatrixCSV(''))
     a = add_meals('EuphebeMealInfo.p')
-    # pass

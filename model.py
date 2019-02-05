@@ -2,12 +2,12 @@ class Meal:
     '''
     This class should follow the db schema designed for meal info
     '''
-    def __init__(self,name = '', ingredients = [], nutrition = {}, type = '', suppliderID = '',price = 0):
+    def __init__(self,name = '', ingredients = [], nutrition = {}, type = '', supplierID = '',price = 0):
         self.name = name
         self.ingredients = ingredients
         self.nutrition = nutrition
         self.type = type
-        self.supplierID = suppliderID
+        self.supplierID = supplierID
         self.price = price
 
     def __str__(self):
