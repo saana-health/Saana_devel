@@ -11,7 +11,7 @@ class Meal:
         self.price = price
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name.encode('ascii','ignore'))
 
     def __eq__(self,other):
         return self.name == other.name

@@ -5,6 +5,7 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
+from connectMongdo import add_meals
 
 PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
 
@@ -23,7 +24,7 @@ def processNutrition(filename):
         is_name = True
 
         #first row
-        items = [x for x in list(reader_list[1])]
+        items = [x.replace('.',',') for x in list(reader_list[1])]
         units = [y.replace('\xc2\xb5g','ng') for y in list(reader_list[2])]
 
         prev_type = ''
@@ -50,8 +51,11 @@ def processNutrition(filename):
 
 if __name__ == "__main__":
     meals = processNutrition(PATH+'nutrition.csv')
-    for each in meals:
-        print('-----{}------'.format(each.name))
-        print(each.ingredients)
-        print(each.nutrition)
-        print(each.type)
+    add_meals(meals)
+    pprint.pprint(meals)
+    pdb.set_trace()
+    # for each in meals:
+    #     print('-----{}------'.format(each.name))
+    #     print(each.ingredients)
+    #     print(each.nutrition)
+    #     print(each.type)

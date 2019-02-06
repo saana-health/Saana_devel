@@ -6,6 +6,7 @@ import os
 from model import Meal
 from difflib import SequenceMatcher
 import re
+from connectMongdo import add_meals
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
@@ -85,7 +86,6 @@ def processNutrition(filename):
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
-    pdb.set_trace()
     return items
 
 def mapToMeal(menus,items):
@@ -183,12 +183,13 @@ def combine_nutrition(mapped):
                 if ingredient not in new_ingredients:
                     new_ingredients.append(ingredient)
             for nutrition in item.nutrition.keys():
+                s = item.nutrition[nutrition]
                 # Add value if already exist
                 try:
-                    new_nutrition[nutrition] += float(item.nutrition[nutrition])
+                    new_nutrition[nutrition] += str(float(new_nutrition[nutrition].split[0]) + float(item.split(' ')[0])) + item.split(' ')[1]
                 # Create a new key/value if doesnt exist
                 except:
-                    new_nutrition[nutrition] = float(item.nutrition[nutrition])
+                    new_nutrition[nutrition] = item.nutrition[nutrition]
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
@@ -204,5 +205,6 @@ if __name__ == "__main__":
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
-    pdb.set_trace()
+    pprint.pprint(mapped)
+    add_meals(combined)
 

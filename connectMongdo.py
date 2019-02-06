@@ -2,11 +2,7 @@ from pymongo import MongoClient
 import pickle
 import pdb
 import pprint
-from processEuphebe import Meal
-from proccessFoodMatrix import processFoodMatrixCSV
 
-client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-db = client.test
 
 def add_tags(tag_dict):
     '''
@@ -14,18 +10,23 @@ def add_tags(tag_dict):
     :param tag_dict: return dictionary of processFoodMatrix.processFoodMatrixCSV
     :return: True/False based on successfulness
     '''
+    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
+    db = client.test
     tags = db.tags
     l = []
     result = tags.insert_many(tag_dict.values())
     return True
 
-def add_meals(pickle_name):
+def add_meals(meal_list = [],pickle_name = ''):
     '''
 
     :param pickle_name: (str)name of the pickle
     :return: True
     '''
-    meal_list = pickle.load( open(pickle_name,'rb'))
+    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
+    db = client.test
+    if not meal_list:
+        meal_list = pickle.load( open(pickle_name,'rb'))
     meals = db.meals
 
     l = []
@@ -42,5 +43,4 @@ def add_meals(pickle_name):
     return True
 
 if __name__ == "__main__":
-    add_tags(processFoodMatrixCSV(''))
-    a = add_meals('EuphebeMealInfo.p')
+    pass

@@ -1,8 +1,9 @@
 import csv
 import pprint
 import os
-
+from connectMongdo import add_tags
 PATH = os.path.join(os.getcwd(),'csv/')
+
 
 def processFoodMatrixCSV(filename):
     '''
@@ -41,4 +42,5 @@ def processFoodMatrixCSV(filename):
 
 
 if __name__ == "__main__":
+    add_tags(processFoodMatrixCSV(''))
     pprint.pprint(processFoodMatrixCSV(''))
