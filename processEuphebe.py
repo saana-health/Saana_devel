@@ -49,6 +49,9 @@ def processNutrition(filename):
         #first row
         columns = [x for x in list(reader_list[0])]
         units = [re.search('\(.*\)',columns[y]).group()[1:-1] if re.search('\(.*\)',columns[y]) else '' for y in range(len(columns))]
+        for i in range(len(columns)):
+            columns[i] = columns[i].replace(' ('+units[i]+')','')
+        full_list = columns[:]
 
         # loop through each row starting 3rd row
         for i in range(2,len(reader_list)):
@@ -68,12 +71,14 @@ def processNutrition(filename):
                         # skip if empty or zero or not a number
                         if row[j] not in ['','0','Serving','--']:
                             try:
-                                nutritions[columns[j].split('(')[0]] = str(float(row[j])) + ' ' + units[j]
+                                nutritions[columns[j]] = str(float(row[j])) + ' ' + units[j]
                             except:
                                 print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
                 #this row is for ingredient
                 else:
                     ingredients.append(name.replace('  ',''))
+                    if name.replace('  ','') not in full_list:
+                        full_list.append(name.replace('  ',''))
             #empty line: update Meal()
             else:
                 is_name = True
@@ -86,7 +91,7 @@ def processNutrition(filename):
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
-    return items
+    return items, full_list
 
 def mapToMeal(menus,items):
     '''
@@ -201,7 +206,7 @@ def combine_nutrition(mapped):
 
 if __name__ == "__main__":
     menus = processMenu(PATH+'menu.csv')
-    items = processNutrition(PATH+'nutrition.csv')
+    items, columns = processNutrition(PATH+'nutrition.csv')
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)

@@ -1,6 +1,7 @@
 import csv
 import pprint
 import os
+import pdb
 from connectMongdo import add_tags
 PATH = os.path.join(os.getcwd(),'csv/')
 
@@ -29,18 +30,20 @@ def processFoodMatrixCSV(filename):
             row = reader_list[i]
             if row[0]:
                 what_type = row[0]
-            master_dict[row[1]] = {'name': row[1], 'type': what_type, 'avoid': [], 'prior': []}
+            name = row[1].replace('\xc2',' ').replace('\xa0',' ')
+            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': []}
             #loop through each column
             for j in range(2,len(row)):
                 #avoid
                 if row[j] == 'A':
-                    master_dict[row[1]]['avoid'].append(columns[j])
+                    master_dict[name]['avoid'].append(columns[j])
                 #prioritize
                 elif row[j] == 'P':
-                    master_dict[row[1]]['prior'].append(columns[j])
-    return master_dict
+                    master_dict[name]['prior'].append(columns[j])
+    return master_dict, columns
 
 
 if __name__ == "__main__":
-    add_tags(processFoodMatrixCSV(''))
+    master_dict, columns = processFoodMatrixCSV('')
+    add_tags(master_dict)
     pprint.pprint(processFoodMatrixCSV(''))

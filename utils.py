@@ -32,3 +32,40 @@ def process_mixpanel_csv():
         writer = csv.writer(csvfile)
         writer.writerows(matrix)
 
+def match_names(list1, list2):
+    '''
+
+    :param list1:
+    :param list2:
+    :return: dictionary
+    '''
+    d = {}
+    for a in list1:
+        for b in list2:
+            if 0.6 > difflib.SequenceMatcher(None,a.lower(),b.lower()).ratio() > 0.5:
+                x = input('{} and {} identical? [Yes:1 / No: 0]: '.format(a,b))
+                if x == 1:
+                    try:
+                        d[a].append(b)
+                    except:
+                        d[a] = b
+
+    pickle.dump(d,open('50.p','wb'))
+
+
+
+
+
+if __name__ == "__main__":
+    from processEuphebe import processNutrition
+    from proccessFoodMatrix import processFoodMatrixCSV
+    import os
+    import pdb
+    import difflib
+    import pickle
+    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
+    master_dict, column_matrix = processFoodMatrixCSV('')
+    items, column_Euphebe = processNutrition(PATH+'nutrition.csv')
+    match_names(column_matrix, column_Euphebe)
+    pdb.set_trace()
+
