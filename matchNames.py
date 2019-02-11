@@ -1,55 +1,112 @@
-import csv
-import pprint
-from difflib import SequenceMatcher
-import pdb
+import processEuphebe
+import processFoodNerd
+from proccessFoodMatrix import processFoodMatrixCSV
 import os
 import pickle
+import pprint
+import difflib
+import pdb
 
-PATH = os.path.join(os.getcwd(),'csv/')
-def match_names(filename):
+def display_names(list1, list2):
     '''
-    TODO: This function is fully functional but hasn't been integrated yet
+    This function only to display two lists to compare.
+    :param list1:
+    :param list2:
+    :return: dictionary
+    '''
+    x = 0
+    print(' > Record indexes for which two ingredients/nutritons ARE identical')
+    for a in list1:
+        print('-------{}------'.format(a))
+        for b in list2:
+            r = difflib.SequenceMatcher(None,a.lower(),b.lower()).ratio()
+            if 0.6 > r > 0.5:
+                l = ' '*(15 - len(a) - len(str(x)))
+                print('{} {}{}|{}'.format(str(x),a,l,b))
+                x += 1
+    print('##########################')
+    x = 0
+    print(' > Record indexes for which two ingredients/nutritons are NOT identical')
+    for a in list1:
+        print('-------{}------'.format(a))
+        for b in list2:
+            r = difflib.SequenceMatcher(None,a.lower(),b.lower()).ratio()
+            if r >= 0.6:
+                l = ' '*(15 - len(a) - len(str(x)))
+                print('{} {}{}|{}'.format(str(x),a,l,b))
+                x += 1
+
+def match_names(list1,list2, gr_then_5, gr_then_6):
+    '''
+    This function only for 0.6 > r > 0.5. For any r > 0.6, automatically match it.
+    :param list1:
+    :param list2:
     :param filename:
     :return:
     '''
-    items = []
+    d = {}
+    index_6 = pickle.load(open(gr_then_6,'rb'))
+    index_5 = pickle.load(open(gr_then_5,'rb'))
+    x = 0
+    y = 0
+    for a in list1:
+        for b in list2:
+            r = difflib.SequenceMatcher(None,a.lower(),b.lower()).ratio()
+            if r >= 0.6:
+                if x not in index_6:
+                    if a not in d.keys():
+                        d[a] = [b]
+                    else:
+                        d[a].append(b)
+                x += 1
+                continue
+            if 0.6 > r > 0.5:
+                if y in index_5:
+                    if a not in d.keys():
+                        d[a] = [b]
+                    else:
+                        d[a].append(b)
+                y += 1
 
-    with open(filename) as csvfile:
-        ingredients = []
-        nutritions = {}
-        reader_list = list(csv.reader(csvfile))
-        is_name = True
+    pickle.dump(d,open(gr_then_5.split('Gr')[0]+'_matched.p','wb'))
+    return d
 
-        #first row
-        euphebe = [x for x in list(reader_list[0])]
+def _auto(new_dict,a_):
+    for each in a_.keys():
+        try:
+            new_dict[each] = new_dict[each] + a_[each]
+        except:
+            new_dict[each] = a_[each]
+    return new_dict
 
-        for i in range(2,len(reader_list)):
-            row = reader_list[i]
-            name = row[0].replace('  ','')
-            if name != '' and name not in euphebe:
-                euphebe.append(name)
+def combine_matched(filenames,save_name):
+    new_dict = {}
+    for filename in filenames:
+        file = pickle.load(open(filename,'rb'))
+        new_dict = _auto(new_dict,file)
 
+    pickle.dump(new_dict,open(save_name,'wb'))
+    return new_dict
 
-    tags= []
-    master_dict = {}
-    with open(PATH+'Food_Tags_Matrix.csv') as csvfile:
-        reader_list = list(csv.reader(csvfile))
-        for each in reader_list[1]:
-            if each != '':
-                tags.append(each)
+def match_euphebe():
+    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
+    PICKLE_PATH = os.path.join(os.getcwd(),'pickle/Euphebe/')
+    master_dict, column_matrix = processFoodMatrixCSV('')
+    items, column_Euphebe = processEuphebe.processNutrition(PATH+'nutrition.csv')
+    # display_names(column_matrix,column_Euphebe)
+    result = match_names(column_matrix, column_Euphebe,  PICKLE_PATH + 'EuphebeGr5.p',PICKLE_PATH + 'EuphebeGr6.p')
+    return result, PICKLE_PATH
 
-    nutrition_map = {}
-    for each in euphebe:
-        for x in [' (mg)',' (g)',' (mcg)',' (IU)']:
-            each = each.replace(x,'')
-        for tag in tags:
-            r = SequenceMatcher(None,each.lower(),tag.lower()).ratio()
-            if r > 0.6:
-                inp = input('Is "{}" identical to "{}"? [Yes: 1 / No: 0]: '.format(each,tag))
-                if inp:
-                    nutrition_map[tag] = each
-    pickle.dump(nutrition_map, open('nutritionMap.p','wb'))
-
+def match_foodnerd():
+    master_dict, column_matrix = processFoodMatrixCSV('')
+    PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
+    PICKLE_PATH = os.path.join(os.getcwd(),'pickle/FoodNerd/')
+    items, column_FoodNerd= processFoodNerd.processNutrition(PATH+'nutrition.csv')
+    # display_names(column_matrix,column_FoodNerd)
+    result = match_names(column_matrix, column_FoodNerd, PICKLE_PATH + 'FoodNerdGr5.p',PICKLE_PATH + 'FoodNerdGr6.p')
+    return result, PICKLE_PATH
 
 if __name__ == "__main__":
-    test(PATH+'Euphebe/nutrition.csv')
+    euphebe, euphebe_pickle_path = match_euphebe()
+    foodnerd, foodnerd_pickle_path = match_foodnerd()
+    result = combine_matched([foodnerd_pickle_path + 'FoodNerd_matched.p',euphebe_pickle_path +'Euphebe_matched.p'],os.path.join(os.getcwd(),'pickle')+'euphebeNfoodnerd.p')

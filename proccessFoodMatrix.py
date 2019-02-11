@@ -42,8 +42,26 @@ def processFoodMatrixCSV(filename):
                     master_dict[name]['prior'].append(columns[j])
     return master_dict, columns
 
+def generate_keyword(columns):
+    keyword_dict = {}
+    for column in columns:
+        column = column.lower()
+        x = input('column {} - as it is: 0 / change: string/ ignore 2: '.format(column))
+        keyword_dict[column] = []
+        if x == 0:
+            keyword_dict[column].append(column)
+        elif x== 2:
+            continue
+        else:
+            for each in x.split(','):
+                keyword_dict[column].append(each)
+    pdb.set_trace()
+    return keyword_dict
+
 
 if __name__ == "__main__":
     master_dict, columns = processFoodMatrixCSV('')
+    generate_keyword(columns)
     add_tags(master_dict)
     pprint.pprint(processFoodMatrixCSV(''))
+    pdb.set_trace()

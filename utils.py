@@ -32,40 +32,39 @@ def process_mixpanel_csv():
         writer = csv.writer(csvfile)
         writer.writerows(matrix)
 
-def match_names(list1, list2):
-    '''
+def unicodetoascii(text):
 
-    :param list1:
-    :param list2:
-    :return: dictionary
-    '''
-    d = {}
-    for a in list1:
-        for b in list2:
-            if 0.6 > difflib.SequenceMatcher(None,a.lower(),b.lower()).ratio() > 0.5:
-                x = input('{} and {} identical? [Yes:1 / No: 0]: '.format(a,b))
-                if x == 1:
-                    try:
-                        d[a].append(b)
-                    except:
-                        d[a] = b
+    uni2ascii = {
+            ord('\xe2\x80\x99'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\x9c'.decode('utf-8')): ord('"'),
+            ord('\xe2\x80\x9d'.decode('utf-8')): ord('"'),
+            ord('\xe2\x80\x9e'.decode('utf-8')): ord('"'),
+            ord('\xe2\x80\x9f'.decode('utf-8')): ord('"'),
+            ord('\xc3\xa9'.decode('utf-8')): ord('e'),
+            ord('\xe2\x80\x9c'.decode('utf-8')): ord('"'),
+            ord('\xe2\x80\x93'.decode('utf-8')): ord('-'),
+            ord('\xe2\x80\x92'.decode('utf-8')): ord('-'),
+            ord('\xe2\x80\x94'.decode('utf-8')): ord('-'),
+            ord('\xe2\x80\x94'.decode('utf-8')): ord('-'),
+            ord('\xe2\x80\x98'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\x9b'.decode('utf-8')): ord("'"),
 
-    pickle.dump(d,open('50.p','wb'))
+            ord('\xe2\x80\x90'.decode('utf-8')): ord('-'),
+            ord('\xe2\x80\x91'.decode('utf-8')): ord('-'),
 
+            ord('\xe2\x80\xb2'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\xb3'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\xb4'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\xb5'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\xb6'.decode('utf-8')): ord("'"),
+            ord('\xe2\x80\xb7'.decode('utf-8')): ord("'"),
 
+            ord('\xe2\x81\xba'.decode('utf-8')): ord("+"),
+            ord('\xe2\x81\xbb'.decode('utf-8')): ord("-"),
+            ord('\xe2\x81\xbc'.decode('utf-8')): ord("="),
+            ord('\xe2\x81\xbd'.decode('utf-8')): ord("("),
+            ord('\xe2\x81\xbe'.decode('utf-8')): ord(")"),
 
-
-
-if __name__ == "__main__":
-    from processEuphebe import processNutrition
-    from proccessFoodMatrix import processFoodMatrixCSV
-    import os
-    import pdb
-    import difflib
-    import pickle
-    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
-    master_dict, column_matrix = processFoodMatrixCSV('')
-    items, column_Euphebe = processNutrition(PATH+'nutrition.csv')
-    match_names(column_matrix, column_Euphebe)
-    pdb.set_trace()
+                            }
+    return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
