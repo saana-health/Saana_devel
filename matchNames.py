@@ -106,6 +106,12 @@ def match_foodnerd():
     result = match_names(column_matrix, column_FoodNerd, PICKLE_PATH + 'FoodNerdGr5.p',PICKLE_PATH + 'FoodNerdGr6.p')
     return result, PICKLE_PATH
 
+def change_name(lookup_dict, nutrition):
+    for key, value in lookup_dict.items():
+        if nutrition in value:
+            return key
+    return nutrition
+
 if __name__ == "__main__":
     euphebe, euphebe_pickle_path = match_euphebe()
     foodnerd, foodnerd_pickle_path = match_foodnerd()

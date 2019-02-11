@@ -14,6 +14,7 @@ def similar(a,b):
     return SequenceMatcher(None,a,b).ratio() > 0.76
 
 def processNutrition(filename):
+    lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
     columns = []
     units = []
     meals = []
@@ -25,7 +26,7 @@ def processNutrition(filename):
         is_name = True
 
         #first row
-        columns = [x.replace('.',',') for x in list(reader_list[1])]
+        columns = [change_name(lookup_dict,x.replace('.',',')) for x in list(reader_list[1])]
         units = [y.replace('\xc2\xb5g','ng') for y in list(reader_list[2])]
 
         prev_type = ''
@@ -36,7 +37,7 @@ def processNutrition(filename):
                 type = first_word
             elif first_word != '':
                 name = unicodetoascii(reader_list[i][0])
-                ingredient = unicodetoascii(reader_list[i][1])
+                ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
                 ingredients.append(ingredient)
                 if ingredient not in full_list:
                     full_list.append(ingredient)
@@ -50,13 +51,14 @@ def processNutrition(filename):
                     ingredients = []
                     nutritions = {}
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
-                    ingredient = unicodetoascii(reader_list[i][1])
+                    ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
                     ingredients.append(ingredient)
                     if ingredient not in full_list:
                         full_list.append(ingredient)
     return meals, full_list + columns
 
 if __name__ == "__main__":
+    from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
-    # add_meals(meals)
-    pdb.set_trace()
+    add_meals(meals)
+    # pdb.set_trace()

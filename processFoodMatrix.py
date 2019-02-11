@@ -43,6 +43,11 @@ def processFoodMatrixCSV(filename):
     return master_dict, columns
 
 def generate_keyword(columns):
+    '''
+    Don't use this function
+    :param columns:
+    :return:
+    '''
     keyword_dict = {}
     for column in columns:
         column = column.lower()
@@ -61,7 +66,7 @@ def generate_keyword(columns):
 
 if __name__ == "__main__":
     master_dict, columns = processFoodMatrixCSV('')
-    generate_keyword(columns)
+    # generate_keyword(columns)
     add_tags(master_dict)
-    pprint.pprint(processFoodMatrixCSV(''))
-    pdb.set_trace()
+    # pprint.pprint(processFoodMatrixCSV(''))
+    # pdb.set_trace()
