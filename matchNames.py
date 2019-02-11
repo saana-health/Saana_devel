@@ -109,4 +109,4 @@ def match_foodnerd():
 if __name__ == "__main__":
     euphebe, euphebe_pickle_path = match_euphebe()
     foodnerd, foodnerd_pickle_path = match_foodnerd()
-    result = combine_matched([foodnerd_pickle_path + 'FoodNerd_matched.p',euphebe_pickle_path +'Euphebe_matched.p'],os.path.join(os.getcwd(),'pickle')+'euphebeNfoodnerd.p')
+    result = combine_matched([foodnerd_pickle_path + 'FoodNerd_matched.p',euphebe_pickle_path +'Euphebe_matched.p'],os.path.join(os.getcwd(),'pickle/')+'euphebeNfoodnerd.p')
