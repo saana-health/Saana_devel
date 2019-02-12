@@ -20,6 +20,11 @@ class Meal:
         return self.name == other.name
 
     def import_dict(self, dict):
+        '''
+        This function is for processing a dictionary response from MongoDB request into a Meal class
+        :param dict:
+        :return:
+        '''
         self.name = dict['name']
         self.ingredients = dict['ingredients']
         self.nutrition = dict['nutrition']
@@ -32,6 +37,9 @@ class Meal:
     __repr__ = __str__
 
 class MealList(list):
+    '''
+    This class is for the sake of convenience in searching a class Meal in a list
+    '''
     def find_by(self,feature_name,value):
         for meal in self:
             if getattr(meal,feature_name) == value:

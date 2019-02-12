@@ -87,6 +87,7 @@ class Optimizer:
                 score_board[score].append({'meal': new_meal,'prior':prior_list,'avoid':avoid_list})
 
         # This is where meals will be saved
+        # TODO: change the number based on input
         lunches = [None for x in range(7)]
         dinners = [None for x in range(7)]
 
@@ -106,6 +107,10 @@ class Optimizer:
                     break
 
         return lunches, dinners
+
+    def _check_repitition(self,):
+        #TODO
+        pass
 
     def to_csv(self, lunches, dinners):
         '''
