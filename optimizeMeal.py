@@ -16,23 +16,25 @@ client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/
 db = client.test
 
 class Optimizer:
+    '''
+    Class for optimizing a patient's meals for a week
+    '''
     def __init__(self,patient_id = 0):
         if patient_id:
             self.patient = db.patients.find_one({'_id': ObjectId(patient_id)})
         else:
             self.patient = db.patients.find_one()
         self.preferred_meals= []
+        # This below line should be read from the db later on
         self.calorie, self.carb, self.fiber, self.protein, self.fat = 2000, 50, 50, 50, 50#submit_form(True,int(self.patient['age']),int(self.patient['feet']),\
                                                                                   # int(self.patient['inches']), int(self.patient['weight']),'Sedentary','')
         # self.calorie = 2000
 
     def optimize(self):
         '''
-        This function gets patient info and filters out all meals avoids and prioritized ingredients/nutritions
-        :return: [Meal()] - a preferred_mealsst of filtered meals
+        This function tries to choose a good list of meals for a patient based on her/his constraint
+        :return: [{lunchs}], [{dinners}]
         '''
-        # patient_collection = db.patients
-        # patient = patient_collection.find_one()
         patient = self.patient
 
         # get tags
@@ -53,19 +55,24 @@ class Optimizer:
         if diseases:
             tags.append(diseases)
 
+        # Concat all the tags
         avoids = list(itertools.chain(*[tag['avoid'] for tag in tags]))
         priors = list(itertools.chain(*[tag['prior'] for tag in tags]))
 
         meals = db.meals.find()
         score_board = {}
+
+        # Score each meal based on their ingredients/nutritions
         for meal in meals:
             new_meal = Meal(meal['name'],meal['ingredients'],meal['nutrition'],meal['type'],meal['supplierID'])
+
             neg = sum([1 if nutrition in avoids else 0 for nutrition in meal['nutrition']])
             neg += sum([1 if ingredient in avoids else 0 for ingredient in meal['ingredients']])
-            avoid_list = [nutrition for nutrition in meal['nutrition'] if nutrition in avoids]
-            avoid_list += [ingredient for ingredient in meal['ingredients'] if ingredient in avoids]
             pos = sum([1 for nutrition in meal['nutrition'] if nutrition in priors])
             pos += sum([1 for ingredient in meal['ingredients'] if ingredient in priors])
+
+            avoid_list = [nutrition for nutrition in meal['nutrition'] if nutrition in avoids]
+            avoid_list += [ingredient for ingredient in meal['ingredients'] if ingredient in avoids]
             prior_list = [nutrition for nutrition in meal['nutrition'] if nutrition in priors]
             prior_list += [ingredient for ingredient in meal['ingredients'] if ingredient in priors]
 
@@ -75,8 +82,10 @@ class Optimizer:
             else:
                 score_board[score].append({'meal': new_meal,'prior':prior_list,'avoid':avoid_list})
 
+        # This is where meals will be saved
         lunches = [None for x in range(7)]
         dinners = [None for x in range(7)]
+
         sorted_scores = sorted(score_board.keys(),reverse=True)
         i = 0
         for score in sorted_scores:
@@ -91,9 +100,16 @@ class Optimizer:
                     i += 1
                 else:
                     break
+
         return lunches, dinners
 
     def to_csv(self, lunches, dinners):
+        '''
+        This function is for generating master order file for a week
+        :param lunches: [{lunch}] - from optimize()
+        :param dinners: [{dinner}] - ^
+        :return: [[]] - 2D array that is written to the csv file
+        '''
         csv_arry = [[self.patient['_id']],['Date','Meal Type','Meal Name','Limiting nutritions','Prioritized nutrtions','Meal provider','Price']]
         for index in range(7):
             lunch = lunches[index]
@@ -107,6 +123,12 @@ class Optimizer:
         return csv_arry
 
     def to_mongo(self, lunches, dinners):
+        '''
+        This function processes the meal lists into mongo-digestable format
+        :param lunches: [{lunch}] - from optimize()
+        :param dinners: [{dinner}] - from optimize()
+        :return: class MealHistory
+        '''
         new_history = MealHistory(self.patient['_id'], 1)
         meal = find_meal(lunches[0]['meal'].name)
         new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]

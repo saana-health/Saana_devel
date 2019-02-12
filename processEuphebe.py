@@ -13,6 +13,12 @@ from matchNames import change_name
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
 def similar(a,b):
+    '''
+    A util function to check if two strings are 'similar', defined by the value below. This is used for mapping items to meals
+    :param a: (str) string 1 to compare
+    :param b: (str) string 2 to compare
+    :return: True if similar, False otherwise
+    '''
     return SequenceMatcher(None,a,b).ratio() > 0.76
 
 def processMenu(filename):
@@ -23,7 +29,7 @@ def processMenu(filename):
     :param filename(str): csv filename to open
     :return menu_list [menu_name(str)]
 
-    !! not stable for 'treatment drugs' (name field contains multiple names)
+    TODO: !! not stable for 'treatment drugs' (name field contains multiple names)
     '''
     menu_list = []
     with open(filename) as csvfile:

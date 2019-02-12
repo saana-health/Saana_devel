@@ -7,12 +7,14 @@ import pprint
 import difflib
 import pdb
 
+#TODO: name matching based on name from Food Matrix is 'in' the name from food supplier name
+
 def display_names(list1, list2):
     '''
-    This function only to display two lists to compare.
-    :param list1:
-    :param list2:
-    :return: dictionary
+    This function displays two lists to compare.
+    :param list1: [str] nutrition/ingredients to display
+    :param list2: [str] ^
+    :return: None
     '''
     x = 0
     print(' > Record indexes for which two ingredients/nutritons ARE identical')
@@ -38,13 +40,14 @@ def display_names(list1, list2):
 
 def match_names(list1,list2, gr_then_5, gr_then_6):
     '''
-    This function only for 0.6 > r > 0.5. For any r > 0.6, automatically match it.
-    :param list1:
-    :param list2:
-    :param filename:
-    :return:
+    Based on display_names(), indexes of pairs of identical names are identified. Based on the indexes, map them together and create a dictionary
+    :param list1: [str] nutrition/ingredients list to map
+    :param list2: [str] ^
+    :param gr_then_5: str - name of a pickle file that includes indexes of names that have similarity 0.5 < ratio < 0.6 but ARE identical
+    :param gr_then_6: str - name of a pickle file that includes indexes of names that have similarity ratio > 0.6 but ARE NOT identical
+    :return: {str: [str]}
     '''
-    d = {}
+    map_dict = {}
     index_6 = pickle.load(open(gr_then_6,'rb'))
     index_5 = pickle.load(open(gr_then_5,'rb'))
     x = 0
@@ -55,23 +58,29 @@ def match_names(list1,list2, gr_then_5, gr_then_6):
             if r >= 0.6:
                 if x not in index_6:
                     if a not in d.keys():
-                        d[a] = [b]
+                        map_dict[a] = [b]
                     else:
-                        d[a].append(b)
+                        map_dict[a].append(b)
                 x += 1
                 continue
             if 0.6 > r > 0.5:
                 if y in index_5:
                     if a not in d.keys():
-                        d[a] = [b]
+                        map_dict[a] = [b]
                     else:
-                        d[a].append(b)
+                        mapd_dict[a].append(b)
                 y += 1
 
-    pickle.dump(d,open(gr_then_5.split('Gr')[0]+'_matched.p','wb'))
-    return d
+    pickle.dump(map_dict,open(gr_then_5.split('Gr')[0]+'_matched.p','wb'))
+    return map_dict
 
 def _auto(new_dict,a_):
+    '''
+    Utils function that automates addition of dictionaries in a list
+    :param new_dict: {str: [str]} - input dictionary to add more
+    :param a_: {str: [str]} - another dictionary to add to new_dict
+    :return: {str: [str]} - new_dict after added
+    '''
     for each in a_.keys():
         try:
             new_dict[each] = new_dict[each] + a_[each]
@@ -80,6 +89,12 @@ def _auto(new_dict,a_):
     return new_dict
 
 def combine_matched(filenames,save_name):
+    '''
+    This function opens all the files with mapped dictionaries and collapse all together into a single master dictionary
+    :param filenames: [str] - names of files to combine
+    :param save_name: str - name of a file to svae
+    :return:  {str: [str]} - combined mapped dictionary
+    '''
     new_dict = {}
     for filename in filenames:
         file = pickle.load(open(filename,'rb'))
@@ -89,16 +104,32 @@ def combine_matched(filenames,save_name):
     return new_dict
 
 def match_euphebe():
+    '''
+    This function maps Euphebe ingredient/nutrition names to those from Food Matrix, following the steps below:
+    1) process food matrix
+    2) process Euphebe info xlsx
+    3) display names to manually get indexes of identical pairs of names
+    4) based on the indexes, map the names to create a dictionary
+    :return: {str: [str]} mapped dictionary
+    TODO: process food matrix only once?
+    '''
     PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
     PICKLE_PATH = os.path.join(os.getcwd(),'pickle/Euphebe/')
     master_dict, column_matrix = processFoodMatrixCSV('')
     items, column_Euphebe = processEuphebe.processNutrition(PATH+'nutrition.csv')
     display_names(column_matrix,column_Euphebe)
-    pdb.set_trace()
     result = match_names(column_matrix, column_Euphebe,  PICKLE_PATH + 'EuphebeGr5.p',PICKLE_PATH + 'EuphebeGr6.p')
     return result, PICKLE_PATH
 
 def match_foodnerd():
+    '''
+    This function maps FoodNerd ingredient/nutrition names to those from Food Matrix, following the steps below:
+    1) process food matrix
+    2) process Food Nerdinfo xlsx
+    3) display names to manually get indexes of identical pairs of names
+    4) based on the indexes, map the names to create a dictionary
+    :return: {str: [str]} mapped dictionary
+    '''
     master_dict, column_matrix = processFoodMatrixCSV('')
     PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
     PICKLE_PATH = os.path.join(os.getcwd(),'pickle/FoodNerd/')
@@ -108,6 +139,12 @@ def match_foodnerd():
     return result, PICKLE_PATH
 
 def change_name(lookup_dict, nutrition):
+    '''
+    A function for substituting a food supplier's own ingredient/nutrition name with a mapped name from Food Matrix
+    :param lookup_dict: {str: [str]} - This is the returned 'result' from combined_matched() function
+    :param nutrition: str - name from info sheet from food suppliers
+    :return: str - return original name if in the dictionary, else return mapped value
+    '''
     for key, value in lookup_dict.items():
         if nutrition in value:
             return key

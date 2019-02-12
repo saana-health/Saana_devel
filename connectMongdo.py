@@ -44,6 +44,11 @@ def add_meals(meal_list = [],pickle_name = ''):
     return True
 
 def add_meal_history(meal_history):
+    '''
+    This function adds meal info (list of meals ordered/planned for a week) to the MongoDB database
+    :param meal_history: [class MealHistory]
+    :return: True if successful
+    '''
     client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
     db = client.test
     meal_history_dict = {}
@@ -54,12 +59,22 @@ def add_meal_history(meal_history):
     return True
 
 def find_meal(name):
+    '''
+    This function finds a meal based on its name
+    :param name: str - name of a meal
+    :return: {mealInfo}
+    '''
     client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
     db = client.test
     meal = db.meals.find_one({"name":name})
     return meal
 
 def find_patient(name):
+    '''
+    This function finds a patient based on her/his name
+    :param name: str - name of a patient
+    :return: {(patient info)}
+    '''
     client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
     db = client.test
     patient = db.patients.find_one({"name":name})

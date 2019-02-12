@@ -14,6 +14,11 @@ def similar(a,b):
     return SequenceMatcher(None,a,b).ratio() > 0.76
 
 def processNutrition(filename):
+    '''
+
+    :param filename:
+    :return:
+    '''
     lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
     columns = []
     units = []

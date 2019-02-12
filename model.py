@@ -41,6 +41,9 @@ class Tag:
     __repr__ = __str__
 
 class MealHistory:
+    '''
+    This class is for modeling 'Meal info' for writing to/ reading from Mongodb
+    '''
     def __init__(self, patient_id, week_num):
         self.patient_id = patient_id
         self.week_num = week_num
