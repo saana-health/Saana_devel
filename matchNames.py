@@ -1,6 +1,6 @@
 import processEuphebe
 import processFoodNerd
-from proccessFoodMatrix import processFoodMatrixCSV
+from processFoodMatrix import processFoodMatrixCSV
 import os
 import pickle
 import pprint
@@ -93,7 +93,8 @@ def match_euphebe():
     PICKLE_PATH = os.path.join(os.getcwd(),'pickle/Euphebe/')
     master_dict, column_matrix = processFoodMatrixCSV('')
     items, column_Euphebe = processEuphebe.processNutrition(PATH+'nutrition.csv')
-    # display_names(column_matrix,column_Euphebe)
+    display_names(column_matrix,column_Euphebe)
+    pdb.set_trace()
     result = match_names(column_matrix, column_Euphebe,  PICKLE_PATH + 'EuphebeGr5.p',PICKLE_PATH + 'EuphebeGr6.p')
     return result, PICKLE_PATH
 
@@ -102,7 +103,7 @@ def match_foodnerd():
     PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
     PICKLE_PATH = os.path.join(os.getcwd(),'pickle/FoodNerd/')
     items, column_FoodNerd= processFoodNerd.processNutrition(PATH+'nutrition.csv')
-    # display_names(column_matrix,column_FoodNerd)
+    display_names(column_matrix,column_FoodNerd)
     result = match_names(column_matrix, column_FoodNerd, PICKLE_PATH + 'FoodNerdGr5.p',PICKLE_PATH + 'FoodNerdGr6.p')
     return result, PICKLE_PATH
 

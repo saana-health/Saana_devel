@@ -4,11 +4,13 @@ import pickle
 import pdb
 import pprint
 from processEuphebe import Meal
-from proccessFoodMatrix import processFoodMatrixCSV
+from processFoodMatrix import processFoodMatrixCSV
 from difflib import SequenceMatcher
 from webscrap.dri import submit_form
 import itertools
-from model import Meal
+from model import Meal,MealHistory
+import csv
+from connectMongdo import add_meal_history,find_meal
 
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
@@ -20,11 +22,11 @@ class Optimizer:
         else:
             self.patient = db.patients.find_one()
         self.preferred_meals= []
-        self.calorie, self.carb, self.fiber, self.protein, self.fat = submit_form(True,int(self.patient['age']),int(self.patient['feet']),\
-                                                                                  int(self.patient['inches']), int(self.patient['weight']),'Sedentary','')
+        self.calorie, self.carb, self.fiber, self.protein, self.fat = 2000, 50, 50, 50, 50#submit_form(True,int(self.patient['age']),int(self.patient['feet']),\
+                                                                                  # int(self.patient['inches']), int(self.patient['weight']),'Sedentary','')
         # self.calorie = 2000
 
-    def filter_meals(self):
+    def optimize(self):
         '''
         This function gets patient info and filters out all meals avoids and prioritized ingredients/nutritions
         :return: [Meal()] - a preferred_mealsst of filtered meals
@@ -35,7 +37,6 @@ class Optimizer:
 
         # get tags
         #TODO: multiple diseases,symptoms, etc
-        #TODO: MAP nutritions and ingredients manually, not just by string matching
         tags = []
         treatment_drugs = db.tags.find_one({'_id':patient['treatment_drugs']})
         comorbidities = db.tags.find_one({'_id':patient['comorbidities']})
@@ -55,116 +56,65 @@ class Optimizer:
         avoids = list(itertools.chain(*[tag['avoid'] for tag in tags]))
         priors = list(itertools.chain(*[tag['prior'] for tag in tags]))
 
-        # generate a preferred_mealsst of meals
-        preferred_meals= []
-        other_meals = []
-        avoid_meals = []
         meals = db.meals.find()
-        for new_meal in meals:
-            meal = Meal(new_meal['name'], new_meal['ingredients'], new_meal['nutrition'], new_meal['type'], new_meal['supplierID'], new_meal['price'])
-            new = False
-            ingredients = meal.ingredients
-            nutritions = meal.nutrition
-            # Matching part below should be gone once mapping is done in the prepreferred_mealsminary part
-            for avoid in avoids:
-                if new:
-                    break
-                for ingredient in ingredients:
-                    if SequenceMatcher(None,ingredient.lower(),avoid.lower()).ratio()>0.8:
-                        print('Filtering out meal {} b/c its ingredient {} matched with avoid ingredient {}'.format(meal,ingredient,avoid))
-                        avoid_meals.append(meal)
-                        new = True
-                        break
-                for nutrition in nutritions:
-                    if SequenceMatcher(None,nutrition.lower(),avoid.lower()).ratio() > 0.8:
-                        print('Filtering out meal {} b/c its nutrition {} matched with avoid nutrition {}'.format(meal,nutrition,avoid))
-                        avoid_meals.append(meal)
-                        new = True
-                        break
-            ## This is for appending if not found in avoids
-            # if not new:
-            #     preferred_meals.append(meal)
+        score_board = {}
+        for meal in meals:
+            new_meal = Meal(meal['name'],meal['ingredients'],meal['nutrition'],meal['type'],meal['supplierID'])
+            neg = sum([1 if nutrition in avoids else 0 for nutrition in meal['nutrition']])
+            neg += sum([1 if ingredient in avoids else 0 for ingredient in meal['ingredients']])
+            avoid_list = [nutrition for nutrition in meal['nutrition'] if nutrition in avoids]
+            avoid_list += [ingredient for ingredient in meal['ingredients'] if ingredient in avoids]
+            pos = sum([1 for nutrition in meal['nutrition'] if nutrition in priors])
+            pos += sum([1 for ingredient in meal['ingredients'] if ingredient in priors])
+            prior_list = [nutrition for nutrition in meal['nutrition'] if nutrition in priors]
+            prior_list += [ingredient for ingredient in meal['ingredients'] if ingredient in priors]
 
-            for prior in priors:
-                if new:
-                    break
-                for nutrition in nutritions:
-                    r = SequenceMatcher(None,prior.lower(),nutrition.lower()).ratio()
-                    if r > 0.6:
-                        print('Prioritizing {} b/c nutrition {} matched *{}* by {} %'.format(meal.name,prior,nutrition,r ))
-                        preferred_meals.append(meal)
-                        new = True
-                        break
-                for ingredient in ingredients:
-                    r = SequenceMatcher(None,ingredient.lower(),prior.lower()).ratio()
-                    if r > 0.6:
-                        print('Prioritizing {} b/c ingredient {} matched *{}* by {} %'.format(meal.name,prior,ingredient,r ))
-                        preferred_meals.append(meal)
-                        new = True
-                        break
-            if not new:
-                other_meals.append(meal)
-            # print('The following meals didnt match any food tags: {}'.format(other_meals))
-        return preferred_meals, other_meals
+            score = 100 - neg*11 + pos * 9
+            if score not in score_board.keys():
+                score_board[score] = [{'meal': new_meal,'prior':prior_list,'avoid':avoid_list}]
+            else:
+                score_board[score].append({'meal': new_meal,'prior':prior_list,'avoid':avoid_list})
 
-    def _knapSack(self,W, wt, n):
-        '''
-        This function is a solver algorithm for a knapsack problem. Used to find meals with best results with a constratint W.
-        More information can be found here: https://www.geeksforgeeks.org/0-1-knapsack-problem-dp-10/
-        >Basically solving: Given preferred_mealsmit integer 'W', find among 'n' times in the array 'wt' that best maximize the value (in this case val = wt)
-        TODO: This algorithm only uses calories
-
-        :param W: INT - 'weight' (daily calorie preferred_mealsmit)
-        :param wt: [INT] - a preferred_mealsst of 'weights' (calories) for each meal
-        :param n: INT - number of items
-        :return: [Meal()] - best matching meals
-        '''
-        val = wt
-
-        # This is the ultimate 4D preferred_mealsst [item index][weight][value, [preferred_mealsst of meals]] that stores values and meals
-        K = [[[0,[]] for x in range(W+1)] for x in range(n+1)]
-
-        for i in range(n+1):
-            for w in range(W+1):
-                # base cases
-                if i==0 or w==0:
-                    K[i][w][0] = 0
-
-                # if 'weight'(calorie) is smaller than the current 'w' index
-                elif wt[i-1] <= w:
-                    K[i][w][0] = max(val[i-1] + K[i-1][w-wt[i-1]][0],  K[i-1][w][0])
-                    if val[i-1] + K[i-1][w-wt[i-1]][0] >  K[i-1][w][0]:
-                        K[i][w][1] = K[i-1][w-wt[i-1]][1][:]+[i-1]
-                    else:
-                        K[i][w][1] = K[i-1][w][1][:]
-
+        lunches = [None for x in range(7)]
+        dinners = [None for x in range(7)]
+        sorted_scores = sorted(score_board.keys(),reverse=True)
+        i = 0
+        for score in sorted_scores:
+            if i >= len(dinners) + len(lunches):
+                break
+            for meal in score_board[score]:
+                if i < len(dinners):
+                    dinners[i] =  meal
+                    i += 1
+                elif i < len(dinners) + len(lunches):
+                    lunches[i-len(dinners)] = meal
+                    i += 1
                 else:
-                    K[i][w][0] = K[i-1][w][0]
-                    K[i][w][1] = K[i-1][w][1][:]
+                    break
+        return lunches, dinners
 
-        return K[n][W][0],K[n][W][1]
+    def to_csv(self, lunches, dinners):
+        csv_arry = [[self.patient['_id']],['Date','Meal Type','Meal Name','Limiting nutritions','Prioritized nutrtions','Meal provider','Price']]
+        for index in range(7):
+            lunch = lunches[index]
+            dinner = dinners[index]
+            csv_arry.append(['Feb '+str(index+1),'Lunch',lunch['meal'].name,lunch['avoid'],lunch['prior'],lunch['meal'].supplierID,lunch['meal'].price])
+            csv_arry.append(['Feb '+str(index+1),'dinner',dinner['meal'].name,dinner['avoid'],dinner['prior'],dinner['meal'].supplierID,dinner['meal'].price])
+        with open('master_order.csv','wb') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(csv_arry)
+        pdb.set_trace()
+        return csv_arry
 
-    def optimize(self):
-        '''
-        This functions basically use the returned preferred_mealsst of meals from 'filter_meals()' and apply it to the knapsack function
-        :param preferred_meals: [Meal()] - filtered preferred_mealsst of meals
-        :return : INT, [Meal()] - achieved calorie and preferred_mealsst of meals
-        '''
-        preferred_meals, other_meals= self.filter_meals()
-        cal_l = []
-        for each in other_meals:
-            try:
-                cal_l.append(int(each.nutrition['Cals '].split('.')[0]))
-            except:
-                pdb.set_trace()
-        calorie, ind = self._knapSack(self.calorie,cal_l,len(cal_l))
-        # test(preferred_meals)
-        return calorie, [other_meals[x] for x in ind]
-
-    def test(preferred_meals):
-        for each in preferred_meals:
-            print(each['nutrition']['Cals (kcal)'])
+    def to_mongo(self, lunches, dinners):
+        new_history = MealHistory(self.patient['_id'], 1)
+        meal = find_meal(lunches[0]['meal'].name)
+        new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]
+        return new_history
 
 if __name__ == "__main__":
-    cal, result = Optimizer().optimize()
-    print('Total calorie: {}, Meals: {}'.format(cal, result))
+    test = Optimizer()
+    lunches, dinners = test.optimize()
+    csv_arry = test.to_csv(lunches, dinners)
+    new_history = test.to_mongo(lunches, dinners)
+    his = add_meal_history(new_history)

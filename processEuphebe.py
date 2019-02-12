@@ -7,6 +7,8 @@ from model import Meal
 from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals
+from matchNames import change_name
+
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
@@ -181,7 +183,7 @@ def combine_nutrition(mapped):
     new_list = []
     # loop through
     for menu_name in mapped.keys():
-        new_meal = Meal(name = menu_name)
+        new_meal = Meal(name = menu_name, supplierID = 'Euphebe')
         new_nutrition = {}
         new_ingredients = []
         for item in mapped[menu_name]:
@@ -212,7 +214,6 @@ if __name__ == "__main__":
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
-    pprint.pprint(mapped)
+    # pprint.pprint(mapped)
     add_meals(combined)
-    # pdb.set_trace()
 

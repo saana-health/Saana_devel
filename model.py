@@ -39,3 +39,16 @@ class Tag:
         return self.name == other.name
 
     __repr__ = __str__
+
+class MealHistory:
+    def __init__(self, patient_id, week_num):
+        self.patient_id = patient_id
+        self.week_num = week_num
+        self.meal_list = []
+
+    def __str__(self):
+        return '{} - {}wk'.format(self.patient_id, self.week_num)
+
+    __repr__ = __str__
+
+
