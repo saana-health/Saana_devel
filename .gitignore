@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 
+# venv folder
+venv/
+
 # pycharm files
 .idea/
 

@@ -65,5 +65,5 @@ def processNutrition(filename):
 if __name__ == "__main__":
     from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
-    add_meals(meals)
+    # add_meals(meals)
     # pdb.set_trace()

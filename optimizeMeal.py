@@ -119,7 +119,6 @@ class Optimizer:
         with open('master_order.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
-        pdb.set_trace()
         return csv_arry
 
     def to_mongo(self, lunches, dinners):

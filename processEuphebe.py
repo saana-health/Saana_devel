@@ -7,7 +7,6 @@ from model import Meal
 from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals
-from matchNames import change_name
 
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
@@ -221,5 +220,5 @@ if __name__ == "__main__":
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
     # pprint.pprint(mapped)
-    add_meals(combined)
+    # add_meals(combined)
 

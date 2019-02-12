@@ -67,6 +67,6 @@ def generate_keyword(columns):
 if __name__ == "__main__":
     master_dict, columns = processFoodMatrixCSV('')
     # generate_keyword(columns)
-    add_tags(master_dict)
+    # add_tags(master_dict)
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

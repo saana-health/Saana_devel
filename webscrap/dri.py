@@ -57,4 +57,3 @@ def submit_form(male, age, height_ft, height_in, weight, activity, pregnancy = '
 
 if __name__ == "__main__":
     calorie, carb, fiber, protein, fat = submit_form(False, 20, 5, 8, 120,'Sedentary','pregnant1st')
-    pdb.set_trace()
