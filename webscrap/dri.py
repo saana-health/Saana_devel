@@ -5,6 +5,17 @@ import time
 import pdb
 
 def submit_form(male, age, height_ft, height_in, weight, activity, pregnancy = ''):
+    '''
+    This function does web-scrap for DRI record
+    :param male:
+    :param age:
+    :param height_ft:
+    :param height_in:
+    :param weight:
+    :param activity:
+    :param pregnancy:
+    :return:
+    '''
     #form page
     driver = webdriver.Chrome()
     driver.get("https://fnic.nal.usda.gov/fnic/dri-calculator/index.php")

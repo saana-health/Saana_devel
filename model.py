@@ -1,3 +1,5 @@
+from bson.objectid import ObjectId
+
 class Meal:
     '''
     This class should follow the db schema designed for meal info
@@ -9,6 +11,7 @@ class Meal:
         self.type = type
         self.supplierID = supplierID
         self.price = price
+        self._id = None
 
     def __str__(self):
         return str(self.name.encode('ascii','ignore'))
@@ -16,7 +19,23 @@ class Meal:
     def __eq__(self,other):
         return self.name == other.name
 
+    def import_dict(self, dict):
+        self.name = dict['name']
+        self.ingredients = dict['ingredients']
+        self.nutrition = dict['nutrition']
+        self.type = dict['type']
+        self.supplierID = dict['supplierID']
+        self.price = dict['price']
+        self._id = dict['_id']
+        return self
+
     __repr__ = __str__
+
+class MealList(list):
+    def find_by(self,feature_name,value):
+        for meal in self:
+            if getattr(meal,feature_name) == value:
+                return meal
 
 class Patient:
     def __init__(self, name = '', weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
@@ -47,7 +66,7 @@ class MealHistory:
     def __init__(self, patient_id, week_num):
         self.patient_id = patient_id
         self.week_num = week_num
-        self.meal_list = []
+        self.meal_list = {}
 
     def __str__(self):
         return '{} - {}wk'.format(self.patient_id, self.week_num)

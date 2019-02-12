@@ -8,9 +8,9 @@ from processFoodMatrix import processFoodMatrixCSV
 from difflib import SequenceMatcher
 from webscrap.dri import submit_form
 import itertools
-from model import Meal,MealHistory
+from model import Meal,MealHistory, MealList
 import csv
-from connectMongdo import add_meal_history,find_meal
+from connectMongdo import add_meal_history,find_meal, get_all_meals
 
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
@@ -19,16 +19,20 @@ class Optimizer:
     '''
     Class for optimizing a patient's meals for a week
     '''
-    def __init__(self,patient_id = 0):
+    def __init__(self,patient_id = 0, week_num = 1):
         if patient_id:
             self.patient = db.patients.find_one({'_id': ObjectId(patient_id)})
         else:
             self.patient = db.patients.find_one()
+        self.week_num = week_num
         self.preferred_meals= []
         # This below line should be read from the db later on
         self.calorie, self.carb, self.fiber, self.protein, self.fat = 2000, 50, 50, 50, 50#submit_form(True,int(self.patient['age']),int(self.patient['feet']),\
                                                                                   # int(self.patient['inches']), int(self.patient['weight']),'Sedentary','')
         # self.calorie = 2000
+
+    # def get_history(self):
+
 
     def optimize(self):
         '''
@@ -128,9 +132,13 @@ class Optimizer:
         :param dinners: [{dinner}] - from optimize()
         :return: class MealHistory
         '''
-        new_history = MealHistory(self.patient['_id'], 1)
-        meal = find_meal(lunches[0]['meal'].name)
-        new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]
+        new_history = MealHistory(self.patient['_id'], self.week_num)
+        # new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]
+        all_meals = get_all_meals()
+        for i in range(7):
+            lunch = all_meals.find_by('name',lunches[i]['meal'].name)
+            dinner = all_meals.find_by('name', dinners[i]['meal'].name)
+            new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch._id, 'dinner': dinner._id}
         return new_history
 
 if __name__ == "__main__":

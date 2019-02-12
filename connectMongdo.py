@@ -2,7 +2,7 @@ from pymongo import MongoClient
 import pickle
 import pdb
 import pprint
-from model import Meal, MealHistory
+from model import Meal, MealHistory,MealList
 
 
 def add_tags(tag_dict):
@@ -53,8 +53,7 @@ def add_meal_history(meal_history):
     db = client.test
     meal_history_dict = {}
     meal_history_dict['patient_id'] = meal_history.patient_id
-    meal_history_dict['week_num'] = meal_history.week_num
-    meal_history_dict['meal_list'] = meal_history.meal_list
+    meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
     db.mealInfo.insert_one(meal_history_dict)
     return True
 
@@ -79,6 +78,16 @@ def find_patient(name):
     db = client.test
     patient = db.patients.find_one({"name":name})
     return patient
+
+def get_all_meals():
+    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
+    db = client.test
+    cursor = db.meals.find()
+    meals = MealList()
+    for meal in cursor:
+        meals.append(Meal().import_dict(meal))
+
+    return meals
 
 if __name__ == "__main__":
     pass
