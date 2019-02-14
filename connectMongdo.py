@@ -43,7 +43,7 @@ def add_meals(meal_list = [],pickle_name = ''):
     meals.insert_many(l)
     return True
 
-def add_meal_history(meal_history):
+def add_meal_history(meal_history,id):
     '''
     This function adds meal info (list of meals ordered/planned for a week) to the MongoDB database
     :param meal_history: [class MealHistory]
@@ -51,10 +51,15 @@ def add_meal_history(meal_history):
     '''
     client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
     db = client.test
-    meal_history_dict = {}
-    meal_history_dict['patient_id'] = meal_history.patient_id
-    meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
-    db.mealInfo.insert_one(meal_history_dict)
+    existing_history = db.mealInfo.find_one({'patient_id': id})
+    if existing_history is None:
+        meal_history_dict = {}
+        meal_history_dict['patient_id'] = meal_history.patient_id
+        meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
+        db.mealInfo.insert_one(meal_history_dict)
+    else:
+        db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): meal_history.meal_list}})
+        pdb.set_trace()
     return True
 
 def find_meal(name):
@@ -85,7 +90,8 @@ def get_all_meals():
     cursor = db.meals.find()
     meals = MealList()
     for meal in cursor:
-        meals.append(Meal().import_dict(meal))
+        # meals.append(Meal().import_dict(meal))
+        meals.append(meal)
 
     return meals
 

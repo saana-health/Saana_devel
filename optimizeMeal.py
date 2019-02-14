@@ -39,23 +39,24 @@ class Optimizer:
         This function tries to choose a good list of meals for a patient based on her/his constraint
         :return: [{lunchs}], [{dinners}]
         '''
+        print(1)
         patient = self.patient
 
         # get tags
         #TODO: multiple diseases,symptoms, etc
         tags = []
-        treatment_drugs = db.tags.find_one({'_id':patient['treatment_drugs']})
-        comorbidities = db.tags.find_one({'_id':patient['comorbidities']})
-        symptoms = db.tags.find_one({'_id':patient['symptoms'][0]})
+        # treatment_drugs = db.tags.find_one({'_id':patient['treatment_drugs']})
+        # comorbidities = db.tags.find_one({'_id':patient['comorbidities']})
+        # symptoms = db.tags.find_one({'_id':patient['symptoms'][0]})
         diseases = db.tags.find_one({'_id':patient['disease']})
 
         # append only if not None (if found)
-        if treatment_drugs:
-            tags.append(treatment_drugs)
-        if comorbidities:
-            tags.append(comorbidities)
-        if symptoms:
-            tags.append(symptoms)
+        # if treatment_drugs:
+        #     tags.append(treatment_drugs)
+        # if comorbidities:
+        #     tags.append(comorbidities)
+        # if symptoms:
+        #     tags.append(symptoms)
         if diseases:
             tags.append(diseases)
 
@@ -63,9 +64,9 @@ class Optimizer:
         avoids = list(itertools.chain(*[tag['avoid'] for tag in tags]))
         priors = list(itertools.chain(*[tag['prior'] for tag in tags]))
 
-        meals = db.meals.find()
+        meals = self._check_repitition()
         score_board = {}
-
+        print(2)
         # Score each meal based on their ingredients/nutritions
         for meal in meals:
             new_meal = Meal(meal['name'],meal['ingredients'],meal['nutrition'],meal['type'],meal['supplierID'])
@@ -90,7 +91,7 @@ class Optimizer:
         # TODO: change the number based on input
         lunches = [None for x in range(7)]
         dinners = [None for x in range(7)]
-
+        print(3)
         sorted_scores = sorted(score_board.keys(),reverse=True)
         i = 0
         for score in sorted_scores:
@@ -105,22 +106,33 @@ class Optimizer:
                     i += 1
                 else:
                     break
-        self.lunches = lunches
-        self.dinners = dinners
-
         return lunches, dinners
 
     def _check_repitition(self):
+        print(4)
         wk_num = self.week_num
         mealinfo = get_mealinfo_by_patient(self.patient['_id'])
-        lunches = self.lunches
-        dinners = self.dinners
+        all_meals = [meal for meal in get_all_meals()]
 
-        if wk_num > 1:
+        if mealinfo is None:
+            return all_meals
+        meal_list = []
+        if 'week_'+str(wk_num - 1) in mealinfo.keys():
             prev_week = mealinfo['week_'+str(wk_num - 1)]
-            if wk_num > 2:
-                prev2_week = mealinfo['week_'+str(wk_num - 2)]
-        pdb.set_trace()
+            prev_list = prev_week['meal_list']
+            for key in prev_list.keys():
+                meal_list.append(prev_list[key]['lunch'])
+                meal_list.append(prev_list[key]['dinner'])
+
+        if 'week_'+str(wk_num - 2) in mealinfo.keys():
+            prev2_week = mealinfo['week_'+str(wk_num - 2)]
+            prev2_list = prev2_week['meal_list']
+            for key in prev2_list.keys():
+                meal_list.append(prev2_list[key]['lunch'])
+                meal_list.append(prev2_list[key]['dinner'])
+
+        no_repeat = [meal for meal in all_meals if meal['_id'] not in meal_list]
+        return no_repeat
 
     def to_csv(self, lunches, dinners):
         '''
@@ -151,15 +163,17 @@ class Optimizer:
         # new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]
         all_meals = get_all_meals()
         for i in range(7):
-            lunch = all_meals.find_by('name',lunches[i]['meal'].name)
-            dinner = all_meals.find_by('name', dinners[i]['meal'].name)
-            new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch._id, 'dinner': dinner._id}
+            lunch = [x for x in all_meals if x['name'] == lunches[i]['meal'].name][0]
+            dinner = [x for x in all_meals if x['name'] == dinners[i]['meal'].name][0]
+            # lunch = all_meals.find_by('name',lunches[i]['meal'].name)
+            # dinner = all_meals.find_by('name', dinners[i]['meal'].name)
+            new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch['_id'], 'dinner': dinner['_id']}
         return new_history
 
 if __name__ == "__main__":
-    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 2)
+    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 3)
     lunches, dinners = test.optimize()
-    test._check_repitition()
+    # test._check_repitition()
     # csv_arry = test.to_csv(lunches, dinners)
-    # new_history = test.to_mongo(lunches, dinners)
-    # his = add_meal_history(new_history)
+    new_history = test.to_mongo(lunches, dinners)
+    his = add_meal_history(new_history, test.patient['_id'])
