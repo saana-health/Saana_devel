@@ -10,7 +10,7 @@ from webscrap.dri import submit_form
 import itertools
 from model import Meal,MealHistory, MealList
 import csv
-from connectMongdo import add_meal_history,find_meal, get_all_meals
+from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient
 
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
@@ -105,12 +105,22 @@ class Optimizer:
                     i += 1
                 else:
                     break
+        self.lunches = lunches
+        self.dinners = dinners
 
         return lunches, dinners
 
-    def _check_repitition(self,):
-        #TODO
-        pass
+    def _check_repitition(self):
+        wk_num = self.week_num
+        mealinfo = get_mealinfo_by_patient(self.patient['_id'])
+        lunches = self.lunches
+        dinners = self.dinners
+
+        if wk_num > 1:
+            prev_week = mealinfo['week_'+str(wk_num - 1)]
+            if wk_num > 2:
+                prev2_week = mealinfo['week_'+str(wk_num - 2)]
+        pdb.set_trace()
 
     def to_csv(self, lunches, dinners):
         '''
@@ -147,8 +157,9 @@ class Optimizer:
         return new_history
 
 if __name__ == "__main__":
-    test = Optimizer()
+    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 2)
     lunches, dinners = test.optimize()
-    csv_arry = test.to_csv(lunches, dinners)
-    new_history = test.to_mongo(lunches, dinners)
-    his = add_meal_history(new_history)
+    test._check_repitition()
+    # csv_arry = test.to_csv(lunches, dinners)
+    # new_history = test.to_mongo(lunches, dinners)
+    # his = add_meal_history(new_history)

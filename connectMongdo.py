@@ -89,5 +89,12 @@ def get_all_meals():
 
     return meals
 
+def get_mealinfo_by_patient(id):
+    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
+    db = client.test
+    mealinfo = db.mealInfo.find_one({'patient_id': id})
+    return mealinfo
+
+
 if __name__ == "__main__":
     pass
