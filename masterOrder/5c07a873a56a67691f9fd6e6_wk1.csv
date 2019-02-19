@@ -1,0 +1,16 @@
+5c07a873a56a67691f9fd6e6
+Date,Meal Type,Meal Name,Limiting nutritions,Prioritized nutrtions,Meal provider,Price
+Feb 1,Lunch,Wild Blueberry Super-food Oats,[{u'Vitamin K': u'0.2 ng'}],[{u'Potassium': u'473.4 mg'}],FoodNerd,0
+Feb 1,dinner,"""Not-so-Stuffing"" Quinoa Salad",[u'Salt'],"[u'Celery', u'Carrots']",Euphebe,0
+Feb 2,Lunch,Hippie Brunch Burrito with Green Salsa,[u'Salt'],[u'Turmeric (Curcumin)'],Euphebe,0
+Feb 2,dinner,White Bean Korma with Tricolor Quinoa (GF),[],[],Euphebe,0
+Feb 3,Lunch,Lemony Red Lentil Soup,[u'Salt'],[u'Carrots'],Euphebe,0
+Feb 3,dinner,Fennel & Arugula Farrotto (GF),[],[],Euphebe,0
+Feb 4,Lunch,Penne w/ Puttanesca,[u'Salt'],[u'Carrots'],Euphebe,0
+Feb 4,dinner,Creamy Broccoli Soup (GF),[u'Salt'],[u'Carrots'],Euphebe,0
+Feb 5,Lunch,Chana Masala with Indian-Spiced Rice (GF),[u'Salt'],[u'Turmeric (Curcumin)'],Euphebe,0
+Feb 5,dinner,Wild Mushroom Risotto (GF),[u'Salt'],[u'Celery'],Euphebe,0
+Feb 6,Lunch,Marcella Inspired Bolognese with Spelt Fusilli,[u'Salt'],[u'Carrots'],Euphebe,0
+Feb 6,dinner,Thai Coconut Green Curry with Lemongrass Rice (GF),[u'Salt'],[u'Carrots'],Euphebe,0
+Feb 7,Lunch,Louisiana Jambalaya,[u'Salt'],[u'Celery'],Euphebe,0
+Feb 7,dinner,Green Machine Bean Burger,[u'Salt'],[{u'Potassium': u'382.4 mg'}],FoodNerd,0

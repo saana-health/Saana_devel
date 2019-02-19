@@ -11,6 +11,7 @@ import itertools
 from model import Meal,MealHistory, MealList
 import csv
 from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient
+from random import shuffle
 
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
@@ -39,47 +40,46 @@ class Optimizer:
         This function tries to choose a good list of meals for a patient based on her/his constraint
         :return: [{lunchs}], [{dinners}]
         '''
-        print(1)
         patient = self.patient
 
         # get tags
         #TODO: multiple diseases,symptoms, etc
         tags = []
         # treatment_drugs = db.tags.find_one({'_id':patient['treatment_drugs']})
-        # comorbidities = db.tags.find_one({'_id':patient['comorbidities']})
-        # symptoms = db.tags.find_one({'_id':patient['symptoms'][0]})
+        treatment_drugs = db.tags.find({'_id': { "$in": patient['treatment_drugs'] }})
+        comorbidities = db.tags.find({'_id':{'$in':patient['comorbidities']}})
+        symptoms = db.tags.find({'_id':{'$in':patient['symptoms']}})
         diseases = db.tags.find_one({'_id':patient['disease']})
 
         # append only if not None (if found)
-        # if treatment_drugs:
-        #     tags.append(treatment_drugs)
-        # if comorbidities:
-        #     tags.append(comorbidities)
-        # if symptoms:
-        #     tags.append(symptoms)
+        if treatment_drugs:
+            tags += list(treatment_drugs)
+        if comorbidities:
+            tags += list(comorbidities)
+        if symptoms:
+            tags += list(symptoms)
         if diseases:
             tags.append(diseases)
 
         # Concat all the tags
-        avoids = list(itertools.chain(*[tag['avoid'] for tag in tags]))
-        priors = list(itertools.chain(*[tag['prior'] for tag in tags]))
+        avoids = list(set(itertools.chain(*[tag['avoid'] for tag in tags])))
+        priors = list(set(itertools.chain(*[tag['prior'] for tag in tags])))
 
         meals = self._check_repitition()
         score_board = {}
-        print(2)
         # Score each meal based on their ingredients/nutritions
         for meal in meals:
             new_meal = Meal(meal['name'],meal['ingredients'],meal['nutrition'],meal['type'],meal['supplierID'])
 
-            neg = sum([1 if nutrition in avoids else 0 for nutrition in meal['nutrition']])
-            neg += sum([1 if ingredient in avoids else 0 for ingredient in meal['ingredients']])
-            pos = sum([1 for nutrition in meal['nutrition'] if nutrition in priors])
-            pos += sum([1 for ingredient in meal['ingredients'] if ingredient in priors])
+            neg = sum([1 if nutrition in avoids else 0 for nutrition in new_meal.nutrition])
+            neg += sum([1 if ingredient in avoids else 0 for ingredient in new_meal.ingredients])
+            pos = sum([1 for nutrition in new_meal.nutrition if nutrition in priors])
+            pos += sum([1 for ingredient in new_meal.ingredients if ingredient in priors])
 
-            avoid_list = [nutrition for nutrition in meal['nutrition'] if nutrition in avoids]
-            avoid_list += [ingredient for ingredient in meal['ingredients'] if ingredient in avoids]
-            prior_list = [nutrition for nutrition in meal['nutrition'] if nutrition in priors]
-            prior_list += [ingredient for ingredient in meal['ingredients'] if ingredient in priors]
+            avoid_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in avoids]
+            avoid_list += [ingredient for ingredient in new_meal.ingredients if ingredient in avoids]
+            prior_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in priors]
+            prior_list += [ingredient for ingredient in new_meal.ingredients if ingredient in priors]
 
             score = 100 - neg*11 + pos * 9
             if score not in score_board.keys():
@@ -91,12 +91,12 @@ class Optimizer:
         # TODO: change the number based on input
         lunches = [None for x in range(7)]
         dinners = [None for x in range(7)]
-        print(3)
         sorted_scores = sorted(score_board.keys(),reverse=True)
         i = 0
         for score in sorted_scores:
             if i >= len(dinners) + len(lunches):
                 break
+            shuffle(score_board[score])
             for meal in score_board[score]:
                 if i < len(dinners):
                     dinners[i] =  meal
@@ -109,7 +109,6 @@ class Optimizer:
         return lunches, dinners
 
     def _check_repitition(self):
-        print(4)
         wk_num = self.week_num
         mealinfo = get_mealinfo_by_patient(self.patient['_id'])
         all_meals = [meal for meal in get_all_meals()]
@@ -147,7 +146,7 @@ class Optimizer:
             dinner = dinners[index]
             csv_arry.append(['Feb '+str(index+1),'Lunch',lunch['meal'].name,lunch['avoid'],lunch['prior'],lunch['meal'].supplierID,lunch['meal'].price])
             csv_arry.append(['Feb '+str(index+1),'dinner',dinner['meal'].name,dinner['avoid'],dinner['prior'],dinner['meal'].supplierID,dinner['meal'].price])
-        with open('master_order.csv','wb') as csvfile:
+        with open('masterOrder/'+str(self.patient['_id'])+'_wk'+str(self.week_num)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
         return csv_arry
@@ -171,9 +170,9 @@ class Optimizer:
         return new_history
 
 if __name__ == "__main__":
-    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 3)
+    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 1)
     lunches, dinners = test.optimize()
     # test._check_repitition()
-    # csv_arry = test.to_csv(lunches, dinners)
+    csv_arry = test.to_csv(lunches, dinners)
     new_history = test.to_mongo(lunches, dinners)
-    his = add_meal_history(new_history, test.patient['_id'])
+    # his = add_meal_history(new_history, test.patient['_id'])

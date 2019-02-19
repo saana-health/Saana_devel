@@ -58,8 +58,7 @@ def add_meal_history(meal_history,id):
         meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
         db.mealInfo.insert_one(meal_history_dict)
     else:
-        db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): meal_history.meal_list}})
-        pdb.set_trace()
+        db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
     return True
 
 def find_meal(name):
