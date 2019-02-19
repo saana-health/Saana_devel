@@ -18,6 +18,7 @@ def processNutrition(filename):
 
     :param filename:
     :return:
+    #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
     lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
     columns = []
@@ -25,7 +26,7 @@ def processNutrition(filename):
     meals = []
     full_list = []
     with open(filename) as csvfile:
-        ingredients = []
+        ingredients = {}
         nutritions = {}
         reader_list = list(csv.reader(csvfile))
         is_name = True
@@ -43,7 +44,11 @@ def processNutrition(filename):
             elif first_word != '':
                 name = unicodetoascii(reader_list[i][0])
                 ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                ingredients.append(ingredient)
+                try:
+                    ingredients[ingredient] = float(reader_list[i][3])*150
+                except:
+                    print(reader_list[i][3])
+                continue
                 if ingredient not in full_list:
                     full_list.append(ingredient)
             elif first_word == '':
@@ -53,11 +58,14 @@ def processNutrition(filename):
                             nutritions[columns[j]] = str(float(reader_list[i][j])) + ' ' + units[j]
                     new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = 'FoodNerd')
                     meals.append(new_meal)
-                    ingredients = []
+                    ingredients = {}
                     nutritions = {}
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
                     ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                    ingredients.append(ingredient)
+                    try:
+                        ingredients[ingredient] = float(reader_list[i][3])*150
+                    except:
+                        print(reader_list[i][3])
                     if ingredient not in full_list:
                         full_list.append(ingredient)
     return meals, full_list + columns
@@ -65,5 +73,7 @@ def processNutrition(filename):
 if __name__ == "__main__":
     from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
+    from utils import create_histogram
+    create_histogram(meals,'tofu')
     # add_meals(meals)
-    # pdb.set_trace()
+    pdb.set_trace()

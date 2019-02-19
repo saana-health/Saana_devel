@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 
+# MasterOrder folder
+masterOrder/
+
 # venv folder
 venv/
 

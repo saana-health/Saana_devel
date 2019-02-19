@@ -49,7 +49,7 @@ def processNutrition(filename):
     lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
 
     with open(filename) as csvfile:
-        ingredients = []
+        ingredients = {}
         nutritions = {}
         reader_list = list(csv.reader(csvfile))
         is_name = True
@@ -84,7 +84,7 @@ def processNutrition(filename):
                                 print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
                 #this row is for ingredient
                 else:
-                    ingredients.append(change_name(lookup_dict,name.replace('  ','')))
+                    ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
                     if name.replace('  ','') not in full_list:
                         full_list.append(name.replace('  ',''))
             #empty line: update Meal()
@@ -93,7 +93,7 @@ def processNutrition(filename):
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
-                ingredients = []
+                ingredients = {}
                 nutritions = {}
             if i == len(reader_list)-1:
                 new_item.ingredients = ingredients
@@ -163,9 +163,10 @@ def manual_input(menus, not_found,mapped):
     for each in not_found:
         for menu in menus:
             if SequenceMatcher(None,menu,each.name).ratio() > 0.5:
-                print('----------------------')
-                x = input('Is "{}" part of "{}"? [Yes: 1 / No: 0]: '.format(each, menu))
-                if x:
+                # Below for matching for the first time
+                # print('----------------------')
+                # x = input('Is "{}" part of "{}"? [Yes: 1 / No: 0]: '.format(each, menu))
+                if True:
                     try:
                         mapped[menu].append(each)
                     except:
@@ -190,11 +191,14 @@ def combine_nutrition(mapped):
     for menu_name in mapped.keys():
         new_meal = Meal(name = menu_name, supplierID = 'Euphebe')
         new_nutrition = {}
-        new_ingredients = []
+        new_ingredients = {}
         for item in mapped[menu_name]:
-            for ingredient in item.ingredients:
-                if ingredient not in new_ingredients:
-                    new_ingredients.append(ingredient)
+            for ingredient in item.ingredients.keys():
+                if ingredient not in new_ingredients.keys():
+                    new_ingredients[ingredient] = item.ingredients[ingredient]
+                else:
+                    new_ingredients[ingredient] += item.ingredients[ingredient]
+
             for nutrition in item.nutrition.keys():
                 s = item.nutrition[nutrition]
                 # Add value if already exist
@@ -219,6 +223,9 @@ if __name__ == "__main__":
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
+    from utils import create_histogram
+    create_histogram(combined,'tofu')
     # pprint.pprint(mapped)
     # add_meals(combined)
+
 

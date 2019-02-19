@@ -63,7 +63,7 @@ class Optimizer:
         avoids = list(set(itertools.chain(*[tag['avoid'] for tag in tags])))
         priors = list(set(itertools.chain(*[tag['prior'] for tag in tags])))
 
-        meals = self._check_repitition()
+        meals = self._check_repetition()
         score_board = {}
         # Score each meal based on their ingredients/nutritions
         for meal in meals:
@@ -75,10 +75,10 @@ class Optimizer:
             pos += sum([1 for ingredient in new_meal.ingredients if ingredient in priors])
 
             avoid_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in avoids]
-            avoid_list += [ingredient for ingredient in new_meal.ingredients if ingredient in avoids]
+            avoid_list += [ingredient for ingredient in new_meal.ingredients if ingredient in avoids and ingredient not in avoid_list]
             prior_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in priors]
-            prior_list += [ingredient for ingredient in new_meal.ingredients if ingredient in priors]
-
+            prior_list += [ingredient for ingredient in new_meal.ingredients if ingredient in priors and ingredient not in avoid_list]
+            pdb.set_trace()
             score = 100 - neg*11 + pos * 9
             if score not in score_board.keys():
                 score_board[score] = [{'meal': new_meal,'prior':prior_list,'avoid':avoid_list}]
@@ -87,8 +87,16 @@ class Optimizer:
 
         # This is where meals will be saved
         # TODO: change the number based on input
-        lunches = [None for x in range(7)]
-        dinners = [None for x in range(7)]
+        if len(meals) >= 42:
+            lunches = [None for x in range(21)]
+            dinners = [None for x in range(21)]
+
+        elif len(meals) >= 28:
+            lunches = [None for x in range(14)]
+            dinners = [None for x in range(14)]
+        else:
+            lunches = [None for x in range(7)]
+            dinners = [None for x in range(7)]
         sorted_scores = sorted(score_board.keys(),reverse=True)
         i = 0
         for score in sorted_scores:
@@ -104,9 +112,9 @@ class Optimizer:
                     i += 1
                 else:
                     break
-        return lunches, dinners
+        return lunches[:7], dinners[:7]
 
-    def _check_repitition(self):
+    def _check_repetition(self):
         wk_num = self.week_num
         mealinfo = get_mealinfo_by_patient(self.patient['_id'])
         all_meals = [meal for meal in get_all_meals()]
@@ -142,8 +150,11 @@ class Optimizer:
         for index in range(7):
             lunch = lunches[index]
             dinner = dinners[index]
-            csv_arry.append(['Feb '+str(index+1),'Lunch',lunch['meal'].name,lunch['avoid'],lunch['prior'],lunch['meal'].supplierID,lunch['meal'].price])
-            csv_arry.append(['Feb '+str(index+1),'dinner',dinner['meal'].name,dinner['avoid'],dinner['prior'],dinner['meal'].supplierID,dinner['meal'].price])
+            try:
+                csv_arry.append(['Feb '+str(index+1),'Lunch',lunch['meal'].name,lunch['avoid'],lunch['prior'],lunch['meal'].supplierID,lunch['meal'].price])
+                csv_arry.append(['Feb '+str(index+1),'dinner',dinner['meal'].name,dinner['avoid'],dinner['prior'],dinner['meal'].supplierID,dinner['meal'].price])
+            except:
+                pdb.set_trace()
         with open('masterOrder/'+str(self.patient['_id'])+'_wk'+str(self.week_num)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
@@ -177,3 +188,8 @@ def auto():
 
 if __name__ == "__main__":
     auto()
+    # st = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 1)
+    # lunches, dinners = test.optimize()
+    # csv_arry = test.to_csv(lunches, dinners)
+    # new_history = test.to_mongo(lunches, dinners)
+    # his = add_meal_history(new_history, test.patient['_id'])

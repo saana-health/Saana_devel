@@ -68,3 +68,34 @@ def unicodetoascii(text):
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
+
+def create_histogram(combined,keyword):
+    '''
+
+    :param combined: [Meal]
+    :return:
+    '''
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    x_label = []
+    y_label = []
+
+    for meal in combined:
+        print('-----------')
+        for ingredient in meal.ingredients.keys():
+            if keyword.lower() in ingredient.lower():
+                print(ingredient)
+                x_label.append(meal.name)
+                y_label.append(float(meal.ingredients[ingredient]))
+
+    sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
+    ind = np.arange(len(x_label))
+
+    fig, ax = plt.subplots()
+
+    ax.barh(ind,sorted(y_label))
+    ax.set_yticks(ind)
+    ax.set_yticklabels(sorted_x_label)
+
+    plt.show()

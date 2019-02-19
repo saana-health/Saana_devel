@@ -4,7 +4,7 @@ class Meal:
     '''
     This class should follow the db schema designed for meal info
     '''
-    def __init__(self,name = '', ingredients = [], nutrition = {}, type = '', supplierID = '',price = 0):
+    def __init__(self,name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',price = 0):
         self.name = name
         self.ingredients = ingredients
         self.nutrition = nutrition
