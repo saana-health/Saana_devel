@@ -1,17 +1,15 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-import pickle
 import pdb
-import pprint
-from processEuphebe import Meal
-from processFoodMatrix import processFoodMatrixCSV
-from difflib import SequenceMatcher
-from webscrap.dri import submit_form
+# from processFoodMatrix import processFoodMatrixCSV
+# from difflib import SequenceMatcher
+# from webscrap.dri import submit_form
 import itertools
 from model import Meal,MealHistory, MealList
 import csv
 from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient
 from random import shuffle
+import os
 
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
@@ -169,10 +167,13 @@ class Optimizer:
             new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch['_id'], 'dinner': dinner['_id']}
         return new_history
 
+def auto():
+    for i in range(1,8):
+        test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = i)
+        lunches, dinners = test.optimize()
+        csv_arry = test.to_csv(lunches, dinners)
+        new_history = test.to_mongo(lunches, dinners)
+        his = add_meal_history(new_history, test.patient['_id'])
+
 if __name__ == "__main__":
-    test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 1)
-    lunches, dinners = test.optimize()
-    # test._check_repitition()
-    csv_arry = test.to_csv(lunches, dinners)
-    new_history = test.to_mongo(lunches, dinners)
-    # his = add_meal_history(new_history, test.patient['_id'])
+    auto()
