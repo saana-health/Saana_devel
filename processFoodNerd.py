@@ -74,6 +74,6 @@ if __name__ == "__main__":
     from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
     from utils import create_histogram
-    create_histogram(meals,'tofu')
+    create_histogram(meals,'tomato')
     # add_meals(meals)
     pdb.set_trace()

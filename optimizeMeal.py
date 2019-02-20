@@ -178,6 +178,10 @@ class Optimizer:
             new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch['_id'], 'dinner': dinner['_id']}
         return new_history
 
+    def feed_back(self,meal_name):
+        #TODO
+        pass
+
 def auto():
     for i in range(1,8):
         test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = i)
