@@ -77,17 +77,29 @@ def create_histogram(combined,keyword):
     '''
     import numpy as np
     import matplotlib.pyplot as plt
+    from textwrap import wrap
 
-    x_label = []
-    y_label = []
-
+    pair = {}
+    unit = ''
     for meal in combined:
-        print('-----------')
         for ingredient in meal.ingredients.keys():
             if keyword.lower() in ingredient.lower():
-                print(ingredient)
-                x_label.append(meal.name)
-                y_label.append(float(meal.ingredients[ingredient]))
+                if meal.name in pair.keys():
+                    pair[meal.name] += float(meal.ingredients[ingredient])
+                else:
+                    pair[meal.name] = float(meal.ingredients[ingredient])
+        for nutrition in meal.nutrition.keys():
+            if keyword.lower() in nutrition.lower():
+                if not unit:
+                    unit = meal.nutrition[nutrition].split(' ')[1]
+                if meal.name in pair.keys():
+                    pair[meal.name] += float(meal.nutrition[nutrition].split(' ')[0])
+                else:
+                    pair[meal.name] = float(meal.nutrition[nutrition].split(' ')[0])
+
+    x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
+    # x_label = pair.keys()
+    y_label = pair.values()
 
     sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
     ind = np.arange(len(x_label))
@@ -97,5 +109,10 @@ def create_histogram(combined,keyword):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
+    plt.title(keyword + ' (' + unit + ')')
+    plt.tight_layout()
+    figure = plt.gcf()
+    figure.set_size_inches(16,12)
 
-    plt.show()
+    plt.savefig('figures/'+keyword,dpi=200)
+    # plt.show(dpi = 100)

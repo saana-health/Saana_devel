@@ -221,12 +221,17 @@ if __name__ == "__main__":
     menus = processMenu(PATH+'menu.csv')
     items, columns = processNutrition(PATH+'nutrition.csv')
     new = list(set(columns))
-    pdb.set_trace()
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
     from utils import create_histogram
+    create_histogram(combined,'vit k')
     create_histogram(combined,'tomato')
+    create_histogram(combined,'onion')
+    create_histogram(combined,'tofu')
+    create_histogram(combined,'soy')
+    create_histogram(combined,'totfib')
+    create_histogram(combined,'potassium')
     # pprint.pprint(mapped)
     # add_meals(combined)
 
