@@ -188,7 +188,7 @@ def auto():
         lunches, dinners = test.optimize()
         csv_arry = test.to_csv(lunches, dinners)
         new_history = test.to_mongo(lunches, dinners)
-        his = add_meal_history(new_history, test.patient['_id'])
+        # his = add_meal_history(new_history, test.patient['_id'])
 
 if __name__ == "__main__":
     auto()

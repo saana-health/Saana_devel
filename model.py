@@ -47,7 +47,10 @@ class MealList(list):
 
 class Patient:
     def __init__(self, name = '', weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
-        pass
+        self.name = name
+        self.weight = weight
+        self.treatment_drugs = treatment_drugs
+        self.disease_stage = disease_stage
 
 class Tag:
     '''

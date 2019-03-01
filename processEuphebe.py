@@ -60,6 +60,8 @@ def processNutrition(filename):
         for i in range(len(columns)):
             columns[i] = columns[i].replace(' ('+units[i]+')','')
         full_list = [change_name(lookup_dict,x) for x in columns]
+        # full_list = [x for x in columns]
+
 
         # loop through each row starting 3rd row
         for i in range(2,len(reader_list)):
@@ -85,6 +87,7 @@ def processNutrition(filename):
                 #this row is for ingredient
                 else:
                     ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
+                    # ingredients[name]= row[3]
                     if name.replace('  ','') not in full_list:
                         full_list.append(name.replace('  ',''))
             #empty line: update Meal()
@@ -195,9 +198,9 @@ def combine_nutrition(mapped):
         for item in mapped[menu_name]:
             for ingredient in item.ingredients.keys():
                 if ingredient not in new_ingredients.keys():
-                    new_ingredients[ingredient] = item.ingredients[ingredient]
+                    new_ingredients[ingredient] = float(item.ingredients[ingredient])
                 else:
-                    new_ingredients[ingredient] += item.ingredients[ingredient]
+                    new_ingredients[ingredient] += float(item.ingredients[ingredient])
 
             for nutrition in item.nutrition.keys():
                 s = item.nutrition[nutrition]
@@ -225,14 +228,6 @@ if __name__ == "__main__":
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
     from utils import create_histogram
-    create_histogram(combined,'vit k')
-    create_histogram(combined,'tomato')
-    create_histogram(combined,'onion')
-    create_histogram(combined,'tofu')
-    create_histogram(combined,'soy')
-    create_histogram(combined,'totfib')
-    create_histogram(combined,'potassium')
+    create_histogram(combined,['garlic'])
     # pprint.pprint(mapped)
     # add_meals(combined)
-
-

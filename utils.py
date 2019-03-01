@@ -2,6 +2,7 @@
 from mixpanel_api import Mixpanel
 import csv
 import pdb
+from model import Meal, Tag
 
 def export_mixpanel_to_csv():
     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
@@ -69,7 +70,7 @@ def unicodetoascii(text):
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
 
-def create_histogram(combined,keyword):
+def create_histogram(combined,keywords,filter = []):
     '''
 
     :param combined: [Meal]
@@ -78,24 +79,35 @@ def create_histogram(combined,keyword):
     import numpy as np
     import matplotlib.pyplot as plt
     from textwrap import wrap
-
+    ret = False
     pair = {}
     unit = ''
     for meal in combined:
-        for ingredient in meal.ingredients.keys():
-            if keyword.lower() in ingredient.lower():
-                if meal.name in pair.keys():
-                    pair[meal.name] += float(meal.ingredients[ingredient])
-                else:
-                    pair[meal.name] = float(meal.ingredients[ingredient])
-        for nutrition in meal.nutrition.keys():
-            if keyword.lower() in nutrition.lower():
-                if not unit:
-                    unit = meal.nutrition[nutrition].split(' ')[1]
-                if meal.name in pair.keys():
-                    pair[meal.name] += float(meal.nutrition[nutrition].split(' ')[0])
-                else:
-                    pair[meal.name] = float(meal.nutrition[nutrition].split(' ')[0])
+        for keyword in keywords:
+            for ingredient in meal.ingredients.keys():
+                if keyword.lower() in ingredient.lower():
+                    for each in filter:
+                        if each in ingredient.lower():
+                            ret = True
+                            break
+                    if ret == True:
+                        ret = False
+                        continue
+                    print(keyword, ingredient)
+                    if meal.name in pair.keys():
+                        pair[meal.name] += float(meal.ingredients[ingredient])
+                    else:
+                        pair[meal.name] = float(meal.ingredients[ingredient])
+            for nutrition in meal.nutrition.keys():
+                if keyword.lower() in nutrition.lower():
+                # if keyword == nutrition:
+                    print(keyword, nutrition)
+                    if not unit:
+                        unit = meal.nutrition[nutrition].split(' ')[1]
+                    if meal.name in pair.keys():
+                        pair[meal.name] += float(meal.nutrition[nutrition].split(' ')[0])
+                    else:
+                        pair[meal.name] = float(meal.nutrition[nutrition].split(' ')[0])
 
     x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
     # x_label = pair.keys()
@@ -109,10 +121,16 @@ def create_histogram(combined,keyword):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
-    plt.title(keyword + ' (' + unit + ')')
+    plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
     plt.tight_layout()
     figure = plt.gcf()
     figure.set_size_inches(16,12)
 
-    plt.savefig('figures/'+keyword,dpi=200)
-    # plt.show(dpi = 100)
+    plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
+    # plt.show()
+
+def meal_dict_to_class(meal):
+    return Meal(name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
+
+def tag_dict_to_class(tag):
+    return Tag(name = tag['name'], avoid = tag['avoid'],prior = tag['prior'], type = tag['type'])

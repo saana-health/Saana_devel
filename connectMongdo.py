@@ -4,6 +4,8 @@ import pdb
 import pprint
 from model import Meal, MealHistory,MealList
 
+client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
+db = client.test
 
 def add_tags(tag_dict):
     '''
@@ -11,8 +13,6 @@ def add_tags(tag_dict):
     :param tag_dict: return dictionary of processFoodMatrix.processFoodMatrixCSV
     :return: True/False based on successfulness
     '''
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     tags = db.tags
     l = []
     result = tags.insert_many(tag_dict.values())
@@ -24,8 +24,6 @@ def add_meals(meal_list = [],pickle_name = ''):
     :param pickle_name: (str)name of the pickle
     :return: True
     '''
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     if not meal_list:
         meal_list = pickle.load( open(pickle_name,'rb'))
     meals = db.meals
@@ -49,8 +47,6 @@ def add_meal_history(meal_history,id):
     :param meal_history: [class MealHistory]
     :return: True if successful
     '''
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     existing_history = db.mealInfo.find_one({'patient_id': id})
     if existing_history is None:
         meal_history_dict = {}
@@ -67,8 +63,6 @@ def find_meal(name):
     :param name: str - name of a meal
     :return: {mealInfo}
     '''
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     meal = db.meals.find_one({"name":name})
     return meal
 
@@ -78,14 +72,10 @@ def find_patient(name):
     :param name: str - name of a patient
     :return: {(patient info)}
     '''
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     patient = db.patients.find_one({"name":name})
     return patient
 
 def get_all_meals():
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     cursor = db.meals.find()
     meals = MealList()
     for meal in cursor:
@@ -95,11 +85,14 @@ def get_all_meals():
     return meals
 
 def get_mealinfo_by_patient(id):
-    client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-    db = client.test
     mealinfo = db.mealInfo.find_one({'patient_id': id})
     return mealinfo
 
+def get_all_tags():
+    return db.tags.find()
+
+def get_all_patients():
+    return db.patients.find()
 
 if __name__ == "__main__":
     pass
