@@ -59,8 +59,8 @@ def processNutrition(filename):
         units = [re.search('\(.*\)',columns[y]).group()[1:-1] if re.search('\(.*\)',columns[y]) else '' for y in range(len(columns))]
         for i in range(len(columns)):
             columns[i] = columns[i].replace(' ('+units[i]+')','')
-        full_list = [change_name(lookup_dict,x) for x in columns]
-        # full_list = [x for x in columns]
+        # full_list = [change_name(lookup_dict,x) for x in columns]
+        full_list = [x for x in columns]
 
 
         # loop through each row starting 3rd row
@@ -86,8 +86,8 @@ def processNutrition(filename):
                                 print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
                 #this row is for ingredient
                 else:
-                    ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
-                    # ingredients[name]= row[3]
+                    # ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
+                    ingredients[name]= row[3]
                     if name.replace('  ','') not in full_list:
                         full_list.append(name.replace('  ',''))
             #empty line: update Meal()
@@ -228,6 +228,6 @@ if __name__ == "__main__":
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
     from utils import create_histogram
-    create_histogram(combined,['garlic'])
+    create_histogram(combined,['Omega3'])
     # pprint.pprint(mapped)
     # add_meals(combined)

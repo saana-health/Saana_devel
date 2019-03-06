@@ -78,7 +78,6 @@ class Optimizer:
             avoid_list += [ingredient for ingredient in new_meal.ingredients if ingredient in avoids and ingredient not in avoid_list]
             prior_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in priors]
             prior_list += [ingredient for ingredient in new_meal.ingredients if ingredient in priors and ingredient not in avoid_list]
-            pdb.set_trace()
             score = 100 - neg*11 + pos * 9
             if score not in score_board.keys():
                 score_board[score] = [{'meal': new_meal,'prior':prior_list,'avoid':avoid_list}]

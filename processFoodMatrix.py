@@ -3,6 +3,7 @@ import pprint
 import os
 import pdb
 from connectMongdo import add_tags
+from model import Tag
 PATH = os.path.join(os.getcwd(),'csv/')
 
 
@@ -31,7 +32,7 @@ def processFoodMatrixCSV(filename):
             if row[0]:
                 what_type = row[0]
             name = row[1].replace('\xc2',' ').replace('\xa0',' ')
-            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': []}
+            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': [], 'minimize':[]}
             #loop through each column
             for j in range(2,len(row)):
                 #avoid
@@ -40,6 +41,9 @@ def processFoodMatrixCSV(filename):
                 #prioritize
                 elif row[j] == 'P':
                     master_dict[name]['prior'].append(columns[j])
+                #TODO: minimize
+                elif False:
+                    master_dict[name]['minimize'].append(columns[j])
     return master_dict, columns
 
 def generate_keyword(columns):
@@ -67,6 +71,6 @@ def generate_keyword(columns):
 if __name__ == "__main__":
     master_dict, columns = processFoodMatrixCSV('')
     # generate_keyword(columns)
-    # add_tags(master_dict)
+    add_tags(master_dict)
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

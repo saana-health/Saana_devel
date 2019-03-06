@@ -2,7 +2,7 @@
 from mixpanel_api import Mixpanel
 import csv
 import pdb
-from model import Meal, Tag
+from model import Meal, Tag, Patient
 
 def export_mixpanel_to_csv():
     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
@@ -84,22 +84,23 @@ def create_histogram(combined,keywords,filter = []):
     unit = ''
     for meal in combined:
         for keyword in keywords:
-            for ingredient in meal.ingredients.keys():
-                if keyword.lower() in ingredient.lower():
-                    for each in filter:
-                        if each in ingredient.lower():
-                            ret = True
-                            break
-                    if ret == True:
-                        ret = False
-                        continue
-                    print(keyword, ingredient)
-                    if meal.name in pair.keys():
-                        pair[meal.name] += float(meal.ingredients[ingredient])
-                    else:
-                        pair[meal.name] = float(meal.ingredients[ingredient])
+            # for ingredient in meal.ingredients.keys():
+            #     if keyword.lower() in ingredient.lower():
+            #         for each in filter:
+            #             if each in ingredient.lower():
+            #                 ret = True
+            #                 break
+            #         if ret == True:
+            #             ret = False
+            #             continue
+            #         print(keyword, ingredient)
+            #         if meal.name in pair.keys():
+            #             pair[meal.name] += float(meal.ingredients[ingredient])
+            #         else:
+            #             pair[meal.name] = float(meal.ingredients[ingredient])
             for nutrition in meal.nutrition.keys():
-                if keyword.lower() in nutrition.lower():
+                # if keyword.lower() in nutrition.lower():
+                if keyword in nutrition:
                 # if keyword == nutrition:
                     print(keyword, nutrition)
                     if not unit:
@@ -130,7 +131,11 @@ def create_histogram(combined,keywords,filter = []):
     # plt.show()
 
 def meal_dict_to_class(meal):
-    return Meal(name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
+    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
 
 def tag_dict_to_class(tag):
-    return Tag(name = tag['name'], avoid = tag['avoid'],prior = tag['prior'], type = tag['type'])
+    return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
+
+def patient_dict_to_class(patient):
+    return Patient(_id = patient['_id'],symptoms = patient['Symptoms'], comorbidities = patient['comorbidities'], disease = patient['disease'])
+

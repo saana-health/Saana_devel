@@ -14,7 +14,6 @@ def add_tags(tag_dict):
     :return: True/False based on successfulness
     '''
     tags = db.tags
-    l = []
     result = tags.insert_many(tag_dict.values())
     return True
 

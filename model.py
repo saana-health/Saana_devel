@@ -4,14 +4,14 @@ class Meal:
     '''
     This class should follow the db schema designed for meal info
     '''
-    def __init__(self,name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',price = 0):
+    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',price = 0):
+        self._id = _id
         self.name = name
         self.ingredients = ingredients
         self.nutrition = nutrition
         self.type = type
         self.supplierID = supplierID
         self.price = price
-        self._id = None
 
     def __str__(self):
         return str(self.name.encode('ascii','ignore'))
@@ -46,21 +46,28 @@ class MealList(list):
                 return meal
 
 class Patient:
-    def __init__(self, name = '', weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
+    def __init__(self, _id = '',name = '', comorbidities = '', disease = '', symptoms = '',weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
         self.name = name
         self.weight = weight
         self.treatment_drugs = treatment_drugs
         self.disease_stage = disease_stage
+        self.comorbidities = comorbidities
+        self.disease = disease
+        self.symptoms = symptoms
+        self._id = _id
+
 
 class Tag:
     '''
     This class should follow the db schema designed for tag info
     '''
-    def __init__(self, name = '', avoid = [], prior = [], type = ''):
+    def __init__(self, _id = '',name = '', minimize= [], prior = [], type = '',avoid=[]):
+        self._id = _id
         self.name = name
         self.avoid = avoid
         self.prior = prior
         self.type = type
+        self.minimize = minimize
 
     def __str__(self):
         return str(self.name)
