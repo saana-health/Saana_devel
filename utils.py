@@ -69,7 +69,6 @@ def unicodetoascii(text):
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
-
 def create_histogram(combined,keywords,filter = []):
     '''
 
@@ -129,6 +128,64 @@ def create_histogram(combined,keywords,filter = []):
 
     plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
     # plt.show()
+
+def create_histogram_insoluble(combined):
+    '''
+
+    :param combined: [Meal]
+    :return:
+    '''
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from textwrap import wrap
+    ret = False
+    pair = {}
+    unit = ''
+    for meal in combined:
+        print(meal)
+        tot = 0.00
+        sol = 0.00
+        both = False
+        for nutrition in meal.nutrition.keys():
+            if 'TotFib' in nutrition:
+                tot = float(meal.nutrition[nutrition].split(' ')[0])
+                print(tot)
+                if both:
+                    pair[meal.name] = tot - sol
+                    break
+                both = True
+            elif 'TotSolFib' in nutrition:
+                sol = float(meal.nutrition[nutrition].split(' ')[0])
+                print(sol)
+                if both:
+                    pair[meal.name] = tot - sol
+                    break
+                both = True
+            else:
+                continue
+
+
+
+    x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
+    # x_label = pair.keys()
+    y_label = pair.values()
+
+    sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
+    ind = np.arange(len(x_label))
+
+    fig, ax = plt.subplots()
+
+    ax.barh(ind,sorted(y_label))
+    ax.set_yticks(ind)
+    ax.set_yticklabels(sorted_x_label)
+    plt.title('insoluable')
+    plt.tight_layout()
+    figure = plt.gcf()
+    figure.set_size_inches(16,12)
+
+    plt.savefig('figures/insoluableFib')
+    # plt.show()
+
 
 def meal_dict_to_class(meal):
     return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])

@@ -1,16 +1,16 @@
 5c07a873a56a67691f9fd6e6
 Date,Meal Type,Meal Name,Limiting nutritions,Prioritized nutrtions,Meal provider,Price
-Feb 1,Lunch,Tomato & Cannellini Bean Soup (GF),[u'Salt'],[],Euphebe,0
-Feb 1,dinner,"""Not-so-Stuffing"" Quinoa Salad",[u'Salt'],"[u'Celery', u'Carrots']",Euphebe,0
-Feb 2,Lunch,Rachel's Veggie Burger with Roasted Sweet potato and parsnip fries (GF),[u'Salt'],[],Euphebe,0
-Feb 2,dinner,White Bean Korma with Tricolor Quinoa (GF),[],[],Euphebe,0
-Feb 3,Lunch,Green Tomatillo Chili,[u'Salt'],[],Euphebe,0
-Feb 3,dinner,Fennel & Arugula Farrotto (GF),[],[],Euphebe,0
-Feb 4,Lunch,Burrito Bowl with Cilantro Lime Rice & Avocado Crema (GF),[u'Salt'],[],Euphebe,0
-Feb 4,dinner,Creamy Broccoli Soup (GF),[u'Salt'],[u'Carrots'],Euphebe,0
-Feb 5,Lunch,Veggie Brunch Pie with Roasted Red Pepper Sauce (GF),[u'Salt'],[],Euphebe,0
-Feb 5,dinner,Chocolate Covered Strawberry Super-food Oats,[{u'Vitamin K': u'0.2 ng'}],[{u'Potassium': u'581.0 mg'}],FoodNerd,0
-Feb 6,Lunch,Lunchtime Rita with Green Salsa,[u'Salt'],[],Euphebe,0
-Feb 6,dinner,Thai Coconut Green Curry with Lemongrass Rice (GF),[u'Salt'],[u'Carrots'],Euphebe,0
-Feb 7,Lunch,Tuscan Farro Salad,[u'Salt'],[],Euphebe,0
-Feb 7,dinner,Lemony Red Lentil Soup,[u'Salt'],[u'Carrots'],Euphebe,0
+Day 1,meal_1,Sweet Beet Slaw Salad,[],"[{u'Potassium': u'678.8 mg'}, {u'Vitamin K': u'1.9 ng'}, u'Cabbage', u'Beets']",FoodNerd,0
+Day 1,meal_2,French Style Vegetable Slaw Salad,"[u'Onions', u'Garlic']","[{u'Potassium': u'673.3 mg'}, {u'Vitamin K': u'6.4 ng'}, u'Cabbage', u'Carrots', u'Cauliflower']",FoodNerd,0
+Day 2,meal_1,Roasted Chickpea & Vegetable Tacos,"[u'Onions', u'Garlic']","[{u'Potassium': u'359.1 mg'}, {u'Vitamin K': u'1.6 ng'}, u'Cabbage', u'Carrots', u'Broccoli']",FoodNerd,0
+Day 2,meal_2,Harvest Grain Bowl (GF),[u'Onions'],"[u'Celery', u'Brussel Sprouts', u'Cauliflower']",Euphebe,0
+Day 3,meal_1,Blueberry Banana Pancakes,[],"[{u'Potassium': u'336.5 mg'}, {u'Vitamin K': u'0.1 ng'}]",FoodNerd,0
+Day 3,meal_2,Apple Cinnamon Mini Muffins,[],"[{u'Potassium': u'459.47 mg'}, {u'Vitamin K': u'0.17 ng'}]",FoodNerd,0
+Day 4,meal_1,Chocolate Covered Strawberry Super-food Oats,[],"[{u'Potassium': u'581.0 mg'}, {u'Vitamin K': u'0.2 ng'}]",FoodNerd,0
+Day 4,meal_2,Wild Blueberry Super-food Oats,[],"[{u'Potassium': u'473.4 mg'}, {u'Vitamin K': u'0.2 ng'}]",FoodNerd,0
+Day 5,meal_1,Butternut Squash Red Lentil Dal with Brown Rice and Three Seed Topping,"[u'Tomato', u'Garlic']","[u'Coconut Oil', u'Ginger', u'Cauliflower']",Euphebe,0
+Day 5,meal_2,Thai Coconut Green Curry with Lemongrass Rice (GF),[u'Garlic'],"[u'Oil, butter', u'Carrots']",Euphebe,0
+Day 6,meal_1,"""Not-so-Stuffing"" Quinoa Salad",[u'Garlic'],"[u'Celery', u'Carrots']",Euphebe,0
+Day 6,meal_2,Hippie Brunch Burrito with Green Salsa,[u'Garlic'],"[u'Oil, butter', u'Turmeric (Curcumin)']",Euphebe,0
+Day 7,meal_1,Creamy Broccoli Soup (GF),[],[u'Carrots'],Euphebe,0
+Day 7,meal_2,Saag no Paneer with Cardamom Rice (GF),[],[u'Turmeric (Curcumin)'],Euphebe,0

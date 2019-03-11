@@ -79,7 +79,8 @@ def processNutrition(filename):
                 if name.lower() == 'total':
                     for j in range(1,len(row)):
                         # skip if empty or zero or not a number
-                        if row[j] not in ['','0','Serving','--']:
+                        if row[j] not in ['','Serving','--']:
+                        # if row[j] not in ['','0','Serving','--']:
                             try:
                                 nutritions[columns[j]] = str(float(row[j])) + ' ' + units[j]
                             except:
@@ -227,7 +228,7 @@ if __name__ == "__main__":
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
-    from utils import create_histogram
-    create_histogram(combined,['Omega3'])
+    from utils import create_histogram_insoluble
+    create_histogram_insoluble(combined)
     # pprint.pprint(mapped)
     # add_meals(combined)

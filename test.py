@@ -61,13 +61,17 @@ class Optimizer:
             score_board = {}
             tags = self.tags
 
-            minimizes = list(set(itertools.chain(*[tag.minimize for tag in tags.values()])))
+            minimizes = list(set(itertools.chain(*[tag.minimize.keys() for tag in tags.values()])))
             priors = list(set(itertools.chain(*[tag.prior for tag in tags.values()])))
             avoids = list(set(itertools.chain(*[tag.avoid for tag in tags.values()])))
             repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
 
 
             for meal in self.meals.values():
+                for each in meal.nutrition.keys() + meal.ingredients:
+                    if each in avoids:
+                        print(each)
+                        pdb.set_trace()
                 score = 100
                 if repeat_one_week is not None and meal in repeat_one_week:
                     score -= 60
@@ -93,18 +97,45 @@ class Optimizer:
                     score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list}]
                 else:
                     score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
+
             slots = [None for _ in range(NUM_MEAL)]
             sorted_scores = sorted(score_board.keys(), reverse=True)
             i=0
+
+            MAX_MEAL_PER_SUPPLIER_1 = 7
+            MAX_MEAL_PER_SUPPLIER_2 = 7
+
+            meal_num_per_supplier = {}
             for score in sorted_scores:
                 if i >= len(slots):
                     break
                 for meal in score_board[score]:
+                    # if all slots filled
                     if i >= len(slots):
                         break
+
+                    supplier = meal['meal'].supplierID
+                    if supplier not in meal_num_per_supplier.keys():
+                        if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
+                            continue
+                        elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
+                            continue
+                        meal_num_per_supplier[supplier] = 1
+
+                    elif supplier == 'Euphebe':
+                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
+                            continue
+                        meal_num_per_supplier[supplier] += 1
+                    elif supplier == 'FoodNerd':
+                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
+                            continue
+                        meal_num_per_supplier[supplier] += 1
+                    else:
+                        pdb.set_trace()
                     slots[i] = meal
                     i += 1
-            self.to_mongo(slots,patient._id)
+            # self.to_mongo(slots,patient._id)
+            self.to_csv(slots,patient._id)
 
 
     def _repeating_meals(self,patient_id):
@@ -139,7 +170,26 @@ class Optimizer:
         his = add_meal_history(new_history, patient_id)
         return True
 
+    def to_csv(self, slots, patient_id):
+        '''
+        This function is for generating master order file for a week
+        :param lunches: [{lunch}] - from optimize()
+        :param dinners: [{dinner}] - ^
+        :return: [[]] - 2D array that is written to the csv file
+        '''
+        csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutritions','Prioritized nutrtions','Meal provider','Price']]
+        for index in range(7):
+            meal_1 = slots[2*index]
+            meal_2 = slots[2*index +1]
+            csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].price])
+            csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].price])
+        with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(csv_arry)
+        return csv_arry
+
     def temp(self):
+        # To see how many meals repeat
         wk_num = self.week
         mealinfo = get_mealinfo_by_patient(self.patients[0]._id)
         all_meals = [meal for meal in get_all_meals()]
@@ -167,13 +217,15 @@ class Optimizer:
                 meal_list += prev2_list[key]
         # no_repeat = [meal for meal in all_meals if meal['_id'] in meal_list]
         return [x for x in meal_list if x in curr_list]
+
+
 if __name__ == "__main__":
     op = Optimizer(week = 1)
     op.optimize()
-    op = Optimizer(week = 2)
-    op.optimize()
-    op = Optimizer(week = 3)
-    op.optimize()
+    # op = Optimizer(week = 2)
+    # op.optimize()
+    # op = Optimizer(week = 3)
+    # op.optimize()
     # ab = op.temp()
     # pdb.set_trace()
 

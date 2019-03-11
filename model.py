@@ -61,7 +61,7 @@ class Tag:
     '''
     This class should follow the db schema designed for tag info
     '''
-    def __init__(self, _id = '',name = '', minimize= [], prior = [], type = '',avoid=[]):
+    def __init__(self, _id = '',name = '', minimize= {}, prior = [], type = '',avoid=[]):
         self._id = _id
         self.name = name
         self.avoid = avoid
