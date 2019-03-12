@@ -7,6 +7,13 @@ from model import Meal, MealHistory,MealList
 client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
 db = client.test
 
+def add_patients(patients):
+    if not isinstance(patients,(list,)):
+        patients = [patients]
+    collection_patients = db.patients
+    pa = [{'name':x.name, 'treatment_drugs': [], 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':[]} for x in patients]
+    result = collection_patients.insert_many(pa)
+
 def add_tags(tag_dict):
     '''
     This function adds tag_dict into a db on MongoDB atlas
@@ -65,14 +72,30 @@ def find_meal(name):
     meal = db.meals.find_one({"name":name})
     return meal
 
-def find_patient(name):
+def find_patient(name = '', object_id = ''):
     '''
     This function finds a patient based on her/his name
     :param name: str - name of a patient
     :return: {(patient info)}
     '''
-    patient = db.patients.find_one({"name":name})
+    if name:
+        patient = db.patients.find_one({"name":name})
+    else:
+        patient = db.patients.find_one({"_id": object_id})
     return patient
+
+def find_disease(name):
+    tags = db.tags.find()
+    for each in tags:
+        if name.lower() in each['name'].lower():
+            return each['_id']
+
+
+
+def find_tag(object_id):
+    from utils import tag_dict_to_class
+    tag = db.tags.find_one({'_id':object_id})
+    return tag_dict_to_class(tag)
 
 def get_all_meals():
     cursor = db.meals.find()
@@ -93,5 +116,11 @@ def get_all_tags():
 def get_all_patients():
     return db.patients.find()
 
+def get_any(collection, attr, val):
+    parser = getattr(db,collection)
+    if isinstance(val,(list,)):
+        return list(parser.find({attr:{"$in":val}}))
+    return parser.find_one({attr:val})
+
 if __name__ == "__main__":
-    pass
+    find_disease('breast')

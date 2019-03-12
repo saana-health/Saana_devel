@@ -4,7 +4,7 @@ import pdb
 import itertools
 from model import Meal,MealHistory, MealList, Patient
 import csv
-from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients
+from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, find_tag,get_any
 from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class
@@ -59,19 +59,24 @@ class Optimizer:
             NUM_MEAL = 14
             que = []
             score_board = {}
-            tags = self.tags
-
-            minimizes = list(set(itertools.chain(*[tag.minimize.keys() for tag in tags.values()])))
-            priors = list(set(itertools.chain(*[tag.prior for tag in tags.values()])))
-            avoids = list(set(itertools.chain(*[tag.avoid for tag in tags.values()])))
+            ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
+            tags = get_any('tags','_id',ids)
+            minimizes = list(set(itertools.chain(*[tag_dict_to_class(tag).minimize.keys() for tag in tags])))
+            priors = list(set(itertools.chain(*[tag_dict_to_class(tag).prior for tag in tags])))
+            avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
             repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
-
+            should_avoid = False
 
             for meal in self.meals.values():
+                should_avoid = False
                 for each in meal.nutrition.keys() + meal.ingredients:
                     if each in avoids:
-                        print(each)
-                        pdb.set_trace()
+                        print('Avoid {}'.format(each))
+                        should_avoid = True
+                        break
+                if should_avoid:
+                    continue
+
                 score = 100
                 if repeat_one_week is not None and meal in repeat_one_week:
                     score -= 60
@@ -92,7 +97,7 @@ class Optimizer:
                 neg = len(minimize_list)
                 pos = len(prior_list)
 
-                score += pos*10 - neg*9
+                score += pos*10 - neg*6
                 if score not in score_board.keys():
                     score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list}]
                 else:
@@ -101,9 +106,8 @@ class Optimizer:
             slots = [None for _ in range(NUM_MEAL)]
             sorted_scores = sorted(score_board.keys(), reverse=True)
             i=0
-
-            MAX_MEAL_PER_SUPPLIER_1 = 7
-            MAX_MEAL_PER_SUPPLIER_2 = 7
+            MAX_MEAL_PER_SUPPLIER_1 = 14
+            MAX_MEAL_PER_SUPPLIER_2 = 0
 
             meal_num_per_supplier = {}
             for score in sorted_scores:
@@ -134,7 +138,7 @@ class Optimizer:
                         pdb.set_trace()
                     slots[i] = meal
                     i += 1
-            # self.to_mongo(slots,patient._id)
+            self.to_mongo(slots,patient._id)
             self.to_csv(slots,patient._id)
 
 
@@ -220,7 +224,7 @@ class Optimizer:
 
 
 if __name__ == "__main__":
-    op = Optimizer(week = 1)
+    op = Optimizer(week = 2)
     op.optimize()
     # op = Optimizer(week = 2)
     # op.optimize()

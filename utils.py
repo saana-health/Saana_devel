@@ -4,18 +4,18 @@ import csv
 import pdb
 from model import Meal, Tag, Patient
 
-def export_mixpanel_to_csv():
+def export_mixpanel_to_csv(filename):
     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
     SECRET = '1261347a3eb35286683e32a2731e4f4d'
 
     mp = Mixpanel(SECRET, token = TOKEN)
 
-    mp.export_people('test_event_export.csv',
+    mp.export_people(filename,
                     {},
                     format='csv')
 
-def process_mixpanel_csv():
-    with open('test_event_export.csv') as csvfile:
+def process_mixpanel_csv(filename):
+    with open(filename) as csvfile:
         reader_list = list(csv.reader(csvfile))
         columns = [x.replace('$','') for x in reader_list[0]]
 
@@ -24,6 +24,7 @@ def process_mixpanel_csv():
         for i in range(len(reader_list)):
             for j in range(len(reader_list[i])):
                 content = reader_list[i][j]
+                content = content.replace("'",'')
                 if content and content[0] == '[':
                     if content[1] == 'u':
                         content = content.replace('$','').replace('[u','').replace('[','').replace(']','')
@@ -194,5 +195,5 @@ def tag_dict_to_class(tag):
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
 
 def patient_dict_to_class(patient):
-    return Patient(_id = patient['_id'],symptoms = patient['Symptoms'], comorbidities = patient['comorbidities'], disease = patient['disease'])
+    return Patient(_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
 
