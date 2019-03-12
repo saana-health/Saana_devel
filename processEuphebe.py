@@ -8,6 +8,14 @@ from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals
 
+'''
+Processing flow
+processMenu()
+-> processNutrition()
+-> mapToMeal()
+-> manual_input()
+-> combine_nutrition()
+'''
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
@@ -34,7 +42,7 @@ def processMenu(filename):
     with open(filename) as csvfile:
         reader_list = list(csv.reader(csvfile))
         for i in range(1,len(reader_list)):
-            menu_list.append(reader_list[i][0])
+            menu_list.append(reader_list[i][0].strip().lower())
     return menu_list
 
 def processNutrition(filename):
@@ -48,49 +56,53 @@ def processNutrition(filename):
     items = []
     lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
 
+    # First row is nutrition and ingredients are all on the first column
     with open(filename) as csvfile:
         ingredients = {}
         nutritions = {}
         reader_list = list(csv.reader(csvfile))
+        # This variable is to see if the row is an ingredient or a name of a meal
         is_name = True
 
-        #first row
+        #first row, which is nutrition
         columns = [x for x in list(reader_list[0])]
+        # matching units for nutritions with Regex (result: ['g','mg', ...])
         units = [re.search('\(.*\)',columns[y]).group()[1:-1] if re.search('\(.*\)',columns[y]) else '' for y in range(len(columns))]
+        # Remove units so that they can be converted to floats
         for i in range(len(columns)):
             columns[i] = columns[i].replace(' ('+units[i]+')','')
+
+        # This line is to change Euphebe's nutrition/ingredient name into those from food matrix
         # full_list = [change_name(lookup_dict,x) for x in columns]
-        full_list = [x for x in columns]
+        # full_list = columns
 
-
-        # loop through each row starting 3rd row
+        # loop through each row starting 3rd row to process ingredients
         for i in range(2,len(reader_list)):
             row = reader_list[i]
-            name = row[0]
+            name = row[0].strip().lower()
 
-            #start of new item
+            #start of new item (ingredient or meal name?)
             if is_name:
                 is_name = False
                 new_item = Meal(name=name, supplierID='Euphebe')
 
             #ingredient
             elif name:
-                #this row is for processing nutrition info
-                if name.lower() == 'total':
+                # this row is for processing nutrition info
+                if name == 'total':
                     for j in range(1,len(row)):
-                        # skip if empty or zero or not a number
+                        # skip if empty or not a number (zero is fine)
                         if row[j] not in ['','Serving','--']:
-                        # if row[j] not in ['','0','Serving','--']:
                             try:
                                 nutritions[columns[j]] = str(float(row[j])) + ' ' + units[j]
                             except:
                                 print('Warning: {} is not a number and is not previously recognized pattern'.format(row[j]))
+
                 #this row is for ingredient
                 else:
                     # ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
-                    ingredients[name]= row[3]
-                    if name.replace('  ','') not in full_list:
-                        full_list.append(name.replace('  ',''))
+                    ingredients[name]= row[3].strip()
+
             #empty line: update Meal()
             else:
                 is_name = True
@@ -99,11 +111,13 @@ def processNutrition(filename):
                 items.append(new_item)
                 ingredients = {}
                 nutritions = {}
+
+            # last line -> update current meal
             if i == len(reader_list)-1:
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
-    return items, full_list
+    return items, nutritions.keys()+ingredients.keys()
 
 def mapToMeal(menus,items):
     '''
@@ -162,7 +176,14 @@ def mapToMeal(menus,items):
     print('{}/{} found twice'.format(cnt2,len(items)))
     return mapped, not_found
 
-def manual_input(menus, not_found,mapped):
+def manual_input(menus, not_found, mapped):
+    '''
+    string sequence matching criteria for ratio() > 0.5 still works for ALL current Euphebe meal list. So this simply maps not_found meals to menus by 0.5 limit
+    :param menus: [str] - menus
+    :param not_found: [Meal()] - not actual menu meal but meal component
+    :param mapped: [Meal()] - already mapped meals
+    :return: [Meal()] - newly mapped meals including previously mapped and newly mapped
+    '''
     left_over = not_found[:]
     for each in not_found:
         for menu in menus:
@@ -170,14 +191,12 @@ def manual_input(menus, not_found,mapped):
                 # Below for matching for the first time
                 # print('----------------------')
                 # x = input('Is "{}" part of "{}"? [Yes: 1 / No: 0]: '.format(each, menu))
-                if True:
-                    try:
-                        mapped[menu].append(each)
-                    except:
-                        mapped[menu] = [each]
-                    left_over.remove(each)
-                else:
-                    print('no')
+                try:
+                    mapped[menu].append(each)
+                except:
+                    mapped[menu] = [each]
+                left_over.remove(each)
+                print('{} now part of {}'.format(each.name, menu))
     if left_over:
         print("{} still not found".format(left_over))
     return mapped
@@ -224,11 +243,12 @@ if __name__ == "__main__":
     from matchNames import change_name
     menus = processMenu(PATH+'menu.csv')
     items, columns = processNutrition(PATH+'nutrition.csv')
-    new = list(set(columns))
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped)
+    pdb.set_trace()
     combined = combine_nutrition(newly_mapped)
-    from utils import create_histogram_insoluble
-    create_histogram_insoluble(combined)
-    # pprint.pprint(mapped)
+
+    # from utils import create_histogram_insoluble
+    # create_histogram_insoluble(combined)
+
     # add_meals(combined)

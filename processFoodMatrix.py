@@ -23,7 +23,7 @@ def processFoodMatrixCSV(filename):
         reader_list = list(csv.reader(csvfile))
         if not columns:
             for each in reader_list[1]:
-                columns.append(each)
+                columns.append(each.strip().lower())
         what_type = ''
 
         #loop through each row
@@ -48,28 +48,6 @@ def processFoodMatrixCSV(filename):
                     min2 = split[1]
                     master_dict[name]['minimize'][columns[j]] = {"min1":min1, "min2":min2}
     return master_dict, columns
-
-def generate_keyword(columns):
-    '''
-    Don't use this function
-    :param columns:
-    :return:
-    '''
-    keyword_dict = {}
-    for column in columns:
-        column = column.lower()
-        x = input('column {} - as it is: 0 / change: string/ ignore 2: '.format(column))
-        keyword_dict[column] = []
-        if x == 0:
-            keyword_dict[column].append(column)
-        elif x== 2:
-            continue
-        else:
-            for each in x.split(','):
-                keyword_dict[column].append(each)
-    pdb.set_trace()
-    return keyword_dict
-
 
 if __name__ == "__main__":
     master_dict, columns = processFoodMatrixCSV('Euphebe/new.csv')
