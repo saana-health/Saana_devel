@@ -6,7 +6,7 @@ import os
 from model import Meal
 from difflib import SequenceMatcher
 import re
-from connectMongdo import add_meals
+from connectMongdo import add_meals, drop
 
 '''
 Processing flow
@@ -285,7 +285,7 @@ def combine_nutrition(mapped):
 
     return new_list
 
-if __name__ == "__main__":
+def process():
     from matchNames import change_name
     menus = processMenu(PATH+'menu0313.csv')
     items, columns = processNutrition(PATH+'test2.csv')
@@ -294,9 +294,29 @@ if __name__ == "__main__":
     # newly_mapped = manual_input(menus,not_found,mapped)
     pprint.pprint(newly_mapped)
     combined = combine_nutrition(newly_mapped)
+    return combined
     # pdb.set_trace()
 
     # from utils import create_histogram_insoluble
     # create_histogram_insoluble(combined)
 
+    # add_meals(combined)
+
+
+if __name__ == "__main__":
+    combined = process()
+    # from matchNames import change_name
+    # menus = processMenu(PATH+'menu0313.csv')
+    # items, columns = processNutrition(PATH+'test2.csv')
+    # mapped, not_found = mapToMeal(menus, items)
+    # newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.csv')
+    # # newly_mapped = manual_input(menus,not_found,mapped)
+    # pprint.pprint(newly_mapped)
+    # combined = combine_nutrition(newly_mapped)
+    # # pdb.set_trace()
+    #
+    # # from utils import create_histogram_insoluble
+    # # create_histogram_insoluble(combined)
+    #
+    drop('meals')
     add_meals(combined)

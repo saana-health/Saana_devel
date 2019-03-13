@@ -1,294 +1,238 @@
 (dp0
-S'tomato sauce, canned, unsalted'
+S'olive oil'
 p1
-S'tomato'
+S'oil'
 p2
-sS'bell pepper'
+sS'almond butter'
 p3
-S'pepper, bell'
+S'butter'
 p4
 sS'kale'
 p5
 S'kale'
 p6
-sS'eggplant, fresh, cubes'
+sS'nut, nut butter'
 p7
-S'egg'
+g4
+sS'cashews, raw, whole'
 p8
-sS'tomato sauce, canned'
+S'raw'
 p9
-g2
-sS'kale, fresh, chopped'
+sS'vinegar, apple cider, unfiltered, raw-unpasteurized, organic'
 p10
-g6
-sS'onion, yellow, fresh, chopped'
+g9
+sS'pot'
 p11
-S'onion'
+S'potassium'
 p12
-sS'onion powder'
+sS'oil, olive, pure'
 p13
-g12
-sS'soy sauce, tamari'
+g2
+sS'kale, baby, power up greens'
 p14
-S'soy'
+g6
+sS'totinfib'
 p15
-sS'avocado'
+S'insoluble fiber'
 p16
-S'avocado'
+sS'vitamin k'
 p17
-sS'celery'
-p18
-S'celery'
-p19
-sS'vit k'
-p20
 S'vitamin k'
+p18
+sS'carrot'
+p19
+S'carrot'
+p20
+sS'flax seeds, brown, ground'
 p21
-sS'bell pepper, yellow, fresh, large, 3 3/4"'
+S'flax'
 p22
-g4
-sS'celery, fresh, diced'
+sS'serrano peppers, fresh'
 p23
-g19
-sS'black beans, dry'
+S'peppers, hot'
 p24
-S'bean'
+sS'soy'
 p25
-sS'red bell pepper'
+S'soy'
 p26
-g4
-sS'jalapeno peppers, fresh'
+sS'lentil'
 p27
-S'pepper, hot'
+S'lentil'
 p28
-sS'chili peppers, powder'
+sS'lentils, french green, dry'
 p29
 g28
-sS'jalapeno peppers'
+sS'wan ja shan organic gluten free soy sauce'
 p30
-g28
-sS'poblano peppers, fresh, sliced'
+g26
+sS'kale, lacinato, fresh'
 p31
-g28
-sS'pinto beans, dry'
-p32
-g25
-sS'ginger root, fresh, 1" sliced'
-p33
-S'ginger'
-p34
-sS'carrots, fresh'
-p35
-S'carrot'
-p36
-sS'garlic cloves, fresh'
-p37
-S'garlic'
-p38
-sS'onion, red, fresh'
-p39
-g12
-sS'kidney beans, all types, dry'
-p40
-g25
-sS'chili pepper powder'
-p41
-g28
-sS'turmeric, ground'
-p42
-S'turmeric (curcumin)'
-p43
-sS'green lentil penne'
-p44
-S'lentil'
-p45
-sS'pinto beans'
-p46
-g25
-sS'brussels sprouts'
-p47
-S'brussel sprouts'
-p48
-sS'beans, small white, dry'
-p49
-g25
-sS'onion, cippolini, fresh, peeled, medium'
-p50
-g12
-sS'avocado, california, fresh'
-p51
-g17
-sS'cannellini beans, dry'
-p52
-g25
-sS'cauliflower'
-p53
-S'cauliflower'
-p54
-sS'coconut oil'
-p55
-S'coconut oil'
-p56
-sS'pine nuts'
-p57
-S'nut, nut butter'
-p58
-sS'green bell pepper'
-p59
-g4
-sS'celery root'
-p60
-g19
-sS'cauliflower florets, fresh'
-p61
-g54
-sS'onion, white, fresh, chopped'
-p62
-g12
-sS'eggplant'
-p63
-g8
+g6
 sS'sod'
-p64
+p32
 S'sodium'
-p65
-sS'pot'
-p66
-S'potassium'
-p67
-sS'red onion'
-p68
-g12
-sS'cherry tomatoes'
-p69
-g2
-sS'chili peppers, red, crushed flakes'
-p70
+p33
+sS'tomatoes, cherry, red, fresh, year round average'
+p34
+S'tomato'
+p35
+sS'bell pepper, fresh'
+p36
+S'peppers, bell'
+p37
+sS'lentils, dry'
+p38
+g28
+sS'vinegar, apple cider, raw, organic'
+p39
+g9
+sS'lentils, red, dry'
+p40
 g28
 sS'spinach'
-p71
+p41
 S'spinach'
-p72
-sS'cayenne chili pepper, dried, ground'
-p73
-g28
+p42
+sS'cabbage, red, fresh, chopped'
+p43
+S'cabbage'
+p44
+sS'avocado'
+p45
+S'avocado'
+p46
 sS'parsley'
-p74
+p47
 S'parsley'
-p75
-sS'totfib'
-p76
-S'fiber'
-p77
-sS'white onion'
-p78
-g12
-sS'carrots, fresh, chopped'
-p79
-g36
-sS'broccoli florets, fresh'
-p80
+p48
+sS'tomatoes, fresh'
+p49
+g35
+sS'broccoli'
+p50
 S'broccoli'
-p81
-sS'spice blend, curry, powder'
-p82
-S'spicy powder'
-p83
-sS'poblano peppers'
-p84
-g28
-sS'spinach, baby, fresh'
-p85
-g72
-sS'garlic powder'
-p86
-g38
-sS'chili pepper flakes'
-p87
-g28
-sS'parsley, fresh, chopped'
-p88
-g75
-sS'bell pepper, red, fresh, chopped'
-p89
-g4
-sS'tomatoes, crushed'
-p90
-g2
-sS'yellow bell pepper'
-p91
-g4
-sS'carrots'
-p92
-g36
-sS'onion, yellow, fresh'
-p93
-g12
-sS'broccoli rabe stalk, fresh'
-p94
-g81
-sS'yellow onion'
-p95
-g12
-sS'ginger root, fresh'
-p96
-g34
-sS'brussels sprouts, fresh'
-p97
-g48
-sS'parsley, fresh, sprigs'
-p98
-g75
-sS'tofu, super firm, nasoya, cubed'
-p99
-g15
-sS'garlic, minced'
-p100
-g38
-sS'tomato sauce'
-p101
+p51
+sS'celery'
+p52
+S'celery'
+p53
+sS'flax seed meal, ground, organic'
+p54
+g22
+sS'almond oil'
+p55
 g2
 sS'yukon gold potatoes'
-p102
+p56
 S'potato'
-p103
-sS'celery, fresh, stalk'
-p104
-g19
-sS'tomatoes'
-p105
+p57
+sS'walnut oil'
+p58
 g2
-sS'tomatoes, crushed, canned'
-p106
+sS'tomatoes, crushed, canned, unsalted, food service'
+p59
+g35
+sS'spinach, frozen, leaf'
+p60
+g42
+sS'butternut squash'
+p61
+g4
+sS'oil, olive'
+p62
 g2
-sS'black pepper'
-p107
-g83
-sS'garlic'
-p108
-g38
-sS'tofu, extra firm, nasoya'
-p109
-g15
-sS'pasta, penne, lentil, dry, 10847, food service'
-p110
-g45
-sS'ginger root'
-p111
-g34
-sS'cayenne chili pepper'
-p112
+sS'oil, coconut'
+p63
+g2
+sS'cauliflower'
+p64
+S'cauliflower'
+p65
+sS'tomato sauce, canned, no salt added, organic'
+p66
+g35
+sS'coconut oil'
+p67
+g2
+sS'red lentil rotini'
+p68
 g28
-sS'red lentils'
-p113
-g45
-sS'black pepper, ground'
-p114
-g83
-sS'white beans'
-p115
-g25
-sS'turmeric'
-p116
-g43
+sS'bell pepper, fire roasted red, canned, drained'
+p69
+g37
+sS'zucchini, fresh, with skin'
+p70
+S'zucchini'
+p71
+sS'black beans'
+p72
+S'beans'
+p73
+sS'garlic'
+p74
+S'garlic'
+p75
+sS'ginger'
+p76
+S'ginger'
+p77
+sS'flax seed meal'
+p78
+g22
+sS'pepper, bell'
+p79
+g37
+sS'pine nuts, dried'
+p80
+S'nuts'
+p81
+sS'pepper, hot'
+p82
+g24
+sS'tomato'
+p83
+g35
+sS'beans, white, dry'
+p84
+g73
+sS'onion'
+p85
+S'onion'
+p86
+sS'brussel sprouts'
+p87
+S'brussels sprouts'
+p88
+sS'broccoli rabe, fresh'
+p89
+g51
+sS'salad, tuscan kale, food service'
+p90
+g6
+sS'tomatoes, vine ripened, iqf, reduced moisture, food service'
+p91
+g35
+sS'tomatoes, sundried'
+p92
+g35
+sS'bell pepper, green, fresh, sliced'
+p93
+g37
+sS'tomato paste'
+p94
+g35
+sS'zucchini'
+p95
+g71
+sS'egg'
+p96
+S'egg'
+p97
+sS'turmeric (curcumin)'
+p98
+S'turmeric'
+p99
+sS'squash, butternut, fresh, cubes'
+p100
+g4
 s.

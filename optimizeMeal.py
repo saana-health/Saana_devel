@@ -69,13 +69,13 @@ class Optimizer:
 
             for meal in self.meals.values():
                 should_avoid = False
-                # for each in meal.nutrition.keys() + meal.ingredients.keys():
-                    # if each in avoids:
-                    #     print('Avoid {}'.format(each))
-                    #     should_avoid = True
-                    #     break
-                # if should_avoid:
-                #     continue
+                for each in meal.nutrition.keys() + meal.ingredients.keys():
+                    if each in avoids:
+                        print('Avoid {}'.format(each))
+                        should_avoid = True
+                        break
+                if should_avoid:
+                    continue
 
                 score = 100
                 if repeat_one_week is not None and meal in repeat_one_week:

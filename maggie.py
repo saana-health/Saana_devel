@@ -2,7 +2,7 @@ import csv
 import pprint
 from pdb import set_trace
 from model import Patient
-from connectMongdo import find_disease, get_any, add_patients
+from connectMongdo import find_disease, get_any, add_patients, drop
 import ast
 from utils import process_mixpanel_csv
 import pickle
@@ -34,14 +34,15 @@ import test
 # treatment_drugs = ast.literal_eval(dic['treatment_drugs']).keys()
 #
 # # maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms = symptoms )
+def add_maggie():
+    disease = get_any('tags','name','breast')['_id']
+    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','mouth & throat sore'])
+    treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)']
+    set_trace()
+    maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    drop('patients')
+    add_patients(maggie)
 
-disease = get_any('tags','name','Breast')['_id']
-symptoms = get_any('tags','name',['Diarrhea','Dry mouth  ','Dry skin','Fatigue','Loss of appetite','Mouth & throat sore'])
-# treatment_drugs = get_any('tags','name')
-
-maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms = [x['_id'] for x in symptoms])
-
-add_patients(maggie)
-
-# set_trace()
+if __name__ == "__main__":
+    add_maggie()
 

@@ -2,7 +2,7 @@ import csv
 import pprint
 import os
 import pdb
-from connectMongdo import add_tags
+from connectMongdo import add_tags, drop
 from model import Tag
 PATH = os.path.join(os.getcwd(),'csv/')
 
@@ -30,8 +30,8 @@ def processFoodMatrixCSV(filename):
         for i in range(1,len(reader_list)):
             row = reader_list[i]
             if row[0]:
-                what_type = row[0]
-            name = row[1].replace('\xc2',' ').replace('\xa0',' ')
+                what_type = row[0].strip().lower()
+            name = row[1].replace('\xc2',' ').replace('\xa0',' ').strip().lower()
             master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': [], 'minimize':{}}
             #loop through each column
             for j in range(2,len(row)):
@@ -41,7 +41,6 @@ def processFoodMatrixCSV(filename):
                 #prioritize
                 elif row[j] == 'P':
                     master_dict[name]['prior'].append(columns[j].strip().lower())
-                #TODO: minimize
                 elif '|' in row[j]:
                     split = row[j].split('|')
                     min1 = split[0]
@@ -50,8 +49,11 @@ def processFoodMatrixCSV(filename):
     return master_dict, [x for x in list(set(columns)) if x != '']
 
 if __name__ == "__main__":
-    master_dict, columns = processFoodMatrixCSV('new.csv')
+    from maggie import add_maggie
+    master_dict, columns = processFoodMatrixCSV('foodtag313.csv')
     # generate_keyword(columns)
+    drop('tags')
     add_tags(master_dict)
+    # add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

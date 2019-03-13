@@ -122,5 +122,9 @@ def get_any(collection, attr, val):
         return list(parser.find({attr:{"$in":val}}))
     return parser.find_one({attr:val})
 
+def drop(collection):
+    parser = getattr(db,collection)
+    return parser.drop()
+
 if __name__ == "__main__":
     find_disease('breast')
