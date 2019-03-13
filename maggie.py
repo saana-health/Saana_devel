@@ -43,5 +43,5 @@ maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms
 
 add_patients(maggie)
 
-set_trace()
+# set_trace()
 

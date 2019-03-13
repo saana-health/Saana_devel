@@ -37,20 +37,20 @@ def processFoodMatrixCSV(filename):
             for j in range(2,len(row)):
                 #avoid
                 if row[j] == 'A':
-                    master_dict[name]['avoid'].append(columns[j])
+                    master_dict[name]['avoid'].append(columns[j].strip().lower())
                 #prioritize
                 elif row[j] == 'P':
-                    master_dict[name]['prior'].append(columns[j])
+                    master_dict[name]['prior'].append(columns[j].strip().lower())
                 #TODO: minimize
                 elif '|' in row[j]:
                     split = row[j].split('|')
                     min1 = split[0]
                     min2 = split[1]
                     master_dict[name]['minimize'][columns[j]] = {"min1":min1, "min2":min2}
-    return master_dict, columns
+    return master_dict, [x for x in list(set(columns)) if x != '']
 
 if __name__ == "__main__":
-    master_dict, columns = processFoodMatrixCSV('Euphebe/new.csv')
+    master_dict, columns = processFoodMatrixCSV('new.csv')
     # generate_keyword(columns)
     add_tags(master_dict)
     # pprint.pprint(processFoodMatrixCSV(''))

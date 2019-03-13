@@ -56,7 +56,7 @@ class Optimizer:
     def optimize(self):
         for patient in self.patients:
 
-            NUM_MEAL = 14
+            NUM_MEAL = 7
             que = []
             score_board = {}
             ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
@@ -69,13 +69,13 @@ class Optimizer:
 
             for meal in self.meals.values():
                 should_avoid = False
-                for each in meal.nutrition.keys() + meal.ingredients:
-                    if each in avoids:
-                        print('Avoid {}'.format(each))
-                        should_avoid = True
-                        break
-                if should_avoid:
-                    continue
+                # for each in meal.nutrition.keys() + meal.ingredients.keys():
+                    # if each in avoids:
+                    #     print('Avoid {}'.format(each))
+                    #     should_avoid = True
+                    #     break
+                # if should_avoid:
+                #     continue
 
                 score = 100
                 if repeat_one_week is not None and meal in repeat_one_week:
@@ -106,7 +106,7 @@ class Optimizer:
             slots = [None for _ in range(NUM_MEAL)]
             sorted_scores = sorted(score_board.keys(), reverse=True)
             i=0
-            MAX_MEAL_PER_SUPPLIER_1 = 14
+            MAX_MEAL_PER_SUPPLIER_1 = 7
             MAX_MEAL_PER_SUPPLIER_2 = 0
 
             meal_num_per_supplier = {}
@@ -138,6 +138,8 @@ class Optimizer:
                         pdb.set_trace()
                     slots[i] = meal
                     i += 1
+            shuffle(slots)
+            # pdb.set_trace()
             self.to_mongo(slots,patient._id)
             self.to_csv(slots,patient._id)
 
@@ -182,11 +184,16 @@ class Optimizer:
         :return: [[]] - 2D array that is written to the csv file
         '''
         csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutritions','Prioritized nutrtions','Meal provider','Price']]
-        for index in range(7):
-            meal_1 = slots[2*index]
-            meal_2 = slots[2*index +1]
-            csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].price])
-            csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].price])
+        if len(slots) == 14:
+            for index in range(7):
+                meal_1 = slots[2*index]
+                meal_2 = slots[2*index +1]
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].price])
+                csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].price])
+        else:
+            for index in range(7):
+                meal_1 = slots[index]
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].price])
         with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
@@ -213,6 +220,8 @@ class Optimizer:
             prev_list = prev_week['meal_list']
             for key in prev_list.keys():
                 meal_list += prev_list[key]
+        last_week = len([x for x in meal_list if x in curr_list])
+        print('Repeat from last week: {}'.format(last_week))
 
         if 'week_'+str(wk_num - 2) in mealinfo.keys():
             prev2_week = mealinfo['week_'+str(wk_num - 2)]
@@ -220,11 +229,12 @@ class Optimizer:
             for key in prev2_list.keys():
                 meal_list += prev2_list[key]
         # no_repeat = [meal for meal in all_meals if meal['_id'] in meal_list]
+        print('Repeat from 2 weeks ago: {}'.format(len([x for x in meal_list if x in curr_list]) - last_week))
         return [x for x in meal_list if x in curr_list]
 
 
 if __name__ == "__main__":
-    op = Optimizer(week = 2)
+    op = Optimizer(week = 1)
     op.optimize()
     # op = Optimizer(week = 2)
     # op.optimize()
