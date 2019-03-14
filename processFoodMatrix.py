@@ -54,6 +54,6 @@ if __name__ == "__main__":
     # generate_keyword(columns)
     drop('tags')
     add_tags(master_dict)
-    # add_maggie()
+    add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()
