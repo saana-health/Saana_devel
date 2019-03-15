@@ -70,15 +70,15 @@ class Optimizer:
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
             repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
             should_avoid = False
-
             for meal in self.meals.values():
                 should_avoid = False
                 score = 100
-                for each in meal.nutrition.keys() + meal.ingredients.keys():
-                    if each in avoids:
-                        print('Avoid {}'.format(each))
-                        should_avoid = True
-                        break
+                ## STRAIGHT AVOIDS
+                # for each in meal.nutrition.keys() + meal.ingredients.keys():
+                #     if each in avoids:
+                #         print('Avoid {}'.format(each))
+                #         should_avoid = True
+                #         break
 
 
 
@@ -171,7 +171,13 @@ class Optimizer:
             shuffle(slots)
             if None in slots:
                 print('Not enough maching meals')
-                raise ValueError
+                pdb.set_trace()
+            cnt = 0
+            for each in score_board.values():
+                for each2 in each:
+                    cnt += 1
+            print(' TOTAL   {}  available meals'.format(cnt))
+            # self.debug(slots)
             self.to_mongo(slots,patient._id)
             self.to_csv(slots,patient._id)
 
@@ -218,7 +224,8 @@ class Optimizer:
         :param dinners: [{dinner}] - ^
         :return: [[]] - 2D array that is written to the csv file
         '''
-        csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider','Nutrition']]
+        csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
+                                  'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
         if len(slots) == 14:
             for index in range(7):
                 meal_1 = slots[2*index]
@@ -228,7 +235,9 @@ class Optimizer:
         else:
             for index in range(6):
                 meal_1 = slots[index]
-                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
+                nutrition_dic = meal_1['meal'].nutrition
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
+                                 nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
         with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
@@ -266,6 +275,14 @@ class Optimizer:
         # no_repeat = [meal for meal in all_meals if meal['_id'] in meal_list]
         print('Repeat from 2 weeks ago: {}'.format(len([x for x in meal_list if x in curr_list]) - last_week))
         return [x for x in meal_list if x in curr_list]
+
+    def debug(self,slots):
+        import pprint
+        meals =[]
+        for each in slots:
+            meals.append(each['meal'])
+
+        pdb.set_trace()
 
 
 if __name__ == "__main__":

@@ -82,6 +82,7 @@ def create_histogram(combined,keywords,filter = []):
     ret = False
     pair = {}
     unit = ''
+    cnt = 0
     for meal in combined:
         for keyword in keywords:
             # for ingredient in meal.ingredients.keys():
@@ -102,7 +103,7 @@ def create_histogram(combined,keywords,filter = []):
                 # if keyword.lower() in nutrition.lower():
                 if keyword in nutrition:
                 # if keyword == nutrition:
-                    print(keyword, nutrition)
+                    cnt +=1
                     if not unit:
                         unit = meal.nutrition[nutrition].split(' ')[1]
                     if meal.name in pair.keys():
@@ -128,6 +129,7 @@ def create_histogram(combined,keywords,filter = []):
     figure.set_size_inches(16,12)
 
     plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
+    print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
 
 def create_histogram_insoluble(combined):
@@ -147,23 +149,24 @@ def create_histogram_insoluble(combined):
         tot = 0.00
         sol = 0.00
         both = False
+        if 'cannellini' in meal.name:
+            pdb.set_trace()
         for nutrition in meal.nutrition.keys():
-            if 'TotFib' in nutrition:
+            if 'totfib' in nutrition:
                 tot = float(meal.nutrition[nutrition].split(' ')[0])
-                print(tot)
                 if both:
                     pair[meal.name] = tot - sol
                     break
                 both = True
-            elif 'TotSolFib' in nutrition:
+            elif 'totsolfib' in nutrition:
                 sol = float(meal.nutrition[nutrition].split(' ')[0])
-                print(sol)
                 if both:
                     pair[meal.name] = tot - sol
                     break
                 both = True
             else:
                 continue
+    pdb.set_trace()
 
 
 

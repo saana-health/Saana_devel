@@ -36,7 +36,7 @@ import test
 # # maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms = symptoms )
 def add_maggie():
     disease = get_any('tags','name','breast')['_id']
-    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','mouth & throat sore'])
+    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','mouth & throat sore','nausea','cough','stomach acidity','sleeping problems'])
     treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
                                               'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
     maggie = Patient(name = 'Maggie', comorbidities= [], disease = disease, symptoms = [x['_id'] for x in symptoms])

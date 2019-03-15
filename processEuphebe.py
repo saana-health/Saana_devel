@@ -56,7 +56,7 @@ def processNutrition(filename):
     print(' --- processNutrition() ----')
     columns = []
     items = []
-    lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
+    # lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
 
     # First row is nutrition and ingredients are all on the first column
     with open(filename) as csvfile:
@@ -113,6 +113,8 @@ def processNutrition(filename):
                 is_name = True
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
+                if 'insoluble fiber' not in nutritions.keys():
+                    pdb.set_trace()
                 items.append(new_item)
                 ingredients = {}
                 nutritions = {}
@@ -122,6 +124,7 @@ def processNutrition(filename):
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
                 items.append(new_item)
+
     return compress(items), nutritions.keys()+list(set(total_ingredients))
 
 def compress(items):
@@ -187,6 +190,10 @@ def mapToMeal(menus,items):
     # print number of one to many mapped items and unmapped items
     # print('{}/{} not found'.format(cnt,len(items)))
     # print('{}/{} found twice'.format(cnt2,len(items)))
+    for item_li in mapped.values():
+        for item in item_li:
+            if 'insoluble fiber' not in item.nutrition.keys():
+                print(item)
     return mapped, not_found
 
 def manual_input(menus, not_found, mapped, filename = ''):
@@ -204,8 +211,6 @@ def manual_input(menus, not_found, mapped, filename = ''):
     else:
         for each in not_found:
             for menu in menus:
-
-
                 if SequenceMatcher(None,menu,each.name).ratio() > 0.5:
                     # if menu in manual_map and each in manual_map[menu]:
                     #     continue
@@ -231,9 +236,11 @@ def manual_input(menus, not_found, mapped, filename = ''):
                                     manual_map[menu] = [each]
                             else:
                                 continue
-        pickle.dump(manual_map,open('euphebe_manualMap.csv','wb'))
+        pickle.dump(manual_map,open('euphebe_manualMap.p','wb'))
 
     for each in manual_map.keys():
+        if each not in menus:
+            continue
         try:
             mapped[each] += manual_map[each]
         except:
@@ -241,7 +248,6 @@ def manual_input(menus, not_found, mapped, filename = ''):
         if each in [x.name for x in left_over]:
             [left_over.remove(item) for item in manual_map[each]]
         # print('{} now part of {}'.format(manual_map, each))
-
     if left_over:
         print("{} still not found".format(left_over))
     return mapped
@@ -254,6 +260,14 @@ def combine_nutrition(mapped):
     :param mapped: {menu_name(str): [Meal()]}
     :return: [Meals()]
     '''
+    #
+    for item_li in mapped.values():
+        for item in item_li:
+            if 'insoluble fiber' not in item.nutrition.keys():
+                print(item)
+
+    #
+
     print(' --- combine_nutrition ---')
     new_list = []
     # loop through
@@ -269,17 +283,27 @@ def combine_nutrition(mapped):
                     new_ingredients[ingredient] += float(item.ingredients[ingredient])
 
             for nutrition in item.nutrition.keys():
-                s = item.nutrition[nutrition]
+                val = item.nutrition[nutrition]
                 # Add value if already exist
-                try:
-                    new_nutrition[nutrition] += str(float(new_nutrition[nutrition].split[0]) + float(item.split(' ')[0])) + item.split(' ')[1]
-                # Create a new key/value if doesnt exist
-                except:
-                    new_nutrition[nutrition] = item.nutrition[nutrition]
+                if nutrition in new_nutrition.keys():
+                    new_nutrition[nutrition] = str(float(new_nutrition[nutrition].split(' ')[0]) + float(val.split(' ')[0])) + ' ' +val.split(' ')[1]
+                else:
+                    new_nutrition[nutrition] = val
+                ######## ERROR ###########
+                # try:
+                #     # pdb.set_trace()
+                #     new_nutrition[nutrition] += str(float(new_nutrition[nutrition].split[0]) + float(item.split(' ')[0])) + item.split(' ')[1]
+                # # Create a new key/value if doesnt exist
+                # except:
+                #     new_nutrition[nutrition] = item.nutrition[nutrition]
+            for each in new_nutrition:
+                if 'insoluble fiber' not in new_nutrition.keys():
+                    # pdb.set_trace()
+                    if 'insoluble fiber' not in item.nutrition.keys():
+                        pdb.set_trace()
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
-
     ## saves into .p file
     #pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
 
@@ -287,12 +311,11 @@ def combine_nutrition(mapped):
 
 def process():
     from matchNames import change_name
-    menus = processMenu(PATH+'menu0313.csv')
+    menus = processMenu(PATH+'menu315.csv')
     items, columns = processNutrition(PATH+'test2.csv')
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.csv')
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.p')
     # newly_mapped = manual_input(menus,not_found,mapped)
-    pprint.pprint(newly_mapped)
     combined = combine_nutrition(newly_mapped)
     return combined
     # pdb.set_trace()
@@ -315,8 +338,9 @@ if __name__ == "__main__":
     # combined = combine_nutrition(newly_mapped)
     # # pdb.set_trace()
     #
-    # # from utils import create_histogram_insoluble
+    # from utils import create_histogram_insoluble, create_histogram
     # # create_histogram_insoluble(combined)
+    # create_histogram(combined,['totfib'])
     #
     drop('meals')
     add_meals(combined)
