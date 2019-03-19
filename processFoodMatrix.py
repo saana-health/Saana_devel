@@ -2,7 +2,8 @@ import csv
 import pprint
 import os
 import pdb
-from connectMongdo import add_tags
+from connectMongdo import add_tags, drop
+from model import Tag
 PATH = os.path.join(os.getcwd(),'csv/')
 
 
@@ -18,55 +19,41 @@ def processFoodMatrixCSV(filename):
     '''
     columns= []
     master_dict = {}
-    with open(PATH+'Food_Tags_Matrix.csv') as csvfile:
+    with open(PATH+filename) as csvfile:
         reader_list = list(csv.reader(csvfile))
         if not columns:
             for each in reader_list[1]:
-                columns.append(each)
+                columns.append(each.strip().lower())
         what_type = ''
 
         #loop through each row
         for i in range(1,len(reader_list)):
             row = reader_list[i]
             if row[0]:
-                what_type = row[0]
-            name = row[1].replace('\xc2',' ').replace('\xa0',' ')
-            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': []}
+                what_type = row[0].strip().lower()
+            name = row[1].replace('\xc2',' ').replace('\xa0',' ').strip().lower()
+            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': [], 'minimize':{}}
             #loop through each column
             for j in range(2,len(row)):
                 #avoid
                 if row[j] == 'A':
-                    master_dict[name]['avoid'].append(columns[j])
+                    master_dict[name]['avoid'].append(columns[j].strip().lower())
                 #prioritize
                 elif row[j] == 'P':
-                    master_dict[name]['prior'].append(columns[j])
-    return master_dict, columns
-
-def generate_keyword(columns):
-    '''
-    Don't use this function
-    :param columns:
-    :return:
-    '''
-    keyword_dict = {}
-    for column in columns:
-        column = column.lower()
-        x = input('column {} - as it is: 0 / change: string/ ignore 2: '.format(column))
-        keyword_dict[column] = []
-        if x == 0:
-            keyword_dict[column].append(column)
-        elif x== 2:
-            continue
-        else:
-            for each in x.split(','):
-                keyword_dict[column].append(each)
-    pdb.set_trace()
-    return keyword_dict
-
+                    master_dict[name]['prior'].append(columns[j].strip().lower())
+                elif '|' in row[j]:
+                    split = row[j].split('|')
+                    min1 = split[0]
+                    min2 = split[1]
+                    master_dict[name]['minimize'][columns[j]] = {"min1":min1, "min2":min2}
+    return master_dict, [x for x in list(set(columns)) if x != '']
 
 if __name__ == "__main__":
-    master_dict, columns = processFoodMatrixCSV('')
+    from maggie import add_maggie
+    master_dict, columns = processFoodMatrixCSV('foodtag313.csv')
     # generate_keyword(columns)
-    # add_tags(master_dict)
+    drop('tags')
+    add_tags(master_dict)
+    add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

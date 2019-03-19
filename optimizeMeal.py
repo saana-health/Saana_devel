@@ -1,199 +1,338 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import pdb
-# from processFoodMatrix import processFoodMatrixCSV
-# from difflib import SequenceMatcher
-# from webscrap.dri import submit_form
 import itertools
-from model import Meal,MealHistory, MealList
+from model import Meal,MealHistory, MealList, Patient
 import csv
-from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient
+from connectMongdo import add_meal_history,find_meal, get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, find_tag,get_any
 from random import shuffle
 import os
-
-client = MongoClient("mongodb+srv://admin:thalswns1!@cluster0-jblst.mongodb.net/test")
-db = client.test
+from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class
 
 class Optimizer:
-    '''
-    Class for optimizing a patient's meals for a week
-    '''
-    def __init__(self,patient_id = 0, week_num = 1):
-        if patient_id:
-            self.patient = db.patients.find_one({'_id': ObjectId(patient_id)})
-        else:
-            self.patient = db.patients.find_one()
-        self.week_num = week_num
-        self.preferred_meals= []
-        # This below line should be read from the db later on
-        self.calorie, self.carb, self.fiber, self.protein, self.fat = 2000, 50, 50, 50, 50#submit_form(True,int(self.patient['age']),int(self.patient['feet']),\
-                                                                                  # int(self.patient['inches']), int(self.patient['weight']),'Sedentary','')
-        # self.calorie = 2000
 
-    # def get_history(self):
+    def __init__(self, week):
+        self.meals = self._get_meals()
+        self.tags = self._get_tags()
+        self.inventory = self._check_inventory()
+        self.patients = self._get_patients()
+        self.week = week
 
+    def _get_meals(self):
+        '''
+
+        :return: {_id: Meal()}
+        '''
+        hash_meal = {}
+        meals = [meal for meal in get_all_meals()]
+        for meal in meals:
+            hash_meal[meal['_id']] = meal_dict_to_class(meal)
+        return hash_meal
+
+    def _get_tags(self):
+        '''
+
+        :return: {_id: Tag()}
+        '''
+        hash_tag = {}
+        tags = [tag for tag in get_all_tags()]
+        for tag in tags:
+            hash_tag[tag['_id']] = tag_dict_to_class(tag)
+        return hash_tag
+
+    def _get_patients(self):
+        '''
+
+        :return: [Patient()]
+        '''
+        return [patient_dict_to_class(patient) for patient in get_all_patients()]
+
+
+    def _check_inventory(self):
+        invent = {}
+        for meal in self.meals.values():
+            invent[meal.name] = 100
 
     def optimize(self):
-        '''
-        This function tries to choose a good list of meals for a patient based on her/his constraint
-        :return: [{lunchs}], [{dinners}]
-        '''
-        patient = self.patient
+        for patient in self.patients:
 
-        # get tags
-        #TODO: multiple diseases,symptoms, etc
-        tags = []
-        # treatment_drugs = db.tags.find_one({'_id':patient['treatment_drugs']})
-        treatment_drugs = db.tags.find({'_id': { "$in": patient['treatment_drugs'] }})
-        comorbidities = db.tags.find({'_id':{'$in':patient['comorbidities']}})
-        symptoms = db.tags.find({'_id':{'$in':patient['symptoms']}})
-        diseases = db.tags.find_one({'_id':patient['disease']})
+            NUM_MEAL = 12
+            que = []
+            score_board = {}
+            ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
+            tags = get_any('tags','_id',ids)
+            # minimizes = list(set(itertools.chain(*[tag_dict_to_class(tag).minimize for tag in tags])))
+            minimizes = {}
+            for tag in tags:
+                minimizes.update(tag['minimize'])
 
-        # append only if not None (if found)
-        if treatment_drugs:
-            tags += list(treatment_drugs)
-        if comorbidities:
-            tags += list(comorbidities)
-        if symptoms:
-            tags += list(symptoms)
-        if diseases:
-            tags.append(diseases)
+            priors = list(set(itertools.chain(*[tag_dict_to_class(tag).prior for tag in tags])))
+            avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
+            repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
+            should_avoid = False
+            for meal in self.meals.values():
+                should_avoid = False
+                score = 100
+                ## STRAIGHT AVOIDS
+                # for each in meal.nutrition.keys() + meal.ingredients.keys():
+                #     if each in avoids:
+                #         print('Avoid {}'.format(each))
+                #         should_avoid = True
+                #         break
 
-        # Concat all the tags
-        avoids = list(set(itertools.chain(*[tag['avoid'] for tag in tags])))
-        priors = list(set(itertools.chain(*[tag['prior'] for tag in tags])))
 
-        meals = self._check_repetition()
-        score_board = {}
-        # Score each meal based on their ingredients/nutritions
-        for meal in meals:
-            new_meal = Meal(meal['name'],meal['ingredients'],meal['nutrition'],meal['type'],meal['supplierID'])
 
-            neg = sum([1 if nutrition in avoids else 0 for nutrition in new_meal.nutrition])
-            neg += sum([1 if ingredient in avoids else 0 for ingredient in new_meal.ingredients])
-            pos = sum([1 for nutrition in new_meal.nutrition if nutrition in priors])
-            pos += sum([1 for ingredient in new_meal.ingredients if ingredient in priors])
+                # neg = sum([1 for nutrition in meal.nutrition if nutrition in minimizes])
+                # neg += sum([1 for ingredient in meal.ingredients if ingredient in minimizes])
+                # minimize_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in minimizes]
+                # minimize_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in minimizes and ingredient not in minimize_list]))
 
-            avoid_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in avoids]
-            avoid_list += [ingredient for ingredient in new_meal.ingredients if ingredient in avoids and ingredient not in avoid_list]
-            prior_list = [{nutrition: new_meal.nutrition[nutrition]} for nutrition in new_meal.nutrition if nutrition in priors]
-            prior_list += [ingredient for ingredient in new_meal.ingredients if ingredient in priors and ingredient not in avoid_list]
-            pdb.set_trace()
-            score = 100 - neg*11 + pos * 9
-            if score not in score_board.keys():
-                score_board[score] = [{'meal': new_meal,'prior':prior_list,'avoid':avoid_list}]
-            else:
-                score_board[score].append({'meal': new_meal,'prior':prior_list,'avoid':avoid_list})
+                minimize_list = []
+                full_meal_info = {}
+                full_meal_info.update(meal.ingredients)
+                full_meal_info.update(meal.nutrition)
 
-        # This is where meals will be saved
-        # TODO: change the number based on input
-        if len(meals) >= 42:
-            lunches = [None for x in range(21)]
-            dinners = [None for x in range(21)]
+                for min_item in minimizes.keys():
+                    if min_item in full_meal_info.keys():
+                        minimize_list.append(min_item)
+                        if not isinstance(full_meal_info[min_item],(float,)):
+                            contain_val = float(full_meal_info[min_item].split(' ')[0])
+                        else:
+                            contain_val = float(full_meal_info[min_item])
 
-        elif len(meals) >= 28:
-            lunches = [None for x in range(14)]
-            dinners = [None for x in range(14)]
-        else:
-            lunches = [None for x in range(7)]
-            dinners = [None for x in range(7)]
-        sorted_scores = sorted(score_board.keys(),reverse=True)
-        i = 0
-        for score in sorted_scores:
-            if i >= len(dinners) + len(lunches):
-                break
-            shuffle(score_board[score])
-            for meal in score_board[score]:
-                if i < len(dinners):
-                    dinners[i] =  meal
-                    i += 1
-                elif i < len(dinners) + len(lunches):
-                    lunches[i-len(dinners)] = meal
-                    i += 1
+                        if contain_val > float(minimizes[min_item]['min2']):
+                            print('Avoid {}'.format(min_item))
+                            should_avoid = True
+                            break
+                        elif contain_val > float(minimizes[min_item]['min1']):
+                            score -= 15
+                        elif contain_val < float(minimizes[min_item]['min1']):
+                            score -= 10
+                        else:
+                            print('ERR')
+                            raise ValueError
+
+                if should_avoid:
+                    continue
+
+                # pos = sum([1 for nutrition in meal.nutrition if nutrition in priors])
+                # pos += sum([1 for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list])
+                prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
+                prior_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list]))
+
+                # neg = len(minimize_list)
+                pos = len(prior_list)
+
+                if repeat_one_week is not None and meal in repeat_one_week:
+                    score -= 60
+                if repeat_two_week is not None and meal in repeat_two_week:
+                    score -= 40
+                score += pos*10
+                if score not in score_board.keys():
+                    score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list}]
                 else:
-                    break
-        return lunches[:7], dinners[:7]
+                    score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
 
-    def _check_repetition(self):
-        wk_num = self.week_num
-        mealinfo = get_mealinfo_by_patient(self.patient['_id'])
-        all_meals = [meal for meal in get_all_meals()]
+            slots = [None for _ in range(NUM_MEAL)]
+            sorted_scores = sorted(score_board.keys(), reverse=True)
+            i=0
+            MAX_MEAL_PER_SUPPLIER_1 = 10
+            MIN_MEAL_PER_SUPPLIER_1 = 3
+            MAX_MEAL_PER_SUPPLIER_2 = 10
+            MIN_MEAL_PER_SUPPLIER_2 = 3
 
+            meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
+
+            if NUM_MEAL == 12:
+                # minimum req
+                for score in sorted_scores:
+                    if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                        break
+                    for meal in score_board[score]:
+                        # if all slots filled
+                        if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                            break
+
+                        supplier = meal['meal'].supplierID
+                        if supplier == 'Euphebe':
+                            if meal_num_per_supplier[supplier] < MIN_MEAL_PER_SUPPLIER_1:
+                                meal_num_per_supplier[supplier] +=1
+                                slots[i] = meal
+                                i += 1
+
+                            else:
+                                continue
+                        elif supplier == 'FoodNerd':
+                            if meal_num_per_supplier[supplier] < MIN_MEAL_PER_SUPPLIER_2:
+                                meal_num_per_supplier[supplier] +=1
+                                slots[i] = meal
+                                i += 1
+                            else:
+                                continue
+
+                # maximum req
+                for score in sorted_scores:
+                    if i >= len(slots):
+                        break
+                    for meal in score_board[score]:
+                        if meal in slots:
+                            continue
+                        # if all slots filled
+                        if i >= len(slots):
+                            break
+
+                        supplier = meal['meal'].supplierID
+                        if supplier not in meal_num_per_supplier.keys():
+                            if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
+                                continue
+                            elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
+                                continue
+                            meal_num_per_supplier[supplier] = 1
+
+                        elif supplier == 'Euphebe':
+                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
+                                continue
+                            meal_num_per_supplier[supplier] += 1
+                        elif supplier == 'FoodNerd':
+                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
+                                continue
+                            meal_num_per_supplier[supplier] += 1
+                        else:
+                            pdb.set_trace()
+                        slots[i] = meal
+                        i += 1
+
+            elif NUM_MEAL == 6:
+                pass
+
+
+            shuffle(slots)
+
+            # num of available meal
+            cnt = 0
+            for each in score_board.values():
+                for each2 in each:
+                    cnt += 1
+            print(' TOTAL   {}  available meals'.format(cnt))
+            if None in slots:
+                print('Not enough maching meals')
+                pdb.set_trace()
+
+            self.to_mongo(slots,patient._id)
+            self.to_csv(slots,patient._id)
+
+    def _repeating_meals(self,patient_id):
+        wk_num = self.week
+        mealinfo = get_mealinfo_by_patient(patient_id)
+        prev_list = []
+        prev2_list = []
+        week1 = []
+        week2 = []
         if mealinfo is None:
-            return all_meals
-        meal_list = []
-        if 'week_'+str(wk_num - 1) in mealinfo.keys():
-            prev_week = mealinfo['week_'+str(wk_num - 1)]
-            prev_list = prev_week['meal_list']
-            for key in prev_list.keys():
-                meal_list.append(prev_list[key]['lunch'])
-                meal_list.append(prev_list[key]['dinner'])
+            return None, None
 
-        if 'week_'+str(wk_num - 2) in mealinfo.keys():
-            prev2_week = mealinfo['week_'+str(wk_num - 2)]
-            prev2_list = prev2_week['meal_list']
-            for key in prev2_list.keys():
-                meal_list.append(prev2_list[key]['lunch'])
-                meal_list.append(prev2_list[key]['dinner'])
+        if 'week_' + str(wk_num -1) in mealinfo.keys():
+                prev_week = mealinfo['week_'+str(wk_num -1)]
+                prev_list = list(set(itertools.chain(*[x for x in prev_week['meal_list'].values()])))
+                week1 = [self.meals[k] for k in prev_list]
 
-        no_repeat = [meal for meal in all_meals if meal['_id'] not in meal_list]
-        return no_repeat
+        if 'week_' + str(wk_num -2) in mealinfo.keys():
+            prev2_week = mealinfo['week_'+str(wk_num -2)]
+            prev2_list = list(set(itertools.chain(*[x for x in prev2_week['meal_list'].values()])))
+            week2 = [self.meals[k] for k in prev2_list]
+        return week1,week2
 
-    def to_csv(self, lunches, dinners):
+    def to_mongo(self, mealinfo, patient_id):
+        new_history = MealHistory(patient_id, self.week)
+        if len(mealinfo) == 7:
+            for i in range(7):
+                new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
+        elif len(mealinfo) == 6:
+            for i in range(6):
+                new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
+
+        else:
+            for i in range(7):
+                new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i - 2]['meal']._id, mealinfo[2*i -1]['meal']._id]
+        his = add_meal_history(new_history, patient_id)
+        return True
+
+    def to_csv(self, slots, patient_id):
         '''
         This function is for generating master order file for a week
         :param lunches: [{lunch}] - from optimize()
         :param dinners: [{dinner}] - ^
         :return: [[]] - 2D array that is written to the csv file
         '''
-        csv_arry = [[self.patient['_id']],['Date','Meal Type','Meal Name','Limiting nutritions','Prioritized nutrtions','Meal provider','Price']]
-        for index in range(7):
-            lunch = lunches[index]
-            dinner = dinners[index]
-            try:
-                csv_arry.append(['Feb '+str(index+1),'Lunch',lunch['meal'].name,lunch['avoid'],lunch['prior'],lunch['meal'].supplierID,lunch['meal'].price])
-                csv_arry.append(['Feb '+str(index+1),'dinner',dinner['meal'].name,dinner['avoid'],dinner['prior'],dinner['meal'].supplierID,dinner['meal'].price])
-            except:
-                pdb.set_trace()
-        with open('masterOrder/'+str(self.patient['_id'])+'_wk'+str(self.week_num)+'.csv','wb') as csvfile:
+        csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
+                                  'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
+        if len(slots) == 12:
+            for index in range(len(slots)/2):
+                meal_1 = slots[2*index]
+                meal_2 = slots[2*index +1]
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
+                csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].nutrition])
+        else:
+            for index in range(6):
+                meal_1 = slots[index]
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
+                nutrition_dic = meal_1['meal'].nutrition
+                # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
+                #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
+        with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
         return csv_arry
 
-    def to_mongo(self, lunches, dinners):
-        '''
-        This function processes the meal lists into mongo-digestable format
-        :param lunches: [{lunch}] - from optimize()
-        :param dinners: [{dinner}] - from optimize()
-        :return: class MealHistory
-        '''
-        new_history = MealHistory(self.patient['_id'], self.week_num)
-        # new_history.meal_list = [ find_meal(lunch['meal'].name)['_id'] for lunch in lunches] + [find_meal(dinner['meal'].name)['_id'] for dinner in dinners]
-        all_meals = get_all_meals()
-        for i in range(7):
-            lunch = [x for x in all_meals if x['name'] == lunches[i]['meal'].name][0]
-            dinner = [x for x in all_meals if x['name'] == dinners[i]['meal'].name][0]
-            # lunch = all_meals.find_by('name',lunches[i]['meal'].name)
-            # dinner = all_meals.find_by('name', dinners[i]['meal'].name)
-            new_history.meal_list['day_'+str(i+1)] = {'lunch': lunch['_id'], 'dinner': dinner['_id']}
-        return new_history
+    def temp(self):
+        # To see how many meals repeat
+        wk_num = self.week
+        mealinfo = get_mealinfo_by_patient(self.patients[0]._id)
+        all_meals = [meal for meal in get_all_meals()]
 
-    def feed_back(self,meal_name):
-        #TODO
-        pass
+        if mealinfo is None:
+            return None
+        curr_list = []
+        meal_list = []
+        if 'week_'+str(wk_num) in mealinfo.keys():
+            prev_week = mealinfo['week_'+str(wk_num)]
+            prev_list = prev_week['meal_list']
+            for key in prev_list.keys():
+                curr_list+= prev_list[key]
 
-def auto():
-    for i in range(1,8):
-        test = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = i)
-        lunches, dinners = test.optimize()
-        csv_arry = test.to_csv(lunches, dinners)
-        new_history = test.to_mongo(lunches, dinners)
-        his = add_meal_history(new_history, test.patient['_id'])
+        if 'week_'+str(wk_num - 1) in mealinfo.keys():
+            prev_week = mealinfo['week_'+str(wk_num - 1)]
+            prev_list = prev_week['meal_list']
+            for key in prev_list.keys():
+                meal_list += prev_list[key]
+        last_week = len([x for x in meal_list if x in curr_list])
+        print('Repeat from last week: {}'.format(last_week))
+
+        if 'week_'+str(wk_num - 2) in mealinfo.keys():
+            prev2_week = mealinfo['week_'+str(wk_num - 2)]
+            prev2_list = prev2_week['meal_list']
+            for key in prev2_list.keys():
+                meal_list += prev2_list[key]
+        # no_repeat = [meal for meal in all_meals if meal['_id'] in meal_list]
+        print('Repeat from 2 weeks ago: {}'.format(len([x for x in meal_list if x in curr_list]) - last_week))
+        return [x for x in meal_list if x in curr_list]
+
+    def debug(self,slots):
+        import pprint
+        meals =[]
+        for each in slots:
+            meals.append(each['meal'])
+
+        pdb.set_trace()
+
 
 if __name__ == "__main__":
-    auto()
-    # st = Optimizer(patient_id = ObjectId('5c07a873a56a67691f9fd6e6'),week_num = 1)
-    # lunches, dinners = test.optimize()
-    # csv_arry = test.to_csv(lunches, dinners)
-    # new_history = test.to_mongo(lunches, dinners)
-    # his = add_meal_history(new_history, test.patient['_id'])
+    op = Optimizer(week = 1)
+    op.optimize()
+    # op = Optimizer(week = 2)
+    # op.optimize()
+    # op = Optimizer(week = 3)
+    # op.optimize()
+    # ab = op.temp()
+    # pdb.set_trace()
+

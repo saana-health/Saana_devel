@@ -2,19 +2,20 @@
 from mixpanel_api import Mixpanel
 import csv
 import pdb
+from model import Meal, Tag, Patient
 
-def export_mixpanel_to_csv():
+def export_mixpanel_to_csv(filename):
     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
     SECRET = '1261347a3eb35286683e32a2731e4f4d'
 
     mp = Mixpanel(SECRET, token = TOKEN)
 
-    mp.export_people('test_event_export.csv',
+    mp.export_people(filename,
                     {},
                     format='csv')
 
-def process_mixpanel_csv():
-    with open('test_event_export.csv') as csvfile:
+def process_mixpanel_csv(filename):
+    with open(filename) as csvfile:
         reader_list = list(csv.reader(csvfile))
         columns = [x.replace('$','') for x in reader_list[0]]
 
@@ -23,6 +24,7 @@ def process_mixpanel_csv():
         for i in range(len(reader_list)):
             for j in range(len(reader_list[i])):
                 content = reader_list[i][j]
+                content = content.replace("'",'')
                 if content and content[0] == '[':
                     if content[1] == 'u':
                         content = content.replace('$','').replace('[u','').replace('[','').replace(']','')
@@ -68,8 +70,7 @@ def unicodetoascii(text):
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
-
-def create_histogram(combined,keyword):
+def create_histogram(combined,keywords,filter = []):
     '''
 
     :param combined: [Meal]
@@ -77,17 +78,42 @@ def create_histogram(combined,keyword):
     '''
     import numpy as np
     import matplotlib.pyplot as plt
-
-    x_label = []
-    y_label = []
-
+    from textwrap import wrap
+    ret = False
+    pair = {}
+    unit = ''
+    cnt = 0
     for meal in combined:
-        print('-----------')
-        for ingredient in meal.ingredients.keys():
-            if keyword.lower() in ingredient.lower():
-                print(ingredient)
-                x_label.append(meal.name)
-                y_label.append(float(meal.ingredients[ingredient]))
+        for keyword in keywords:
+            # for ingredient in meal.ingredients.keys():
+            #     if keyword.lower() in ingredient.lower():
+            #         for each in filter:
+            #             if each in ingredient.lower():
+            #                 ret = True
+            #                 break
+            #         if ret == True:
+            #             ret = False
+            #             continue
+            #         print(keyword, ingredient)
+            #         if meal.name in pair.keys():
+            #             pair[meal.name] += float(meal.ingredients[ingredient])
+            #         else:
+            #             pair[meal.name] = float(meal.ingredients[ingredient])
+            for nutrition in meal.nutrition.keys():
+                # if keyword.lower() in nutrition.lower():
+                if keyword in nutrition:
+                # if keyword == nutrition:
+                    cnt +=1
+                    if not unit:
+                        unit = meal.nutrition[nutrition].split(' ')[1]
+                    if meal.name in pair.keys():
+                        pair[meal.name] += float(meal.nutrition[nutrition].split(' ')[0])
+                    else:
+                        pair[meal.name] = float(meal.nutrition[nutrition].split(' ')[0])
+
+    x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
+    # x_label = pair.keys()
+    y_label = pair.values()
 
     sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
     ind = np.arange(len(x_label))
@@ -97,5 +123,93 @@ def create_histogram(combined,keyword):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
+    plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
+    plt.tight_layout()
+    figure = plt.gcf()
+    figure.set_size_inches(16,12)
 
-    plt.show()
+    plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
+    print(' TOTAL {} FOUND '.format(cnt))
+    # plt.show()
+
+def create_histogram_insoluble(combined):
+    '''
+
+    :param combined: [Meal]
+    :return:
+    '''
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from textwrap import wrap
+    ret = False
+    pair = {}
+    unit = ''
+    for meal in combined:
+        print(meal)
+        tot = 0.00
+        sol = 0.00
+        both = False
+        if 'cannellini' in meal.name:
+            pdb.set_trace()
+        for nutrition in meal.nutrition.keys():
+            if 'totfib' in nutrition:
+                tot = float(meal.nutrition[nutrition].split(' ')[0])
+                if both:
+                    pair[meal.name] = tot - sol
+                    break
+                both = True
+            elif 'totsolfib' in nutrition:
+                sol = float(meal.nutrition[nutrition].split(' ')[0])
+                if both:
+                    pair[meal.name] = tot - sol
+                    break
+                both = True
+            else:
+                continue
+    pdb.set_trace()
+
+
+
+    x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
+    # x_label = pair.keys()
+    y_label = pair.values()
+
+    sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
+    ind = np.arange(len(x_label))
+
+    fig, ax = plt.subplots()
+
+    ax.barh(ind,sorted(y_label))
+    ax.set_yticks(ind)
+    ax.set_yticklabels(sorted_x_label)
+    plt.title('insoluable')
+    plt.tight_layout()
+    figure = plt.gcf()
+    figure.set_size_inches(16,12)
+
+    plt.savefig('figures/insoluableFib')
+    # plt.show()
+
+
+def meal_dict_to_class(meal):
+    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
+
+def tag_dict_to_class(tag):
+    return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
+
+def patient_dict_to_class(patient):
+    return Patient(_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
+
+def auto_add_meal():
+    import os
+    import processFoodNerd
+    import processEuphebe
+    from connectMongdo import drop, add_meals
+    FOOD_NERD_PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
+    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
+    drop('meals')
+    add_meals(processEuphebe.process(PATH))
+    add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
+
+if __name__ == "__main__":
+    auto_add_meal()
