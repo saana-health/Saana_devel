@@ -58,7 +58,7 @@ class Optimizer:
 
             # number of meals per week
             # TODO: this should be retrieved from the db
-            NUM_MEAL = 12
+            NUM_MEAL = 6
             score_board = {}
 
             # get Mongodb IDs and retrieve data from db based on the ID
@@ -149,7 +149,10 @@ class Optimizer:
                     score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
 
             # list for saving meals
-            slots = [None for _ in range(NUM_MEAL)]
+            if NUM_MEAL > 7:
+                slots = [None for _ in range(NUM_MEAL)]
+            else:
+                slots = [None for _ in range(NUM_MEAL*2)]
             i=0
             # TODO: below should auto link to supplier from db
             # Euphebe
@@ -158,6 +161,10 @@ class Optimizer:
             # FoodNerd
             MAX_MEAL_PER_SUPPLIER_2 = 10
             MIN_MEAL_PER_SUPPLIER_2 = 3
+
+            if MAX_MEAL_PER_SUPPLIER_1 + MAX_MEAL_PER_SUPPLIER_2 < NUM_MEAL or MIN_MEAL_PER_SUPPLIER_2 + MIN_MEAL_PER_SUPPLIER_1 > NUM_MEAL:
+                print('maximum meal number constraints to low')
+                raise ValueError
 
             meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
 
@@ -183,7 +190,7 @@ class Optimizer:
                                 i += 1
 
                                 # penalize more as more repetition
-                                if meal['meal'] in repeat_one_week:
+                                if repeat_one_week is not None and meal['meal'] in repeat_one_week:
                                     num_repeat += 1
                                     for score_ in sorted_scores:
                                         for repeat in repeat_one_week:
@@ -205,7 +212,7 @@ class Optimizer:
                                 slots[i] = meal
                                 i += 1
                                 # penalize more as more repetition
-                                if meal['meal'] in repeat_one_week:
+                                if repeat_one_week is not None and meal['meal'] in repeat_one_week:
                                     num_repeat += 1
                                     for score_ in sorted_scores:
                                         for repeat in repeat_one_week:
@@ -258,26 +265,22 @@ class Optimizer:
             # shuffle so that they don't look the same every week
             shuffle(slots)
 
-            # # utility to count num of available meal
-            # cnt = 0
-            # for each in score_board.values():
-            #     for each2 in each:
-            #         cnt += 1
-            # print(' TOTAL   {}  available meals'.format(cnt))
-            # if None in slots:
-            #     print('Not enough maching meals')
-            #     pdb.set_trace()
-
             # how many repetition from past 2 weeks?
             repeat_cnt = 0
             for each in slots:
-                if each['meal'] in repeat_one_week:
+                if repeat_one_week is not None and each['meal'] in repeat_one_week:
                     repeat_cnt += 1
             print('{} repetitions from last week'.format(repeat_cnt))
 
-            pdb.set_trace()
-            self.to_mongo(slots,patient._id)
-            self.to_csv(slots,patient._id)
+            if NUM_MEAL > 7:
+                self.to_mongo(slots,patient._id, self.week)
+                self.to_csv(slots,patient._id, self.week)
+            elif NUM_MEAL <= 7:
+                self.to_mongo(slots[:NUM_MEAL], patient._id, self.week)
+                self.to_mongo(slots[NUM_MEAL:], patient._id, self.week +1)
+                self.to_csv(slots[:NUM_MEAL],patient._id, self.week)
+                self.to_csv(slots[NUM_MEAL:],patient._id, self.week + 1)
+
 
     def _repeating_meals(self,patient_id):
         wk_num = self.week
@@ -300,22 +303,20 @@ class Optimizer:
             week2 = [self.meals[k] for k in prev2_list]
         return week1,week2
 
-    def to_mongo(self, mealinfo, patient_id):
-        new_history = MealHistory(patient_id, self.week)
-        if len(mealinfo) == 7:
-            for i in range(7):
+    def to_mongo(self, mealinfo, patient_id, wk):
+        new_history = MealHistory(patient_id, wk)
+        # for 6 meals
+        if len(mealinfo) <= 7:
+            for i in range(len(mealinfo)):
                 new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
-        elif len(mealinfo) == 6:
-            for i in range(6):
-                new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
-
+        # for 12 meals
         else:
-            for i in range(7):
-                new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i - 2]['meal']._id, mealinfo[2*i -1]['meal']._id]
+            for i in range(len(mealinfo)/2):
+                new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
         his = add_meal_history(new_history, patient_id)
         return True
 
-    def to_csv(self, slots, patient_id):
+    def to_csv(self, slots, patient_id, wk):
         '''
         This function is for generating master order file for a week
         :param lunches: [{lunch}] - from optimize()
@@ -324,20 +325,20 @@ class Optimizer:
         '''
         csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
                                   'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
-        if len(slots) == 12:
+        if len(slots) > 7:
             for index in range(len(slots)/2):
                 meal_1 = slots[2*index]
                 meal_2 = slots[2*index +1]
                 csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
                 csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].nutrition])
         else:
-            for index in range(6):
+            for index in range(len(slots)):
                 meal_1 = slots[index]
                 csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
-                nutrition_dic = meal_1['meal'].nutrition
+                # nutrition_dic = meal_1['meal'].nutrition
                 # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
                 #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
-        with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
+        with open('masterOrder/'+str(patient_id)+'_wk'+str(wk)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
         return csv_arry
@@ -385,10 +386,12 @@ class Optimizer:
 
 
 if __name__ == "__main__":
-    # op = Optimizer(week = 1)
-    # op.optimize()
-    op = Optimizer(week = 2)
+    from connectMongdo import drop
+    drop('mealInfo')
+    op = Optimizer(week = 1)
     op.optimize()
+    # op = Optimizer(week = 2)
+    # op.optimize()
     # op = Optimizer(week = 3)
     # op.optimize()
     # ab = op.temp()
