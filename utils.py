@@ -200,3 +200,16 @@ def tag_dict_to_class(tag):
 def patient_dict_to_class(patient):
     return Patient(_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
 
+def auto_add_meal():
+    import os
+    import processFoodNerd
+    import processEuphebe
+    from connectMongdo import drop, add_meals
+    FOOD_NERD_PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
+    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
+    drop('meals')
+    add_meals(processEuphebe.process(PATH))
+    add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
+
+if __name__ == "__main__":
+    auto_add_meal()

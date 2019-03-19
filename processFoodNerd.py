@@ -20,7 +20,7 @@ def processNutrition(filename):
     :return:
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
-    lookup_dict = pickle.load(open(os.path.join(os.getcwd(),'pickle/euphebeNfoodnerd.p')))
+    convert_dic = pickle.load(open('foodnerd_change.p' , 'rb'))
     columns = []
     units = []
     meals = []
@@ -32,7 +32,8 @@ def processNutrition(filename):
         is_name = True
 
         #first row
-        columns = [change_name(lookup_dict,x.replace('.',',')) for x in list(reader_list[1])]
+        columns = [convert_dic[x.lower()] if x.lower() in convert_dic.keys() else x.lower().replace('.',',') for x in list(reader_list[1])]
+        # columns = [change_name(lookup_dict,x.replace('.',',')) for x in list(reader_list[1])]
         units = [y.replace('\xc2\xb5g','ng') for y in list(reader_list[2])]
 
         prev_type = ''
@@ -40,10 +41,15 @@ def processNutrition(filename):
         for i in range(4,len(reader_list)):
             first_word = reader_list[i][0].split(' ')[0]
             if first_word  in ['Breakfast','Lunch','Dinner']:
-                type = first_word
+                type = first_word.lower()
             elif first_word != '':
-                name = unicodetoascii(reader_list[i][0])
-                ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
+                name = unicodetoascii(reader_list[i][0]).lower()
+                # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
+                ingredient = unicodetoascii(reader_list[i][1]).lower()
+                if ingredient in convert_dic.keys():
+                    ingredient = convert_dic[ingredient]
+                else:
+                    ingredient = ingredient.replace('.',',')
                 try:
                     ingredients[ingredient] = float(reader_list[i][3])*150
                 except:
@@ -61,8 +67,14 @@ def processNutrition(filename):
                     ingredients = {}
                     nutritions = {}
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
-                    ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
+                    # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
+                    ingredient = unicodetoascii(reader_list[i][1]).lower()
+                    if ingredient in convert_dic.keys():
+                        ingredient = convert_dic[ingredient]
+                    else:
+                        ingredient = ingredient.replace('.',',')
                     try:
+                        # TODO: conversion
                         ingredients[ingredient] = float(reader_list[i][3])*150
                     except:
                         print(reader_list[i][3])
@@ -73,7 +85,7 @@ def processNutrition(filename):
 if __name__ == "__main__":
     from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
-    from utils import create_histogram
-    create_histogram(meals,'tomato')
-    # add_meals(meals)
-    pdb.set_trace()
+    # from utils import create_histogram
+    # create_histogram(meals,'tomato')
+    add_meals(meals)
+    # pdb.set_trace()

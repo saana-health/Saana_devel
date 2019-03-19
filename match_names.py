@@ -6,7 +6,9 @@ import pprint
 import pickle
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
-if __name__ == "__main__":
+# TODO: These functions can be combined into one really
+
+def match_euphebe():
     # get full lists from food tag matrix and euphebe of all nutritions and ingredients
     _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag313.csv')
     items, euphebe_all = processEuphebe.processNutrition(PATH+'test2.csv')
@@ -65,3 +67,34 @@ if __name__ == "__main__":
 
     pickle.dump(convert_dic,open('euphebe_change.p','wb'))
 
+def match_foodnerd():
+    from processFoodNerd import processNutrition
+    PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
+    _, full_list = processNutrition(PATH + 'nutrition.csv')
+    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag313.csv')
+
+    tag_no_match = matrix_columns[:]
+    foodnerd_no_match = full_list[:]
+    convert_dic = {'black pepper':'spicy powders', 'fiber. total dietary':'total fiber', 'chili powder':'spicy powders', 'energy':'cals','protein':'prot',\
+                   'carbohydrate, by difference':'carb','total lipid (fat)':'fat'}
+    for key, val in convert_dic.items():
+        print(key,val)
+        if val in tag_no_match:
+            tag_no_match.remove(val)
+        if key in foodnerd_no_match:
+            foodnerd_no_match.remove(key)
+    for tag_keyword in matrix_columns:
+        print('----')
+        for name in full_list:
+            if tag_keyword in name:
+                convert_dic[name] = tag_keyword
+                print('{} | {} '.format(tag_keyword, name))
+                if name in foodnerd_no_match:
+                    foodnerd_no_match.remove(name)
+                if tag_keyword in tag_no_match:
+                    tag_no_match.remove(tag_keyword)
+
+    pickle.dump(convert_dic,open('foodnerd_change.p','wb'))
+
+if __name__ == "__main__":
+    match_foodnerd()

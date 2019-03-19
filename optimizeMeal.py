@@ -56,7 +56,7 @@ class Optimizer:
     def optimize(self):
         for patient in self.patients:
 
-            NUM_MEAL = 6
+            NUM_MEAL = 12
             que = []
             score_board = {}
             ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
@@ -136,48 +136,88 @@ class Optimizer:
             slots = [None for _ in range(NUM_MEAL)]
             sorted_scores = sorted(score_board.keys(), reverse=True)
             i=0
-            MAX_MEAL_PER_SUPPLIER_1 = 7
-            MAX_MEAL_PER_SUPPLIER_2 = 0
+            MAX_MEAL_PER_SUPPLIER_1 = 10
+            MIN_MEAL_PER_SUPPLIER_1 = 3
+            MAX_MEAL_PER_SUPPLIER_2 = 10
+            MIN_MEAL_PER_SUPPLIER_2 = 3
 
-            meal_num_per_supplier = {}
-            for score in sorted_scores:
-                if i >= len(slots):
-                    break
-                for meal in score_board[score]:
-                    # if all slots filled
+            meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
+
+            if NUM_MEAL == 12:
+                # minimum req
+                for score in sorted_scores:
+                    if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                        break
+                    for meal in score_board[score]:
+                        # if all slots filled
+                        if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                            break
+
+                        supplier = meal['meal'].supplierID
+                        if supplier == 'Euphebe':
+                            if meal_num_per_supplier[supplier] < MIN_MEAL_PER_SUPPLIER_1:
+                                meal_num_per_supplier[supplier] +=1
+                                slots[i] = meal
+                                i += 1
+
+                            else:
+                                continue
+                        elif supplier == 'FoodNerd':
+                            if meal_num_per_supplier[supplier] < MIN_MEAL_PER_SUPPLIER_2:
+                                meal_num_per_supplier[supplier] +=1
+                                slots[i] = meal
+                                i += 1
+                            else:
+                                continue
+
+                # maximum req
+                for score in sorted_scores:
                     if i >= len(slots):
                         break
+                    for meal in score_board[score]:
+                        if meal in slots:
+                            continue
+                        # if all slots filled
+                        if i >= len(slots):
+                            break
 
-                    supplier = meal['meal'].supplierID
-                    if supplier not in meal_num_per_supplier.keys():
-                        if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
-                            continue
-                        elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
-                            continue
-                        meal_num_per_supplier[supplier] = 1
+                        supplier = meal['meal'].supplierID
+                        if supplier not in meal_num_per_supplier.keys():
+                            if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
+                                continue
+                            elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
+                                continue
+                            meal_num_per_supplier[supplier] = 1
 
-                    elif supplier == 'Euphebe':
-                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
-                            continue
-                        meal_num_per_supplier[supplier] += 1
-                    elif supplier == 'FoodNerd':
-                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
-                            continue
-                        meal_num_per_supplier[supplier] += 1
-                    else:
-                        pdb.set_trace()
-                    slots[i] = meal
-                    i += 1
+                        elif supplier == 'Euphebe':
+                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
+                                continue
+                            meal_num_per_supplier[supplier] += 1
+                        elif supplier == 'FoodNerd':
+                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
+                                continue
+                            meal_num_per_supplier[supplier] += 1
+                        else:
+                            pdb.set_trace()
+                        slots[i] = meal
+                        i += 1
+
+            elif NUM_MEAL == 6:
+                pass
+
+
             shuffle(slots)
-            if None in slots:
-                print('Not enough maching meals')
-                pdb.set_trace()
+
+            # num of available meal
             cnt = 0
             for each in score_board.values():
                 for each2 in each:
                     cnt += 1
             print(' TOTAL   {}  available meals'.format(cnt))
-            # self.debug(slots)
+            if None in slots:
+                print('Not enough maching meals')
+                pdb.set_trace()
+
             self.to_mongo(slots,patient._id)
             self.to_csv(slots,patient._id)
 
@@ -226,8 +266,8 @@ class Optimizer:
         '''
         csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
                                   'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
-        if len(slots) == 14:
-            for index in range(7):
+        if len(slots) == 12:
+            for index in range(len(slots)/2):
                 meal_1 = slots[2*index]
                 meal_2 = slots[2*index +1]
                 csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
@@ -235,9 +275,10 @@ class Optimizer:
         else:
             for index in range(6):
                 meal_1 = slots[index]
+                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
                 nutrition_dic = meal_1['meal'].nutrition
-                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
-                                 nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
+                # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
+                #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
         with open('masterOrder/'+str(patient_id)+'_wk'+str(self.week)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_arry)
@@ -288,8 +329,8 @@ class Optimizer:
 if __name__ == "__main__":
     op = Optimizer(week = 1)
     op.optimize()
-    op = Optimizer(week = 2)
-    op.optimize()
+    # op = Optimizer(week = 2)
+    # op.optimize()
     # op = Optimizer(week = 3)
     # op.optimize()
     # ab = op.temp()
