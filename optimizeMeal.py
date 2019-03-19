@@ -56,37 +56,39 @@ class Optimizer:
     def optimize(self):
         for patient in self.patients:
 
+            # number of meals per week
+            # TODO: this should be retrieved from the db
             NUM_MEAL = 12
-            que = []
             score_board = {}
-            ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
-            tags = get_any('tags','_id',ids)
-            # minimizes = list(set(itertools.chain(*[tag_dict_to_class(tag).minimize for tag in tags])))
+
+            # get Mongodb IDs and retrieve data from db based on the ID
+            tag_ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
+            tags = get_any('tags','_id',tag_ids)
+
+            # populate minimize dictionary
             minimizes = {}
             for tag in tags:
                 minimizes.update(tag['minimize'])
 
+
             priors = list(set(itertools.chain(*[tag_dict_to_class(tag).prior for tag in tags])))
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
+            # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
             repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
             should_avoid = False
             for meal in self.meals.values():
                 should_avoid = False
                 score = 100
-                ## STRAIGHT AVOIDS
-                # for each in meal.nutrition.keys() + meal.ingredients.keys():
-                #     if each in avoids:
-                #         print('Avoid {}'.format(each))
-                #         should_avoid = True
-                #         break
+                # STRAIGHT AVOIDS
+                for each in meal.nutrition.keys() + meal.ingredients.keys():
+                    if each in avoids:
+                        print('(AOVID TAG) Avoid {}'.format(each))
+                        # instead of skipping, penalize by deducting 100 points
+                        score -= 80
+                        # should_avoid = True
+                        break
 
-
-
-                # neg = sum([1 for nutrition in meal.nutrition if nutrition in minimizes])
-                # neg += sum([1 for ingredient in meal.ingredients if ingredient in minimizes])
-                # minimize_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in minimizes]
-                # minimize_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in minimizes and ingredient not in minimize_list]))
-
+                # list of keep matched tags
                 minimize_list = []
                 full_meal_info = {}
                 full_meal_info.update(meal.ingredients)
@@ -95,62 +97,82 @@ class Optimizer:
                 for min_item in minimizes.keys():
                     if min_item in full_meal_info.keys():
                         minimize_list.append(min_item)
+
+                        # If a unit is included in the value, get rid of it
                         if not isinstance(full_meal_info[min_item],(float,)):
                             contain_val = float(full_meal_info[min_item].split(' ')[0])
                         else:
                             contain_val = float(full_meal_info[min_item])
 
+                        # if contain val above min 2
                         if contain_val > float(minimizes[min_item]['min2']):
-                            print('Avoid {}'.format(min_item))
-                            should_avoid = True
+                            print('(MINIMIZE) Avoid {}'.format(min_item))
+                            score -= 80
+                            # should_avoid = True
                             break
+                        # if min1 < val < min2
                         elif contain_val > float(minimizes[min_item]['min1']):
                             score -= 15
+                        #if val < min1
                         elif contain_val < float(minimizes[min_item]['min1']):
                             score -= 10
+                        # This should never happen
                         else:
                             print('ERR')
                             raise ValueError
+                # No need to continue at this point
+                # if should_avoid:
+                #     continue
 
-                if should_avoid:
-                    continue
-
-                # pos = sum([1 for nutrition in meal.nutrition if nutrition in priors])
-                # pos += sum([1 for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list])
+                # lists for matched prior tags
                 prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
                 prior_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list]))
-
-                # neg = len(minimize_list)
                 pos = len(prior_list)
-
-                if repeat_one_week is not None and meal in repeat_one_week:
-                    score -= 60
-                if repeat_two_week is not None and meal in repeat_two_week:
-                    score -= 40
                 score += pos*10
+
+                # check repetition. deduct for every repetition of meal
+                if repeat_one_week is not None:
+                    for repeat_meal in repeat_one_week:
+                        if meal == repeat_meal:
+                            score -= 60
+                if repeat_two_week is not None:
+                    for repeat_meal in repeat_two_week:
+                        if meal == repeat_meal:
+                            score -= 40
+                # if repeat_two_week is not None and meal in repeat_two_week:
+                #     score -= 40
+
+                # update the score_board
                 if score not in score_board.keys():
                     score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list}]
                 else:
                     score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
 
+            # list for saving meals
             slots = [None for _ in range(NUM_MEAL)]
-            sorted_scores = sorted(score_board.keys(), reverse=True)
             i=0
+            # TODO: below should auto link to supplier from db
+            # Euphebe
             MAX_MEAL_PER_SUPPLIER_1 = 10
             MIN_MEAL_PER_SUPPLIER_1 = 3
+            # FoodNerd
             MAX_MEAL_PER_SUPPLIER_2 = 10
             MIN_MEAL_PER_SUPPLIER_2 = 3
 
             meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
 
-            if NUM_MEAL == 12:
-                # minimum req
+            num_repeat = 0
+            restart = False
+            # minimum req
+            while i < MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                sorted_scores = sorted(score_board.keys(), reverse=True)
                 for score in sorted_scores:
-                    if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                    if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2 or restart:
+                        restart = False
                         break
                     for meal in score_board[score]:
                         # if all slots filled
-                        if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+                        if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2 or restart:
                             break
 
                         supplier = meal['meal'].supplierID
@@ -160,6 +182,21 @@ class Optimizer:
                                 slots[i] = meal
                                 i += 1
 
+                                # penalize more as more repetition
+                                if meal['meal'] in repeat_one_week:
+                                    num_repeat += 1
+                                    for score_ in sorted_scores:
+                                        for repeat in repeat_one_week:
+                                            for meal_info in score_board[score_]:
+                                                if meal_info['meal'] == repeat:
+                                                    score_board[score_].remove(meal_info)
+                                                    if score_ - 5 in score_board.keys():
+                                                        score_board[score_ -5*num_repeat].append(meal_info)
+                                                    else:
+                                                        score_board[score_ -5*num_repeat] = [meal_info]
+
+                                    restart = True
+                                    break
                             else:
                                 continue
                         elif supplier == 'FoodNerd':
@@ -167,57 +204,78 @@ class Optimizer:
                                 meal_num_per_supplier[supplier] +=1
                                 slots[i] = meal
                                 i += 1
+                                # penalize more as more repetition
+                                if meal['meal'] in repeat_one_week:
+                                    num_repeat += 1
+                                    for score_ in sorted_scores:
+                                        for repeat in repeat_one_week:
+                                            for meal_info in score_board[score_]:
+                                                if meal_info['meal'] == repeat:
+                                                    score_board[score_].remove(meal_info)
+                                                    if score_ - 5 in score_board.keys():
+                                                        score_board[score_ -5*num_repeat].append(meal_info)
+                                                    else:
+                                                        score_board[score_ -5*num_repeat] = [meal_info]
+
+                                    restart = True
+                                    break
                             else:
                                 continue
 
-                # maximum req
-                for score in sorted_scores:
+            # maximum req
+            for score in sorted_scores:
+                if i >= len(slots):
+                    break
+                for meal in score_board[score]:
+                    if meal in slots:
+                        continue
+                    # if all slots filled
                     if i >= len(slots):
                         break
-                    for meal in score_board[score]:
-                        if meal in slots:
+
+                    supplier = meal['meal'].supplierID
+                    if supplier not in meal_num_per_supplier.keys():
+                        if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
                             continue
-                        # if all slots filled
-                        if i >= len(slots):
-                            break
+                        elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
+                            continue
+                        meal_num_per_supplier[supplier] = 1
 
-                        supplier = meal['meal'].supplierID
-                        if supplier not in meal_num_per_supplier.keys():
-                            if supplier == 'Euphebe' and MAX_MEAL_PER_SUPPLIER_1 == 0:
-                                continue
-                            elif supplier == 'FoodNerd' and MAX_MEAL_PER_SUPPLIER_2 == 0:
-                                continue
-                            meal_num_per_supplier[supplier] = 1
-
-                        elif supplier == 'Euphebe':
-                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
-                                continue
-                            meal_num_per_supplier[supplier] += 1
-                        elif supplier == 'FoodNerd':
-                            if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
-                                continue
-                            meal_num_per_supplier[supplier] += 1
-                        else:
-                            pdb.set_trace()
-                        slots[i] = meal
-                        i += 1
-
-            elif NUM_MEAL == 6:
-                pass
+                    elif supplier == 'Euphebe':
+                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_1:
+                            continue
+                        meal_num_per_supplier[supplier] += 1
+                    elif supplier == 'FoodNerd':
+                        if meal_num_per_supplier[supplier] >= MAX_MEAL_PER_SUPPLIER_2:
+                            continue
+                        meal_num_per_supplier[supplier] += 1
+                    else:
+                        pdb.set_trace()
+                    slots[i] = meal
+                    i += 1
 
 
+            # shuffle so that they don't look the same every week
             shuffle(slots)
 
-            # num of available meal
-            cnt = 0
-            for each in score_board.values():
-                for each2 in each:
-                    cnt += 1
-            print(' TOTAL   {}  available meals'.format(cnt))
-            if None in slots:
-                print('Not enough maching meals')
-                pdb.set_trace()
+            # # utility to count num of available meal
+            # cnt = 0
+            # for each in score_board.values():
+            #     for each2 in each:
+            #         cnt += 1
+            # print(' TOTAL   {}  available meals'.format(cnt))
+            # if None in slots:
+            #     print('Not enough maching meals')
+            #     pdb.set_trace()
 
+            # how many repetition from past 2 weeks?
+            repeat_cnt = 0
+            for each in slots:
+                if each['meal'] in repeat_one_week:
+                    repeat_cnt += 1
+            print('{} repetitions from last week'.format(repeat_cnt))
+
+            pdb.set_trace()
             self.to_mongo(slots,patient._id)
             self.to_csv(slots,patient._id)
 
@@ -327,10 +385,10 @@ class Optimizer:
 
 
 if __name__ == "__main__":
-    op = Optimizer(week = 1)
-    op.optimize()
-    # op = Optimizer(week = 2)
+    # op = Optimizer(week = 1)
     # op.optimize()
+    op = Optimizer(week = 2)
+    op.optimize()
     # op = Optimizer(week = 3)
     # op.optimize()
     # ab = op.temp()
