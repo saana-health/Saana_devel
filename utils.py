@@ -85,24 +85,28 @@ def create_histogram(combined,keywords,filter = []):
     cnt = 0
     for meal in combined:
         for keyword in keywords:
-            # for ingredient in meal.ingredients.keys():
-            #     if keyword.lower() in ingredient.lower():
-            #         for each in filter:
-            #             if each in ingredient.lower():
-            #                 ret = True
-            #                 break
-            #         if ret == True:
-            #             ret = False
-            #             continue
-            #         print(keyword, ingredient)
-            #         if meal.name in pair.keys():
-            #             pair[meal.name] += float(meal.ingredients[ingredient])
-            #         else:
-            #             pair[meal.name] = float(meal.ingredients[ingredient])
+            for ingredient in meal.ingredients.keys():
+                if keyword.lower() == ingredient.lower():
+                # if keyword.lower() in ingredient.lower():
+
+                    cnt += 1
+                    for each in filter:
+                        if each in ingredient.lower():
+                            ret = True
+                            break
+                    if ret == True:
+                        ret = False
+                        continue
+                    print(keyword, ingredient)
+                    if meal.name in pair.keys():
+                        pair[meal.name] += float(meal.ingredients[ingredient])
+                    else:
+                        pair[meal.name] = float(meal.ingredients[ingredient])
             for nutrition in meal.nutrition.keys():
                 # if keyword.lower() in nutrition.lower():
-                if keyword in nutrition:
-                # if keyword == nutrition:
+                # if keyword in nutrition:
+                if keyword == nutrition:
+                    print(keyword, nutrition)
                     cnt +=1
                     if not unit:
                         unit = meal.nutrition[nutrition].split(' ')[1]
@@ -149,8 +153,8 @@ def create_histogram_insoluble(combined):
         tot = 0.00
         sol = 0.00
         both = False
-        if 'cannellini' in meal.name:
-            pdb.set_trace()
+        # if 'cannellini' in meal.name:
+        #     pdb.set_trace()
         for nutrition in meal.nutrition.keys():
             if 'totfib' in nutrition:
                 tot = float(meal.nutrition[nutrition].split(' ')[0])
@@ -192,7 +196,7 @@ def create_histogram_insoluble(combined):
 
 
 def meal_dict_to_class(meal):
-    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
+    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], quantity = meal['quantity'])
 
 def tag_dict_to_class(tag):
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])

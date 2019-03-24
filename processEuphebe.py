@@ -7,6 +7,7 @@ from model import Meal
 from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals, drop
+import random
 
 '''
 Processing flow
@@ -311,14 +312,14 @@ def combine_nutrition(mapped):
 
 def process(path):
     from matchNames import change_name
-    menus = processMenu(path+'menu315.csv')
+    menus = processMenu(path+'menu.csv')
     items, columns = processNutrition(path+'test2.csv')
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.p')
     # newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
+    pdb.set_trace()
     return combined
-    # pdb.set_trace()
 
     # from utils import create_histogram_insoluble
     # create_histogram_insoluble(combined)
@@ -336,12 +337,19 @@ if __name__ == "__main__":
     # # newly_mapped = manual_input(menus,not_found,mapped)
     # pprint.pprint(newly_mapped)
     # combined = combine_nutrition(newly_mapped)
-    # # pdb.set_trace()
     #
-    # from utils import create_histogram_insoluble, create_histogram
-    # # create_histogram_insoluble(combined)
-    # create_histogram(combined,['totfib'])
-    #
-    pdb.set_trace()
-    drop('meals')
-    add_meals(combined)
+    from utils import create_histogram_insoluble, create_histogram
+    # create_histogram_insoluble(combined)
+    # create_histogram(combined,['sodium'])
+    ## Bell peppers
+    # create_histogram(combined,['pepper'],['jalapeno','serrano','poblano','chili','flake','curry','black'])
+
+    ## pepper powder
+    # create_histogram(combined,['pepper'],['bell','green','red','yellow','jalapeno','serrano','poblano'])
+
+    ## Spcity Peppers
+    # create_histogram(combined,['pepper'],['bell','green','red','yellow','flake',\
+    #                                       'curry','black','powder'])
+    # pdb.set_trace()
+    # drop('meals')
+    # add_meals(combined)
