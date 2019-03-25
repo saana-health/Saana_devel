@@ -281,7 +281,6 @@ class Optimizer:
                         restart = True
                         break
 
-            pdb.set_trace()
             # shuffle so that they don't look the same every week
             shuffle(slots)
 
@@ -298,12 +297,15 @@ class Optimizer:
             print('{} repetitions from last week'.format(repeat_cnt))
             if NUM_MEAL > 7:
                 self.to_mongo(slots,patient._id, self.week)
-                self.to_csv(slots,patient._id, self.week)
+                # self.to_csv(slots,patient._id, self.week)
+                self.write_csv(slots,patient._id, self.week)
             elif NUM_MEAL <= 7:
                 self.to_mongo(slots[:NUM_MEAL], patient._id, self.week)
                 self.to_mongo(slots[NUM_MEAL:], patient._id, self.week +1)
-                self.to_csv(slots[:NUM_MEAL],patient._id, self.week)
-                self.to_csv(slots[NUM_MEAL:],patient._id, self.week + 1)
+                self.write_csv(slots[:NUM_MEAL], patient._id, self.week)
+                self.write_csv(slots[NUM_MEAL:], patient._id, self.week +1)
+                # self.to_csv(slots[:NUM_MEAL],patient._id, self.week)
+                # self.to_csv(slots[NUM_MEAL:],patient._id, self.week + 1)
 
 
     def _repeating_meals(self,patient_id):
@@ -340,32 +342,44 @@ class Optimizer:
         his = add_meal_history(new_history, patient_id)
         return True
 
-    def to_csv(self, slots, patient_id, wk):
-        '''
-        This function is for generating master order file for a week
-        :param lunches: [{lunch}] - from optimize()
-        :param dinners: [{dinner}] - ^
-        :return: [[]] - 2D array that is written to the csv file
-        '''
-        csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
-                                  'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
-        if len(slots) > 7:
-            for index in range(len(slots)/2):
-                meal_1 = slots[2*index]
-                meal_2 = slots[2*index +1]
-                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
-                csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].nutrition])
-        else:
-            for index in range(len(slots)):
-                meal_1 = slots[index]
-                csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
-                # nutrition_dic = meal_1['meal'].nutrition
-                # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
-                #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
-        with open('masterOrder/'+str(patient_id)+'_wk'+str(wk)+'.csv','wb') as csvfile:
+    # def to_csv(self, slots, patient_id, wk):
+    #     '''
+    #     This function is for generating master order file for a week
+    #     :param lunches: [{lunch}] - from optimize()
+    #     :param dinners: [{dinner}] - ^
+    #     :return: [[]] - 2D array that is written to the csv file
+    #     '''
+    #     csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
+    #                               'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
+    #     if len(slots) > 7:
+    #         for index in range(len(slots)/2):
+    #             meal_1 = slots[2*index]
+    #             meal_2 = slots[2*index +1]
+    #             csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
+    #             csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].nutrition])
+    #     else:
+    #         for index in range(len(slots)):
+    #             meal_1 = slots[index]
+    #             csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
+    #             # nutrition_dic = meal_1['meal'].nutrition
+    #             # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
+    #             #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
+    #     with open('masterOrder/'+str(patient_id)+'_wk'+str(wk)+'.csv','wb') as csvfile:
+    #         writer = csv.writer(csvfile)
+    #         writer.writerows(csv_arry)
+    #     return csv_arry
+    def write_csv(self,slots,patient_id,wk):
+        try:
+            existing_order = list(csv.reader(open('masterorder.csv','rb')))
+        except:
+            existing_order = [['ID','Week','Day','meal_name','minimize','prior']]
+        for index in range(len(slots)):
+            meal = slots[index]
+            row = [str(patient_id), wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior']]
+            existing_order.append(row)
+        with open('masterorder.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerows(csv_arry)
-        return csv_arry
+            writer.writerows(existing_order)
 
     def temp(self):
         # To see how many meals repeat

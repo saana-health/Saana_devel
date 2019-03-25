@@ -1,0 +1,13 @@
+ID,Week,Day,meal_name,minimize,prior
+5c9829d43c243b180cbd1cbf,1,day 1,thai coconut green curry with lemongrass rice (gf),[u'insoluble fiber'],[]
+5c9829d43c243b180cbd1cbf,1,day 2,lunchtime chili (gf),[u'insoluble fiber'],[u'zucchini']
+5c9829d43c243b180cbd1cbf,1,day 3,sweet beet slaw salad,[u'total fiber'],[]
+5c9829d43c243b180cbd1cbf,1,day 4,pasta al forno (gf),[u'insoluble fiber'],[u'zucchini']
+5c9829d43c243b180cbd1cbf,1,day 5,"""not-so-stuffing"" quinoa salad","[u'garlic', u'insoluble fiber']","[u'kale', u'parsley']"
+5c9829d43c243b180cbd1cbf,1,day 6,butternut squash red lentil dal with brown rice and three seed topping,"[u'garlic', u'insoluble fiber']","[u'cauliflower', u'spinach']"
+5c9829d43c243b180cbd1cbf,2,day 1,burrito bowl with cilantro lime rice & avocado crema (gf),[u'insoluble fiber'],[u'avocado']
+5c9829d43c243b180cbd1cbf,2,day 2,pizza pocket,[u'insoluble fiber'],[u'zucchini']
+5c9829d43c243b180cbd1cbf,2,day 3,fennel & arugula farrotto (gf),[u'insoluble fiber'],[]
+5c9829d43c243b180cbd1cbf,2,day 4,blueberry banana pancakes,[u'total fiber'],[]
+5c9829d43c243b180cbd1cbf,2,day 5,apple cinnamon mini muffins,[u'total fiber'],[]
+5c9829d43c243b180cbd1cbf,2,day 6,tuscan farro salad,[u'insoluble fiber'],[u'zucchini']
