@@ -70,7 +70,7 @@ def unicodetoascii(text):
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
-def create_histogram(combined,keywords,filter = []):
+def create_histogram(combined,keywords,filter = [],filename = ''):
     '''
 
     :param combined: [Meal]
@@ -85,24 +85,28 @@ def create_histogram(combined,keywords,filter = []):
     cnt = 0
     for meal in combined:
         for keyword in keywords:
-            # for ingredient in meal.ingredients.keys():
-            #     if keyword.lower() in ingredient.lower():
-            #         for each in filter:
-            #             if each in ingredient.lower():
-            #                 ret = True
-            #                 break
-            #         if ret == True:
-            #             ret = False
-            #             continue
-            #         print(keyword, ingredient)
-            #         if meal.name in pair.keys():
-            #             pair[meal.name] += float(meal.ingredients[ingredient])
-            #         else:
-            #             pair[meal.name] = float(meal.ingredients[ingredient])
+            for ingredient in meal.ingredients.keys():
+                if keyword.lower() == ingredient.lower():
+                # if keyword.lower() in ingredient.lower():
+
+                    cnt += 1
+                    for each in filter:
+                        if each in ingredient.lower():
+                            ret = True
+                            break
+                    if ret == True:
+                        ret = False
+                        continue
+                    print(keyword, ingredient)
+                    if meal.name in pair.keys():
+                        pair[meal.name] += float(meal.ingredients[ingredient])
+                    else:
+                        pair[meal.name] = float(meal.ingredients[ingredient])
             for nutrition in meal.nutrition.keys():
                 # if keyword.lower() in nutrition.lower():
-                if keyword in nutrition:
-                # if keyword == nutrition:
+                # if keyword in nutrition:
+                if keyword == nutrition:
+                    print(keyword, nutrition)
                     cnt +=1
                     if not unit:
                         unit = meal.nutrition[nutrition].split(' ')[1]
@@ -123,12 +127,22 @@ def create_histogram(combined,keywords,filter = []):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
-    plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
+    for i,v in enumerate(sorted(y_label)):
+        ax.text(v,i, str(v),color='blue',fontweight='bold')
+    if not filename:
+        plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
+    else:
+        plt.title(filename + '(' + unit+ ')')
+
     plt.tight_layout()
     figure = plt.gcf()
     figure.set_size_inches(16,12)
 
-    plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
+    if filename:
+        plt.savefig('figures/'+filename + '(' + unit + ')', dpi=200)
+    else:
+        plt.savefig('figures/'+str(keywords), dpi=200)
+
     print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
 
@@ -149,8 +163,8 @@ def create_histogram_insoluble(combined):
         tot = 0.00
         sol = 0.00
         both = False
-        if 'cannellini' in meal.name:
-            pdb.set_trace()
+        # if 'cannellini' in meal.name:
+        #     pdb.set_trace()
         for nutrition in meal.nutrition.keys():
             if 'totfib' in nutrition:
                 tot = float(meal.nutrition[nutrition].split(' ')[0])
@@ -166,7 +180,6 @@ def create_histogram_insoluble(combined):
                 both = True
             else:
                 continue
-    pdb.set_trace()
 
 
 
@@ -182,6 +195,8 @@ def create_histogram_insoluble(combined):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
+    for i,v in enumerate(y_label):
+        ax.text(v+3,i+0.25, str(v),color='blue',fontweight='bold')
     plt.title('insoluable')
     plt.tight_layout()
     figure = plt.gcf()
@@ -192,7 +207,7 @@ def create_histogram_insoluble(combined):
 
 
 def meal_dict_to_class(meal):
-    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], price = meal['price'])
+    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], quantity = meal['quantity'])
 
 def tag_dict_to_class(tag):
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
@@ -210,6 +225,17 @@ def auto_add_meal():
     drop('meals')
     add_meals(processEuphebe.process(PATH))
     add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
+
+def add_dummy_patients():
+    disease = get_any('tags','name','brain')['_id']
+    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','fatgiue','weight loss', 'inflammation'])
+    comorbidities = get_any('tags','name',['diabetes'])
+    # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
+    #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
+    maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    drop('patients')
+    add_patients(maggie)
+
 
 if __name__ == "__main__":
     auto_add_meal()

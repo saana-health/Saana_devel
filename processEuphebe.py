@@ -7,6 +7,7 @@ from model import Meal
 from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals, drop
+import random
 
 '''
 Processing flow
@@ -52,7 +53,7 @@ def processNutrition(filename):
     :param filename (str): to open:
     :return [Meal()]
     '''
-    convert_dic = pickle.load(open('euphebe_change.p','rb'))
+    convert_dic = pickle.load(open('euphebe_change0313.p','r'))#b'))
     print(' --- processNutrition() ----')
     columns = []
     items = []
@@ -132,6 +133,10 @@ def compress(items):
     for each in items:
         if each not in temp:
             temp.append(each)
+    for each in temp:
+        if 'caesar salad' in each.name:
+            print(each)
+    pdb.set_trace()
     return temp
 
 def mapToMeal(menus,items):
@@ -207,7 +212,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
     manual_map = {}
     left_over = not_found[:]
     if filename:
-        manual_map = pickle.load(open(filename,'rb'))
+        manual_map = pickle.load(open(filename,'r'))
     else:
         for each in not_found:
             for menu in menus:
@@ -310,38 +315,49 @@ def combine_nutrition(mapped):
     return new_list
 
 def process(path):
-    from matchNames import change_name
-    menus = processMenu(path+'menu315.csv')
+    menus = processMenu(path+'menu0226.csv')
     items, columns = processNutrition(path+'test2.csv')
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.p')
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap0226.p')
     # newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
+    pdb.set_trace()
     return combined
-    # pdb.set_trace()
 
     # from utils import create_histogram_insoluble
     # create_histogram_insoluble(combined)
 
     # add_meals(combined)
 
+def histogram(combined):
+    from utils import create_histogram_insoluble, create_histogram
+    # # ## Bell peppers
+    # create_histogram(combined,['pepper'],['jalapeno','serrano','poblano','chili','flake','curry','black','hot'],\
+    #                  filename='Bell peppers (red, green, yellow, bell')
+    # #
+    # # ## pepper powder
+    # create_histogram(combined,['pepper'],['bell','green','red','yellow','jalapeno','serrano','poblano'],\
+    #                  filename='Pepper_powders_(black,chilipowder_and_ground,cayenne_ground')
+    # #
+    # # ## Spcity Peppers
+    # create_histogram(combined,['pepper'],['bell','green','red','yellow','flake',\
+    #                                       'curry','black','powder'],'Spicy peppers(cayenne, hot, jalapeno, poblano')
+    # #
+    # create_histogram(combined,['vit k'])
+    # create_histogram(combined,['totfib'])
+    # create_histogram(combined,['onion'])
+    # create_histogram(combined,['potassium'])
+    # create_histogram(combined,['insoluble fiber'])
+    # create_histogram(combined,['totsolfib'])
+    create_histogram(combined,['sodium'])
+    # create_histogram(combined,['onion','tomato'])
+    # create_histogram(combined,['garlic'])
+    # create_histogram(combined,['tempeh'])
+
 
 if __name__ == "__main__":
     combined = process(PATH)
-    # from matchNames import change_name
-    # menus = processMenu(PATH+'menu0313.csv')
-    # items, columns = processNutrition(PATH+'test2.csv')
-    # mapped, not_found = mapToMeal(menus, items)
-    # newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.csv')
-    # # newly_mapped = manual_input(menus,not_found,mapped)
-    # pprint.pprint(newly_mapped)
-    # combined = combine_nutrition(newly_mapped)
-    # # pdb.set_trace()
-    #
-    # from utils import create_histogram_insoluble, create_histogram
-    # # create_histogram_insoluble(combined)
-    # create_histogram(combined,['totfib'])
-    #
-    pdb.set_trace()
-    drop('meals')
-    add_meals(combined)
+    histogram(combined)
+
+    # drop('meals')
+    # add_meals(combined)

@@ -11,7 +11,7 @@ def add_patients(patients):
     if not isinstance(patients,(list,)):
         patients = [patients]
     collection_patients = db.patients
-    pa = [{'name':x.name, 'treatment_drugs': [], 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':[]} for x in patients]
+    pa = [{'name':x.name, 'treatment_drugs': x.treatment_drugs, 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':x.comorbidities} for x in patients]
     result = collection_patients.insert_many(pa)
 
 def add_tags(tag_dict):
@@ -41,7 +41,7 @@ def add_meals(meal_list = [],pickle_name = ''):
         new_dict['nutrition'] = each.nutrition
         new_dict['ingredients'] = each.ingredients
         new_dict['supplierID'] = each.supplierID
-        new_dict['price'] = each.price
+        new_dict['quantity'] = each.quantity
         new_dict['type'] = each.type
         l.append(new_dict)
     meals.insert_many(l)
@@ -63,39 +63,37 @@ def add_meal_history(meal_history,id):
         db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
     return True
 
-def find_meal(name):
-    '''
-    This function finds a meal based on its name
-    :param name: str - name of a meal
-    :return: {mealInfo}
-    '''
-    meal = db.meals.find_one({"name":name})
-    return meal
+# def find_meal(name):
+#     '''
+#     This function finds a meal based on its name
+#     :param name: str - name of a meal
+#     :return: {mealInfo}
+#     '''
+#     meal = db.meals.find_one({"name":name})
+#     return meal
 
-def find_patient(name = '', object_id = ''):
-    '''
-    This function finds a patient based on her/his name
-    :param name: str - name of a patient
-    :return: {(patient info)}
-    '''
-    if name:
-        patient = db.patients.find_one({"name":name})
-    else:
-        patient = db.patients.find_one({"_id": object_id})
-    return patient
+# def find_patient(name = '', object_id = ''):
+#     '''
+#     This function finds a patient based on her/his name
+#     :param name: str - name of a patient
+#     :return: {(patient info)}
+#     '''
+#     if name:
+#         patient = db.patients.find_one({"name":name})
+#     else:
+#         patient = db.patients.find_one({"_id": object_id})
+#     return patient
 
-def find_disease(name):
-    tags = db.tags.find()
-    for each in tags:
-        if name.lower() in each['name'].lower():
-            return each['_id']
+# def find_disease(name):
+#     tags = db.tags.find()
+#     for each in tags:
+#         if name.lower() in each['name'].lower():
+#             return each['_id']
 
-
-
-def find_tag(object_id):
-    from utils import tag_dict_to_class
-    tag = db.tags.find_one({'_id':object_id})
-    return tag_dict_to_class(tag)
+# def find_tag(object_id):
+#     from utils import tag_dict_to_class
+#     tag = db.tags.find_one({'_id':object_id})
+#     return tag_dict_to_class(tag)
 
 def get_all_meals():
     cursor = db.meals.find()
@@ -126,5 +124,11 @@ def drop(collection):
     parser = getattr(db,collection)
     return parser.drop()
 
+def update_quantity():
+    import random
+    parser = db.meals.find()
+    for each in parser:
+        db.meals.update({'_id': each['_id']},{'$set':{'quantity':random.randint(0,10)}})
+
 if __name__ == "__main__":
-    find_disease('breast')
+    update_quantity()
