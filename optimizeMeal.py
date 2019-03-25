@@ -179,8 +179,9 @@ class Optimizer:
             while i < MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
                 print('restarted')
                 sorted_scores = sorted(score_board.keys(), reverse=True)
+                # print('-----------{}----------'.format(sorted_scores[0]))
+                # pprint.pprint([score_board[sorted_scores[1]]])
                 for score in sorted_scores:
-                    print(score)
                     if i >= MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2 or restart:
                         restart = False
                         break
@@ -198,6 +199,7 @@ class Optimizer:
                             if meal_num_per_supplier[supplier] >= MIN_MEAL_PER_SUPPLIER_2:
                                 continue
 
+                        # print('!!!! {} ADDED !!!!'.format(meal['meal']))
                         meal_num_per_supplier[supplier] +=1
                         slots[i] = meal
                         i += 1
@@ -222,24 +224,22 @@ class Optimizer:
                                             else:
                                                 score_board[score_ -5*num_repeat] = [meal_info]
 
-                            restart = True
-                            break
+                        restart = True
+                        break
 
             restart = False
-            # maximum req
+            ### maximum req ###
             # TODO: FIND OUT WHY NO MEALS REPEAT WHEN I TAKE OUT SOME FUNCTIONALITY
             while i < len(slots):
                 print('RESTARTED')
                 sorted_scores = sorted(score_board.keys(), reverse=True)
+                print('-----------{}----------'.format(sorted_scores[0]))
+                pprint.pprint([score_board[sorted_scores[0]]])
                 for score in sorted_scores:
                     if i >= len(slots) or restart:
                         restart = False
                         break
                     for meal in score_board[score]:
-                        # # TODO: not skip it but deduct point
-                        # if meal in slots:
-                        #     continue
-
                         # if all slots filled
                         if i >= len(slots) or restart:
                             break
@@ -257,13 +257,14 @@ class Optimizer:
                             pdb.set_trace()
                         slots[i] = meal
                         i += 1
+                        print('!!!! {} ADDED !!!!'.format(meal['meal']))
 
                         # deduct just added meal
-                        # score_board[score].remove(meal)
-                        # if score - 100 in score_board.keys():
-                        #     score_board[score-100].append(meal)
-                        # else:
-                        #     score_board[score-100] = [meal]
+                        score_board[score].remove(meal)
+                        if score - 100 in score_board.keys():
+                            score_board[score-100].append(meal)
+                        else:
+                            score_board[score-100] = [meal]
 
                         if repeat_one_week is not None and meal['meal'] in repeat_one_week:
                                     num_repeat += 1
@@ -277,10 +278,10 @@ class Optimizer:
                                                     else:
                                                         score_board[score_ -5*num_repeat] = [meal_info]
 
-                                    restart = True
-                                    break
+                        restart = True
+                        break
 
-
+            pdb.set_trace()
             # shuffle so that they don't look the same every week
             shuffle(slots)
 
@@ -295,7 +296,6 @@ class Optimizer:
                 else:
                     repeat_same_week[each['meal'].name] = 1
             print('{} repetitions from last week'.format(repeat_cnt))
-            pdb.set_trace()
             if NUM_MEAL > 7:
                 self.to_mongo(slots,patient._id, self.week)
                 self.to_csv(slots,patient._id, self.week)
@@ -410,14 +410,14 @@ class Optimizer:
 
 
 if __name__ == "__main__":
-    # from connectMongdo import drop
-    # drop('mealInfo')
-    # op = Optimizer(week = 1)
-    # op.optimize()
+    from connectMongdo import drop
+    drop('mealInfo')
+    op = Optimizer(week = 1)
+    op.optimize()
     # op = Optimizer(week = 2)
     # op.optimize()
-    op = Optimizer(week = 3)
-    op.optimize()
+    # op = Optimizer(week = 3)
+    # op.optimize()
     # ab = op.temp()
     # pdb.set_trace()
 

@@ -133,10 +133,6 @@ def compress(items):
     for each in items:
         if each not in temp:
             temp.append(each)
-    for each in temp:
-        if 'caesar salad' in each.name:
-            print(each)
-    pdb.set_trace()
     return temp
 
 def mapToMeal(menus,items):
@@ -321,7 +317,6 @@ def process(path):
     newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap0226.p')
     # newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
-    pdb.set_trace()
     return combined
 
     # from utils import create_histogram_insoluble

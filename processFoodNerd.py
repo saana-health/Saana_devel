@@ -20,7 +20,7 @@ def processNutrition(filename):
     :return:
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
-    convert_dic = pickle.load(open('foodnerd_change.p' , 'rb'))
+    convert_dic = pickle.load(open('foodnerd_change.p' , 'r'))
     columns = []
     units = []
     meals = []
