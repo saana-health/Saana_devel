@@ -70,7 +70,7 @@ def unicodetoascii(text):
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
 
-def create_histogram(combined,keywords,filter = []):
+def create_histogram(combined,keywords,filter = [],filename = ''):
     '''
 
     :param combined: [Meal]
@@ -127,12 +127,22 @@ def create_histogram(combined,keywords,filter = []):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
-    plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
+    for i,v in enumerate(sorted(y_label)):
+        ax.text(v,i, str(v),color='blue',fontweight='bold')
+    if not filename:
+        plt.title(str(keywords) + ' that is not ' + str(filter) + '(' + unit + ')')
+    else:
+        plt.title(filename + '(' + unit+ ')')
+
     plt.tight_layout()
     figure = plt.gcf()
     figure.set_size_inches(16,12)
 
-    plt.savefig('figures/'+str(keywords)+'_Not_'+str(filter),dpi=200)
+    if filename:
+        plt.savefig('figures/'+filename + '(' + unit + ')', dpi=200)
+    else:
+        plt.savefig('figures/'+str(keywords), dpi=200)
+
     print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
 
@@ -170,7 +180,6 @@ def create_histogram_insoluble(combined):
                 both = True
             else:
                 continue
-    pdb.set_trace()
 
 
 
@@ -186,6 +195,8 @@ def create_histogram_insoluble(combined):
     ax.barh(ind,sorted(y_label))
     ax.set_yticks(ind)
     ax.set_yticklabels(sorted_x_label)
+    for i,v in enumerate(y_label):
+        ax.text(v+3,i+0.25, str(v),color='blue',fontweight='bold')
     plt.title('insoluable')
     plt.tight_layout()
     figure = plt.gcf()
