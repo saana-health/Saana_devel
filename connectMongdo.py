@@ -11,7 +11,7 @@ def add_patients(patients):
     if not isinstance(patients,(list,)):
         patients = [patients]
     collection_patients = db.patients
-    pa = [{'name':x.name, 'treatment_drugs': [], 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':[]} for x in patients]
+    pa = [{'name':x.name, 'treatment_drugs': x.treatment_drugs, 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':x.comorbidities} for x in patients]
     result = collection_patients.insert_many(pa)
 
 def add_tags(tag_dict):

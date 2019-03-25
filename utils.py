@@ -226,5 +226,16 @@ def auto_add_meal():
     add_meals(processEuphebe.process(PATH))
     add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
 
+def add_dummy_patients():
+    disease = get_any('tags','name','brain')['_id']
+    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','fatgiue','weight loss', 'inflammation'])
+    comorbidities = get_any('tags','name',['diabetes'])
+    # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
+    #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
+    maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    drop('patients')
+    add_patients(maggie)
+
+
 if __name__ == "__main__":
     auto_add_meal()
