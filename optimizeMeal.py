@@ -59,7 +59,7 @@ class Optimizer:
 
             # number of meals per week
             # TODO: this should be retrieved from the db
-            NUM_MEAL = 6
+            NUM_MEAL = 15
             score_board = {}
 
             # get Mongodb IDs and retrieve data from db based on the ID
@@ -152,6 +152,8 @@ class Optimizer:
                 else:
                     score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
 
+            self.scoreboard_to_csv(score_board,patient._id)
+
             ####### Start choosing meals ########
             # list for saving meals
             if NUM_MEAL > 7:
@@ -162,10 +164,10 @@ class Optimizer:
             # TODO: below should auto link to supplier from db
             # Euphebe
             MAX_MEAL_PER_SUPPLIER_1 = 10
-            MIN_MEAL_PER_SUPPLIER_1 = 3
+            MIN_MEAL_PER_SUPPLIER_1 = 5
             # FoodNerd
             MAX_MEAL_PER_SUPPLIER_2 = 10
-            MIN_MEAL_PER_SUPPLIER_2 = 3
+            MIN_MEAL_PER_SUPPLIER_2 = 5
 
             if MAX_MEAL_PER_SUPPLIER_1 + MAX_MEAL_PER_SUPPLIER_2 < NUM_MEAL or MIN_MEAL_PER_SUPPLIER_2 + MIN_MEAL_PER_SUPPLIER_1 > NUM_MEAL:
                 print('maximum meal number constraints to low')
@@ -229,7 +231,6 @@ class Optimizer:
 
             restart = False
             ### maximum req ###
-            # TODO: FIND OUT WHY NO MEALS REPEAT WHEN I TAKE OUT SOME FUNCTIONALITY
             while i < len(slots):
                 print('RESTARTED')
                 sorted_scores = sorted(score_board.keys(), reverse=True)
@@ -297,15 +298,12 @@ class Optimizer:
             print('{} repetitions from last week'.format(repeat_cnt))
             if NUM_MEAL > 7:
                 self.to_mongo(slots,patient._id, self.week)
-                # self.to_csv(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
             elif NUM_MEAL <= 7:
                 self.to_mongo(slots[:NUM_MEAL], patient._id, self.week)
                 self.to_mongo(slots[NUM_MEAL:], patient._id, self.week +1)
                 self.write_csv(slots[:NUM_MEAL], patient._id, self.week)
                 self.write_csv(slots[NUM_MEAL:], patient._id, self.week +1)
-                # self.to_csv(slots[:NUM_MEAL],patient._id, self.week)
-                # self.to_csv(slots[NUM_MEAL:],patient._id, self.week + 1)
 
 
     def _repeating_meals(self,patient_id):
@@ -342,40 +340,14 @@ class Optimizer:
         his = add_meal_history(new_history, patient_id)
         return True
 
-    # def to_csv(self, slots, patient_id, wk):
-    #     '''
-    #     This function is for generating master order file for a week
-    #     :param lunches: [{lunch}] - from optimize()
-    #     :param dinners: [{dinner}] - ^
-    #     :return: [[]] - 2D array that is written to the csv file
-    #     '''
-    #     csv_arry = [[patient_id],['Date','Meal Type','Meal Name','Limiting nutrition','Prioritized nutrtion','Meal provider',\
-    #                               'Tot Cal', 'Protein','Carb','Fat','Tot Fib','TotSolFib']]
-    #     if len(slots) > 7:
-    #         for index in range(len(slots)/2):
-    #             meal_1 = slots[2*index]
-    #             meal_2 = slots[2*index +1]
-    #             csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
-    #             csv_arry.append(['Day '+str(index+1),'meal_2',meal_2['meal'].name,meal_2['minimize'],meal_2['prior'],meal_2['meal'].supplierID,meal_2['meal'].nutrition])
-    #     else:
-    #         for index in range(len(slots)):
-    #             meal_1 = slots[index]
-    #             csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,meal_1['meal'].nutrition])
-    #             # nutrition_dic = meal_1['meal'].nutrition
-    #             # csv_arry.append(['Day '+str(index+1),'meal_1',meal_1['meal'].name,meal_1['minimize'],meal_1['prior'],meal_1['meal'].supplierID,\
-    #             #                  nutrition_dic['cals'],nutrition_dic['prot'],nutrition_dic['carb'],nutrition_dic['fat'],nutrition_dic['totfib'],nutrition_dic['totsolfib']])
-    #     with open('masterOrder/'+str(patient_id)+'_wk'+str(wk)+'.csv','wb') as csvfile:
-    #         writer = csv.writer(csvfile)
-    #         writer.writerows(csv_arry)
-    #     return csv_arry
     def write_csv(self,slots,patient_id,wk):
         try:
             existing_order = list(csv.reader(open('masterorder.csv','rb')))
         except:
-            existing_order = [['ID','Week','Day','meal_name','minimize','prior']]
+            existing_order = [['ID','Week','Day','meal_name','minimize','prior','supplier']]
         for index in range(len(slots)):
             meal = slots[index]
-            row = [str(patient_id), wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior']]
+            row = [str(patient_id)[-5:], wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior'],meal['meal'].supplierID]
             existing_order.append(row)
         with open('masterorder.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
@@ -414,18 +386,26 @@ class Optimizer:
         print('Repeat from 2 weeks ago: {}'.format(len([x for x in meal_list if x in curr_list]) - last_week))
         return [x for x in meal_list if x in curr_list]
 
-    def debug(self,slots):
-        import pprint
-        meals =[]
-        for each in slots:
-            meals.append(each['meal'])
+    def scoreboard_to_csv(self,score_board,patient_id):
+        sorted_score = sorted(score_board.keys(),reverse = True)
+        csv_list = [[patient_id],['score','meal','minimize','prior']]
+        for score in sorted_score:
+            for meal in score_board[score]:
+                temp_list = [score]
+                temp_list += [meal['meal'],meal['minimize'],meal['prior']]
+                csv_list.append(temp_list)
+        with open('scoreboard_'+str(patient_id)[-5:]+'.csv','wb') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(csv_list)
+        return True
 
-        pdb.set_trace()
+
 
 
 if __name__ == "__main__":
     from connectMongdo import drop
     drop('mealInfo')
+    os.remove('masterorder.csv')
     op = Optimizer(week = 1)
     op.optimize()
     # op = Optimizer(week = 2)
