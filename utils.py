@@ -227,15 +227,36 @@ def auto_add_meal():
     add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
 
 def add_dummy_patients():
+    from connectMongdo import add_patients, get_any
     disease = get_any('tags','name','brain')['_id']
-    symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','fatgiue','weight loss', 'inflammation'])
-    comorbidities = get_any('tags','name',['diabetes'])
+    symptoms = get_any('tags','name',['constipation','difficulty to swallow','dry mouth','nausea'])
+    comorbidities = get_any('tags','name',['hypertension'])
+    treatment_drugs =[]
     # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
     #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
-    maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
-    drop('patients')
-    add_patients(maggie)
+    dummy = Patient(name = 'test1', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    add_patients(dummy)
 
+    disease = get_any('tags','name','skin')['_id']
+    symptoms = get_any('tags','name',['fatigue','inflammation'])
+    comorbidities = get_any('tags','name',[''])
+    dummy = Patient(name = 'test2', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    add_patients(dummy)
+
+    disease = get_any('tags','name','pancreas')['_id']
+    symptoms = get_any('tags','name',['cough','diarrhea','difficulty chewing','dry mouth','loss of or change of taste','weight loss'])
+    comorbidities = get_any('tags','name',['diabetes'])
+    dummy = Patient(name = 'test3', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    add_patients(dummy)
+
+    disease = get_any('tags','name','leukemia')['_id']
+    symptoms = get_any('tags','name',['constipation','loss of appetite','dry mouth'])
+    comorbidities = get_any('tags','name',['hypertension'])
+    dummy = Patient(name = 'test4', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    add_patients(dummy)
 
 if __name__ == "__main__":
-    auto_add_meal()
+    # auto_add_meal()
+    from maggie import add_maggie
+    add_maggie()
+    add_dummy_patients()
