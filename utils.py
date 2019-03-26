@@ -213,7 +213,7 @@ def tag_dict_to_class(tag):
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
 
 def patient_dict_to_class(patient):
-    return Patient(_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
+    return Patient(name = patient['name'],_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
 
 def auto_add_meal():
     import os

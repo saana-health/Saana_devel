@@ -19,6 +19,5 @@ def add_maggie():
     add_patients(maggie)
 
 if __name__ == "__main__":
-    drop('patients')
     add_maggie()
 

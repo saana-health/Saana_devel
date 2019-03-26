@@ -4,6 +4,7 @@ __pycache__/
 
 # MasterOrder folder
 masterOrder/
+scoreboard/
 
 # venv folder
 venv/
