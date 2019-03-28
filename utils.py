@@ -35,7 +35,7 @@ def process_mixpanel_csv(filename):
         writer.writerows(matrix)
 
 def unicodetoascii(text):
-
+    print(text)
     uni2ascii = {
             ord('\xe2\x80\x99'.decode('utf-8')): ord("'"),
             ord('\xe2\x80\x9c'.decode('utf-8')): ord('"'),
@@ -65,7 +65,7 @@ def unicodetoascii(text):
             ord('\xe2\x81\xbb'.decode('utf-8')): ord("-"),
             ord('\xe2\x81\xbc'.decode('utf-8')): ord("="),
             ord('\xe2\x81\xbd'.decode('utf-8')): ord("("),
-            ord('\xe2\x81\xbe'.decode('utf-8')): ord(")"),
+            ord('\xc2\xac\xc2\xb5'.decode('utf-8')): ord("n")
 
                             }
     return text.decode('utf-8').translate(uni2ascii).encode('ascii')
@@ -86,8 +86,8 @@ def create_histogram(combined,keywords,filter = [],filename = ''):
     for meal in combined:
         for keyword in keywords:
             for ingredient in meal.ingredients.keys():
-                if keyword.lower() == ingredient.lower():
-                # if keyword.lower() in ingredient.lower():
+                # if keyword.lower() == ingredient.lower():
+                if keyword.lower() in ingredient.lower():
 
                     cnt += 1
                     for each in filter:

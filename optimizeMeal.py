@@ -77,12 +77,13 @@ class Optimizer:
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
             # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
             repeat_one_week, repeat_two_week= self._repeating_meals(patient._id)
-            print(patient.name)
-            if patient.name == "Maggie" and self.week == 2:
-                pdb.set_trace()
+
+            # if patient.name == "test4" and self.week == 2:
+            #     pdb.set_trace()
 
             should_avoid = False
             for meal in self.meals.values():
+                avoid_list = []
                 if meal.quantity == 0:
                     continue
                 should_avoid = False
@@ -90,6 +91,7 @@ class Optimizer:
                 # STRAIGHT AVOIDS
                 for each in meal.nutrition.keys() + meal.ingredients.keys():
                     if each in avoids:
+                        avoid_list.append(each)
                         # print('(AOVID TAG) Avoid {}'.format(each))
                         # instead of skipping, penalize by deducting 100 points
                         score -= 80
@@ -152,9 +154,9 @@ class Optimizer:
 
                 # update the score_board
                 if score not in score_board.keys():
-                    score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list}]
+                    score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list}]
                 else:
-                    score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list})
+                    score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list})
 
             self.scoreboard_to_csv(score_board,patient._id)
 
@@ -183,6 +185,7 @@ class Optimizer:
             restart = False
             # minimum req
             while i < MIN_MEAL_PER_SUPPLIER_1 + MIN_MEAL_PER_SUPPLIER_2:
+
                 # print('restarted')
                 sorted_scores = sorted(score_board.keys(), reverse=True)
                 # print('-----------{}----------'.format(sorted_scores[0]))
@@ -204,6 +207,7 @@ class Optimizer:
                         elif supplier == 'FoodNerd':
                             if meal_num_per_supplier[supplier] >= MIN_MEAL_PER_SUPPLIER_2:
                                 continue
+                            pdb.set_trace()
 
                         # print('!!!! {} ADDED !!!!'.format(meal['meal']))
                         meal_num_per_supplier[supplier] +=1
@@ -334,13 +338,18 @@ class Optimizer:
     def to_mongo(self, mealinfo, patient_id, wk):
         new_history = MealHistory(patient_id, wk)
         # for 6 meals
-        if len(mealinfo) <= 7:
+        if len(mealinfo) <= 8:
             for i in range(len(mealinfo)):
                 new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
         # for 12 meals
         else:
-            for i in range(len(mealinfo)/2):
-                new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
+            for i in range(len(mealinfo)):
+                if not i % 2:
+                    new_history.meal_list['day_'+str(i/2 + 1)] = [mealinfo[i]['meal']._id]
+                else:
+                    new_history.meal_list['day_'+str(i/2 + 1)] += [mealinfo[i]['meal']._id]
+            # for i in range(len(mealinfo)2):
+            #     new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
         his = add_meal_history(new_history, patient_id)
         return True
 
@@ -348,55 +357,22 @@ class Optimizer:
         try:
             existing_order = list(csv.reader(open('masterOrder/masterorder.csv','rb')))
         except:
-            existing_order = [['ID','Week','Day','meal_name','minimize','prior','supplier']]
+            existing_order = [['ID','Week','Day','meal_name','minimize','prior','avoid','supplier']]
         for index in range(len(slots)):
             meal = slots[index]
-            row = [str(patient_id)[-5:], wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior'],meal['meal'].supplierID]
+            row = [str(patient_id)[-5:], wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplierID]
             existing_order.append(row)
         with open('masterOrder/masterorder.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(existing_order)
 
-    def temp(self):
-        # To see how many meals repeat
-        wk_num = self.week
-        mealinfo = get_mealinfo_by_patient(self.patients[0]._id)
-        all_meals = [meal for meal in get_all_meals()]
-
-        if mealinfo is None:
-            return None
-        curr_list = []
-        meal_list = []
-        if 'week_'+str(wk_num) in mealinfo.keys():
-            prev_week = mealinfo['week_'+str(wk_num)]
-            prev_list = prev_week['meal_list']
-            for key in prev_list.keys():
-                curr_list+= prev_list[key]
-
-        if 'week_'+str(wk_num - 1) in mealinfo.keys():
-            prev_week = mealinfo['week_'+str(wk_num - 1)]
-            prev_list = prev_week['meal_list']
-            for key in prev_list.keys():
-                meal_list += prev_list[key]
-        last_week = len([x for x in meal_list if x in curr_list])
-        print('Repeat from last week: {}'.format(last_week))
-
-        if 'week_'+str(wk_num - 2) in mealinfo.keys():
-            prev2_week = mealinfo['week_'+str(wk_num - 2)]
-            prev2_list = prev2_week['meal_list']
-            for key in prev2_list.keys():
-                meal_list += prev2_list[key]
-        # no_repeat = [meal for meal in all_meals if meal['_id'] in meal_list]
-        print('Repeat from 2 weeks ago: {}'.format(len([x for x in meal_list if x in curr_list]) - last_week))
-        return [x for x in meal_list if x in curr_list]
-
     def scoreboard_to_csv(self,score_board,patient_id):
         sorted_score = sorted(score_board.keys(),reverse = True)
-        csv_list = [[patient_id],['score','meal','minimize','prior']]
+        csv_list = [[patient_id],['score','meal','minimize','prior','avoid','supplierID']]
         for score in sorted_score:
             for meal in score_board[score]:
                 temp_list = [score]
-                temp_list += [meal['meal'],meal['minimize'],meal['prior']]
+                temp_list += [meal['meal'],meal['minimize'],meal['prior'], meal['avoid'],meal['meal'].supplierID]
                 csv_list.append(temp_list)
         with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.week)+'.csv','wb') as csvfile:
             writer = csv.writer(csvfile)
@@ -417,8 +393,8 @@ if __name__ == "__main__":
     op.optimize()
     op = Optimizer(week = 2)
     op.optimize()
-    op = Optimizer(week = 3)
-    op.optimize()
+    # op = Optimizer(week = 3)
+    # op.optimize()
     # ab = op.temp()
     # pdb.set_trace()
 

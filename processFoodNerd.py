@@ -69,6 +69,7 @@ def processNutrition(filename):
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
                     # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
                     ingredient = unicodetoascii(reader_list[i][1]).lower()
+                    pdb.set_trace()
                     if ingredient in convert_dic.keys():
                         ingredient = convert_dic[ingredient]
                     else:
@@ -83,9 +84,9 @@ def processNutrition(filename):
     return meals, full_list + columns
 
 if __name__ == "__main__":
-    from matchNames import change_name
+    # from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
     # from utils import create_histogram
     # create_histogram(meals,'tomato')
-    add_meals(meals)
+    # add_meals(meals)
     # pdb.set_trace()

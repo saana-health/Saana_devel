@@ -344,7 +344,7 @@ def histogram(combined):
     # create_histogram(combined,['potassium'])
     # create_histogram(combined,['insoluble fiber'])
     # create_histogram(combined,['totsolfib'])
-    create_histogram(combined,['sodium'])
+    create_histogram(combined,['tofu','tempeh'])
     # create_histogram(combined,['onion','tomato'])
     # create_histogram(combined,['garlic'])
     # create_histogram(combined,['tempeh'])
