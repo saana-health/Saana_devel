@@ -206,7 +206,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
     :return: [Meal()] - newly mapped meals including previously mapped and newly mapped
     '''
     manual_map = {}
-    left_over = not_found[:]
+    left_over = []
     if filename:
         manual_map = pickle.load(open(filename,'r'))
     else:
@@ -237,7 +237,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
                                     manual_map[menu] = [each]
                             else:
                                 continue
-        pickle.dump(manual_map,open('euphebe_manualMap.p','wb'))
+        pickle.dump(manual_map,open('euphebe_manualMap'+filename[-6:-4]+'.p','wb'))
 
     for each in manual_map.keys():
         if each not in menus:
@@ -246,11 +246,14 @@ def manual_input(menus, not_found, mapped, filename = ''):
             mapped[each] += manual_map[each]
         except:
             mapped[each] = manual_map[each]
-        if each in [x.name for x in left_over]:
-            [left_over.remove(item) for item in manual_map[each]]
+
+    for menu in menus:
+        if menu not in mapped.keys():
+            left_over.append(menu)
         # print('{} now part of {}'.format(manual_map, each))
     if left_over:
         print("{} still not found".format(left_over))
+    pdb.set_trace()
     return mapped
 
 def combine_nutrition(mapped):
@@ -310,13 +313,14 @@ def combine_nutrition(mapped):
 
     return new_list
 
-def process(path):
-    menus = processMenu(path+'menu0226.csv')
+def process(path,menuname):
+    menus = processMenu(path+menuname)
     items, columns = processNutrition(path+'test2.csv')
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap0226.p')
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.p')
     # newly_mapped = manual_input(menus,not_found,mapped)
     combined = combine_nutrition(newly_mapped)
+    pdb.set_trace()
     return combined
 
     # from utils import create_histogram_insoluble
@@ -351,8 +355,8 @@ def histogram(combined):
 
 
 if __name__ == "__main__":
-    combined = process(PATH)
-    histogram(combined)
+    combined = process(PATH, 'menu0328.csv')
+    # histogram(combined)
 
     # drop('meals')
     # add_meals(combined)
