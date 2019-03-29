@@ -50,7 +50,7 @@ def processFoodMatrixCSV(filename):
 
 if __name__ == "__main__":
     from maggie import add_maggie
-    master_dict, columns = processFoodMatrixCSV('foodtag313.csv')
+    master_dict, columns = processFoodMatrixCSV('foodtag0328.csv')
     # generate_keyword(columns)
     drop('tags')
     add_tags(master_dict)

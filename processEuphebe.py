@@ -253,7 +253,6 @@ def manual_input(menus, not_found, mapped, filename = ''):
         # print('{} now part of {}'.format(manual_map, each))
     if left_over:
         print("{} still not found".format(left_over))
-    pdb.set_trace()
     return mapped
 
 def combine_nutrition(mapped):
@@ -313,14 +312,16 @@ def combine_nutrition(mapped):
 
     return new_list
 
-def process(path,menuname):
-    menus = processMenu(path+menuname)
-    items, columns = processNutrition(path+'test2.csv')
+def process(path,menu_filename, nutrition_filename):
+    menus = processMenu(path+menu_filename)
+    items, columns = processNutrition(path+nutrition_filename)
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap.p')
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap0328.p')
+    # del newl_mapped[]
     # newly_mapped = manual_input(menus,not_found,mapped)
-    combined = combine_nutrition(newly_mapped)
     pdb.set_trace()
+    combined = combine_nutrition(newly_mapped)
+
     return combined
 
     # from utils import create_histogram_insoluble
@@ -355,8 +356,8 @@ def histogram(combined):
 
 
 if __name__ == "__main__":
-    combined = process(PATH, 'menu0328.csv')
+    combined = process(PATH, 'menu0328.csv', 'total2.csv')
     # histogram(combined)
 
-    # drop('meals')
-    # add_meals(combined)
+    drop('meals')
+    add_meals(combined)

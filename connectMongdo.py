@@ -118,7 +118,12 @@ def get_any(collection, attr, val):
     parser = getattr(db,collection)
     if isinstance(val,(list,)):
         return list(parser.find({attr:{"$in":val}}))
-    return parser.find_one({attr:val})
+    # return list(parser.find({attr:val}))
+    x = list(parser.find({attr:val}))
+    if len(x) > 0:
+        return x[0]
+    else:
+        return None
 
 def drop(collection):
     parser = getattr(db,collection)

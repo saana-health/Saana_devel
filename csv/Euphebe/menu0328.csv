@@ -1,32 +1,28 @@
-Meal: Meal Name,Inventory,Type
-Split Pea Soup,114,Lunch
-Perfect Pot Pie,111,Lunch
-Chana Masala with Indian Spiced Rice,96,Dinner
-Puy Lentil & Cabbage Burger with Roasted Veggies,88,Dinner
-Chef's Harvest Lunch with Tricolor Quinoa,81,Lunch
-Cuban Black Bean Soup,80,Lunch
-Creamy Celeriac Soup with Rosemary Oat Crumble,79,Lunch
-Breakfast Bowl with Smoky Tomato Sauce,69,Lunch
-Magic Mushroom Ragout with Herbed Quinoa,67,Dinner
-Veggie Heavy Spanakopita with Chickpea Toast and Olive and Almond Crumble,62,Dinner
-Tex Mex Bake,51,Lunch
-Roasted Chickpea & Tahini Soup,50,Lunch
-Zucchini Farro Soup with Seed Crumble,49,Lunch
-Good For You Aloo Gobi with Cardamom Rice,49,Dinner
-Lunchtime Rita with Green Salsa,47,Lunch
-Herby Farro Salad,46,Lunch
-Creamy Tomato Soup with Herbed Garlic Croutons,45,Lunch
-Creamy Veggie Pesto with Red Lentil Penne,44,Dinner
-Sweet Potato & Black Bean Burger with Roasted Veggies,42,Dinner
-Brussels Sprouts Gratin with Toasted Pecans,38,Dinner
-"White Lentil, Tomato & Fennel Faux-sotto",35,Dinner
-Eggplant Caponata with Herbed Quinoa,34,Dinner
-Lunch Thyme Grain Bowl,33,Lunch
-Chickpea & Maitake Tacos with Corn Tortillas,21,Dinner
-Tomato & Cannellini Bean Soup,20,Lunch
-Eggplant Sugo with Green Lentil Penne,15,Dinner
-Cremini & Shiitake Mushroom Soup with Rosemary Oat Crumble,9,Lunch
-Hippie Brunch Burrito with Green Salsa,9,Lunch
-Veggie Brunch Muffin with Roasted Red Pepper Sauce,7,Lunch
-Thai Coconut Red Curry with Lemongrass Rice,6,Dinner
-Pasta Al Forno,1,Dinner
+Meal: Meal Name,New inventory 03/28,Type
+Split Pea Soup,20,Lunch
+Perfect Pot Pie,21,Lunch
+Chana Masala with Indian Spiced Rice,22,Dinner
+Puy Lentil & Cabbage Burger with Roasted Veggies,23,Dinner
+Chef's Harvest Lunch with Tricolor Quinoa,24,Lunch
+Cuban Black Bean Soup,25,Lunch
+Creamy Celeriac Soup with Rosemary Oat Crumble,26,Lunch
+Breakfast Bowl with Smoky Tomato Sauce,27,Lunch
+Magic Mushroom Ragout with Herbed Quinoa,28,Dinner
+Veggie Heavy Spanakopita with Chickpea Toast and Olive and Almond Crumble,29,Dinner
+Tex Mex Bake,30,Lunch
+Roasted Chickpea & Tahini Soup,31,Lunch
+Good For You Aloo Gobi with Cardamom Rice,32,Dinner
+Zucchini Farro Soup with Seed Crumble,33,Lunch
+Lunchtime Rita with Green Salsa,34,Lunch
+Herby Farro Salad,35,Lunch
+Creamy Tomato Soup with Herbed Garlic Croutons,36,Lunch
+Creamy Veggie Pesto with Red Lentil Penne,37,Dinner
+Sweet Potato & Black Bean Burger with Roasted Veggies,38,Dinner
+Brussels Sprouts Gratin with Toasted Pecans,39,Dinner
+"White Lentil, Tomato & Fennel Faux-sotto",40,Dinner
+Eggplant Caponata with Herbed Quinoa,41,Dinner
+Lunch Thyme Grain Bowl,42,Lunch
+Tomato & Cannellini Bean Soup,43,Lunch
+Cremini & Shiitake Mushroom Soup with Rosemary Oat Crumble,44,Lunch
+Hippie Brunch Burrito with Green Salsa,45,Lunch
+Veggie Brunch Muffin with Roasted Red Pepper Sauce,46,Lunch
