@@ -8,6 +8,8 @@ from difflib import SequenceMatcher
 import re
 from connectMongdo import add_meals, drop
 import random
+import time
+DATE = time.ctime()[4:10].replace(' ','_')
 
 '''
 Processing flow
@@ -237,7 +239,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
                                     manual_map[menu] = [each]
                             else:
                                 continue
-        pickle.dump(manual_map,open('euphebe_manualMap'+filename[-6:-4]+'.p','wb'))
+        pickle.dump(manual_map,open('euphebe_manualMap'+time.ctime().replace(' ','_')+'.p','wb'))
 
     for each in manual_map.keys():
         if each not in menus:
@@ -316,10 +318,7 @@ def process(path,menu_filename, nutrition_filename):
     menus = processMenu(path+menu_filename)
     items, columns = processNutrition(path+nutrition_filename)
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap0328.p')
-    # del newl_mapped[]
-    # newly_mapped = manual_input(menus,not_found,mapped)
-    pdb.set_trace()
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manual_map_0330.p')
     combined = combine_nutrition(newly_mapped)
 
     return combined

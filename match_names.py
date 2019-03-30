@@ -4,14 +4,16 @@ import os
 import pdb
 import pprint
 import pickle
+import time
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
+DATE = time.ctime()[4:10].replace(' ','_')
 
 # TODO: These functions can be combined into one really
 
 def match_euphebe():
     # get full lists from food tag matrix and euphebe of all nutritions and ingredients
-    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag313.csv')
-    items, euphebe_all = processEuphebe.processNutrition(PATH+'test2.csv')
+    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
+    items, euphebe_all = processEuphebe.processNutrition(PATH+'total2.csv')
 
     # combined = processEuphebe.process()
 
@@ -33,8 +35,8 @@ def match_euphebe():
                 print('{}  |  {}'.format(tag_keyword, euphebe_name))
                 if euphebe_name in euphebe_tag_no_match:
                     euphebe_tag_no_match.remove(euphebe_name)
-                if tag_keyword in tag_no_match:
-                    tag_no_match.remove(tag_keyword)
+                # if tag_keyword in tag_no_match:
+                #     tag_no_match.remove(tag_keyword)
 
     #for Euphebe - keys are for Euphebe and values for food tags matrix
     keyword_dictionary = {'nut, nut butter':'nuts','brussels sprouts': 'brussel sprouts','vitamin k': 'vit k', 'insoluble fiber': 'totinfib','total fiber': 'totfib','turmeric (curcumin)': 'turmeric',\
@@ -65,7 +67,7 @@ def match_euphebe():
                     if tag_keyword in tag_no_match:
                         tag_no_match.remove(tag_keyword)
 
-    # pickle.dump(convert_dic,open('euphebe_change.p','wb'))
+    pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
 
 def match_foodnerd():
     from processFoodNerd import processNutrition
@@ -99,4 +101,5 @@ def match_foodnerd():
 
 
 if __name__ == "__main__":
-    match_foodnerd()
+    # match_foodnerd()
+    match_euphebe()

@@ -9,6 +9,8 @@ from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class
 import pprint
+import time
+DATE = time.ctime()[4:10].replace(' ','_')
 
 class Optimizer:
 
@@ -76,13 +78,13 @@ class Optimizer:
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
 
             score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
-            self.scoreboard_to_csv(score_board,patient._id)
 
             ####### Start choosing meals ########
             assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == NUM_MEAL
             slots = self.choose_meal(score_board, repeat_one_week)
+            pdb.set_trace()
 
-
+            self.scoreboard_to_csv(score_board,patient._id)
             if NUM_MEAL > 10:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
@@ -91,7 +93,6 @@ class Optimizer:
                 self.to_mongo(slots[NUM_MEAL:], patient._id, self.week +1)
                 self.write_csv(slots[:NUM_MEAL], patient._id, self.week)
                 self.write_csv(slots[NUM_MEAL:], patient._id, self.week +1)
-
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
