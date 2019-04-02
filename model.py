@@ -46,7 +46,7 @@ class MealList(list):
                 return meal
 
 class Patient:
-    def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = ''):
+    def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = '', next_order = '', plan = 7):
         self.name = name
         self.weight = weight
         self.treatment_drugs = treatment_drugs
@@ -55,6 +55,8 @@ class Patient:
         self.disease = disease
         self.symptoms = symptoms
         self._id = _id
+        self.next_order = next_order
+        self.plan = plan
 
 
 class Tag:

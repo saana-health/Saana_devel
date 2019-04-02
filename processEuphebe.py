@@ -55,7 +55,7 @@ def processNutrition(filename):
     :param filename (str): to open:
     :return [Meal()]
     '''
-    convert_dic = pickle.load(open('euphebe_change0313.p','r'))#b'))
+    convert_dic = pickle.load(open('euphebe_change0313.p','rb'))
     print(' --- processNutrition() ----')
     columns = []
     items = []
@@ -128,7 +128,7 @@ def processNutrition(filename):
                 new_item.nutrition = nutritions
                 items.append(new_item)
 
-    return compress(items), nutritions.keys()+list(set(total_ingredients))
+    return compress(items), list(nutritions.keys())+list(set(total_ingredients))
 
 def compress(items):
     temp = []
@@ -210,7 +210,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
     manual_map = {}
     left_over = []
     if filename:
-        manual_map = pickle.load(open(filename,'r'))
+        manual_map = pickle.load(open(filename,'rb'))
     else:
         for each in not_found:
             for menu in menus:

@@ -20,7 +20,7 @@ def processNutrition(filename):
     :return:
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
-    convert_dic = pickle.load(open('foodnerd_change.p' , 'r'))
+    convert_dic = pickle.load(open('foodnerd_change.p' , 'rb'))
     columns = []
     units = []
     meals = []
@@ -39,13 +39,19 @@ def processNutrition(filename):
         prev_type = ''
         # loop through each row starting 3rd row
         for i in range(4,len(reader_list)):
+            pdb.set_trace()
             first_word = reader_list[i][0].split(' ')[0]
             if first_word  in ['Breakfast','Lunch','Dinner']:
                 type = first_word.lower()
             elif first_word != '':
-                name = unicodetoascii(reader_list[i][0]).lower()
+                name = reader_list[i][0].lower()
+                ingredient = reader_list[i][1].lower()#unicodetoascii(reader_list[i][1]).lower()
+
+                ### PYTHON 2
+                #name = unicodetoascii(reader_list[i][0]).lower()
                 # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                ingredient = unicodetoascii(reader_list[i][1]).lower()
+                ###
+
                 if ingredient in convert_dic.keys():
                     ingredient = convert_dic[ingredient]
                 else:
@@ -67,9 +73,13 @@ def processNutrition(filename):
                     ingredients = {}
                     nutritions = {}
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
+                    ### PYTHON 2
                     # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                    ingredient = unicodetoascii(reader_list[i][1]).lower()
-                    pdb.set_trace()
+                    #unicodetoascii(reader_list[i][1]).lower()
+                    ###
+
+                    ingredient = reader_list[i][1].lower()
+                    # ingredient = change_name(lookup_dict, reader_list[i][1]))
                     if ingredient in convert_dic.keys():
                         ingredient = convert_dic[ingredient]
                     else:

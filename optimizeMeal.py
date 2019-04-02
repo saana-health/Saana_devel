@@ -4,11 +4,12 @@ import pdb
 import itertools
 from model import Meal,MealHistory, MealList, Patient
 import csv
-from connectMongdo import add_meal_history,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any
+from connectMongdo import add_meal_history,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order
 from random import shuffle
 import os
-from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class
+from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
 import pprint
+from datetime import date, timedelta
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
 
@@ -61,9 +62,14 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
+            assert date.today(),weekday() == 1
+            today = TODAY
+            # today = date.today()
+            num_meal = patient.plan
+            if patient.next_order != today:
+                continue
 
-            # number of meals per week
-            # TODO: this should be retrieved from the db
+            print('Processing   {}  !'.format(patient.name))
             score_board = {}
 
             # get all tags
@@ -80,19 +86,20 @@ class Optimizer:
             score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
 
             ####### Start choosing meals ########
-            assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == NUM_MEAL
-            slots = self.choose_meal(score_board, repeat_one_week)
-            pdb.set_trace()
+            # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
+            slots = self.choose_meal(score_board, repeat_one_week,num_meal)
 
             self.scoreboard_to_csv(score_board,patient._id)
-            if NUM_MEAL > 10:
+            if num_meal> 8:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
-            elif NUM_MEAL <= 10:
-                self.to_mongo(slots[:NUM_MEAL], patient._id, self.week)
-                self.to_mongo(slots[NUM_MEAL:], patient._id, self.week +1)
-                self.write_csv(slots[:NUM_MEAL], patient._id, self.week)
-                self.write_csv(slots[NUM_MEAL:], patient._id, self.week +1)
+                update_next_order(patient._id,find_tuesday(today,2))
+            else:
+                self.to_mongo(slots[:num_meal], patient._id, self.week)
+                self.to_mongo(slots[num_meal:], patient._id, self.week +1)
+                self.write_csv(slots[:num_meal], patient._id, self.week)
+                self.write_csv(slots[num_meal:], patient._id, self.week +1)
+                update_next_order(patient._id,find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
@@ -112,7 +119,7 @@ class Optimizer:
             avoid_list = []
             # should_avoid = False
 
-            for each in meal.nutrition.keys() + meal.ingredients.keys():
+            for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
                 if each in avoids:
                     avoid_list.append(each)
                     score += DEDUCT_AVOID
@@ -172,14 +179,14 @@ class Optimizer:
 
         return score_board, repeat_one_week
 
-    def choose_meal(self,score_board,repeat_one_week):
+    def choose_meal(self,score_board,repeat_one_week, num_meal):
         # list for saving meals
         slots = []
         meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
         num_repeat = 0
         restart = False
 
-        while len(slots) < NUM_MEAL:
+        while len(slots) < num_meal:
             sorted_scores = sorted(score_board.keys(), reverse=True)
             for score in sorted_scores:
                 if restart:
@@ -214,7 +221,7 @@ class Optimizer:
                                     if each_meal['meal'] == repeat:
                                         score_board[score_].remove(each_meal)
                                         deduct_pnt = REPEAT_CUM*num_repeat
-                                        if score_ - deduct_pnt in score_board.keys():
+                                        if score_ + deduct_pnt in score_board.keys():
                                             score_board[score_ + deduct_pnt].append(each_meal)
                                         else:
                                             score_board[score_ + deduct_pnt] = [each_meal]
@@ -224,7 +231,7 @@ class Optimizer:
                     break
 
         # slots filled up
-        assert len(slots) == NUM_MEAL
+        assert len(slots) == num_meal
 
         # shuffle so that they don't look the same every week
         shuffle(slots)
@@ -310,9 +317,6 @@ class Optimizer:
         return True
 
 if __name__ == "__main__":
-    # TODO: below should auto link to supplier from db
-    NUM_MEAL = 12
-
     # # Euphebe
     # MAX_MEAL_PER_SUPPLIER_1 = 12
     # MIN_MEAL_PER_SUPPLIER_1 = 12
@@ -346,12 +350,23 @@ if __name__ == "__main__":
         os.remove('masterOrder/masterorder.csv')
     except:
         pass
-    op = Optimizer(week = 1)
-    op.optimize()
+
+    # print('----WK1----')
+    # TODAY = find_tuesday(date.today(),1)
+    # op = Optimizer(week = 1)
+    # op.optimize()
+    #
+    # print('----WK2----')
+    # TODAY = find_tuesday(date.today(),2)
     # op = Optimizer(week = 2)
     # op.optimize()
+    #
+    # print('----WK3----')
+    # TODAY = find_tuesday(date.today(),3)
     # op = Optimizer(week = 3)
     # op.optimize()
-    # ab = op.temp()
-    # pdb.set_trace()
 
+    print('----WK4----')
+    TODAY = find_tuesday(date.today(),4)
+    op = Optimizer(week = 4)
+    op.optimize()

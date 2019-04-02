@@ -1,38 +1,39 @@
 #test
-from mixpanel_api import Mixpanel
+# from mixpanel_api import Mixpanel
 import csv
 import pdb
 from model import Meal, Tag, Patient
+from datetime import date, timedelta
 
-def export_mixpanel_to_csv(filename):
-    TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
-    SECRET = '1261347a3eb35286683e32a2731e4f4d'
-
-    mp = Mixpanel(SECRET, token = TOKEN)
-
-    mp.export_people(filename,
-                    {},
-                    format='csv')
-
-def process_mixpanel_csv(filename):
-    with open(filename) as csvfile:
-        reader_list = list(csv.reader(csvfile))
-        columns = [x.replace('$','') for x in reader_list[0]]
-
-        matrix = [[0 for x in range(len(reader_list[0]))] for y in range(len(reader_list))]
-
-        for i in range(len(reader_list)):
-            for j in range(len(reader_list[i])):
-                content = reader_list[i][j]
-                content = content.replace("'",'')
-                if content and content[0] == '[':
-                    if content[1] == 'u':
-                        content = content.replace('$','').replace('[u','').replace('[','').replace(']','')
-                matrix[i][j] = content
-
-    with open ('mixpanelData.csv','wb',) as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(matrix)
+# def export_mixpanel_to_csv(filename):
+#     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
+#     SECRET = '1261347a3eb35286683e32a2731e4f4d'
+#
+#     mp = Mixpanel(SECRET, token = TOKEN)
+#
+#     mp.export_people(filename,
+#                     {},
+#                     format='csv')
+#
+# def process_mixpanel_csv(filename):
+#     with open(filename) as csvfile:
+#         reader_list = list(csv.reader(csvfile))
+#         columns = [x.replace('$','') for x in reader_list[0]]
+#
+#         matrix = [[0 for x in range(len(reader_list[0]))] for y in range(len(reader_list))]
+#
+#         for i in range(len(reader_list)):
+#             for j in range(len(reader_list[i])):
+#                 content = reader_list[i][j]
+#                 content = content.replace("'",'')
+#                 if content and content[0] == '[':
+#                     if content[1] == 'u':
+#                         content = content.replace('$','').replace('[u','').replace('[','').replace(']','')
+#                 matrix[i][j] = content
+#
+#     with open ('mixpanelData.csv','wb',) as csvfile:
+#         writer = csv.writer(csvfile)
+#         writer.writerows(matrix)
 
 def unicodetoascii(text):
     print(text)
@@ -213,7 +214,8 @@ def tag_dict_to_class(tag):
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
 
 def patient_dict_to_class(patient):
-    return Patient(name = patient['name'],_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'])
+    parse_date = [int(x) for x in patient['next_order'].split('-')]
+    return Patient(name = patient['name'],_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'], next_order = date(parse_date[0],parse_date[1],parse_date[2]),plan = patient['plan'])
 
 def auto_add_meal():
     import os
@@ -234,26 +236,37 @@ def add_dummy_patients():
     treatment_drugs =[]
     # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
     #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
-    dummy = Patient(name = 'test1', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    dummy = Patient(name = 'Stephanie', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms],next_order = date.today(), plan = 7)
     add_patients(dummy)
 
     disease = get_any('tags','name','skin')['_id']
     symptoms = get_any('tags','name',['fatigue','inflammation'])
     comorbidities = get_any('tags','name',[''])
-    dummy = Patient(name = 'test2', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    dummy = Patient(name = 'Sunny', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today() + timedelta(weeks=1), plan = 7)
     add_patients(dummy)
 
     disease = get_any('tags','name','pancreas')['_id']
     symptoms = get_any('tags','name',['cough','diarrhea','difficulty chewing','dry mouth','loss of or change of taste','weight loss'])
     comorbidities = get_any('tags','name',['diabetes'])
-    dummy = Patient(name = 'test3', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    dummy = Patient(name = 'Min Joon', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today(), plan = 14)
     add_patients(dummy)
 
     disease = get_any('tags','name','leukemia')['_id']
     symptoms = get_any('tags','name',['constipation','loss of appetite','dry mouth'])
     comorbidities = get_any('tags','name',['hypertension'])
-    dummy = Patient(name = 'test4', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms])
+    dummy = Patient(name = 'Jacki', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today(), plan = 14)
     add_patients(dummy)
+
+def find_tuesday(curr, wk = 1):
+    weekday = curr.weekday()
+    while True:
+        if weekday == 1:
+            if wk == 1:
+                break
+            wk -= 1
+        curr = curr + timedelta(days = 1)
+        weekday = curr.weekday()
+    return curr
 
 if __name__ == "__main__":
     # auto_add_meal()

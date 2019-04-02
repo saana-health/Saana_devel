@@ -11,7 +11,7 @@ def add_patients(patients):
     if not isinstance(patients,(list,)):
         patients = [patients]
     collection_patients = db.patients
-    pa = [{'name':x.name, 'treatment_drugs': x.treatment_drugs, 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':x.comorbidities} for x in patients]
+    pa = [{'name':x.name, 'treatment_drugs': x.treatment_drugs, 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':x.comorbidities, 'next_order': str(x.next_order), 'plan': x.plan} for x in patients]
     result = collection_patients.insert_many(pa)
 
 def add_tags(tag_dict):
@@ -134,6 +134,10 @@ def update_quantity():
     parser = db.meals.find()
     for each in parser:
         db.meals.update({'_id': each['_id']},{'$set':{'quantity':random.randint(0,10)}})
+
+def update_next_order(patient_id, next_order):
+    parser = db.patients.find()
+    return db.patients.update({'_id':patient_id},{'$set':{'next_order':str(next_order)}})
 
 if __name__ == "__main__":
     update_quantity()
