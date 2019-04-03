@@ -95,6 +95,8 @@ class Optimizer:
 
             assert len(slots) == 15
 
+            slots = self.reorder_slots(slots)
+
             if num_meal> 8:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
@@ -288,6 +290,17 @@ class Optimizer:
             prev2_list = list(set(itertools.chain(*[x for x in prev2_week['meal_list'].values()])))
             week2 = [self.meals[k] for k in prev2_list]
         return week1,week2
+
+    def reorder_slots(self,slots):
+        slots = sorted(slots, key = lambda meal: float(meal['meal'].nutrition['cals'].split(' ')[0]),reverse=True)
+        high_cal = slots[:7]
+        low_cal = slots[8:]
+        new_slots = []
+        for high,low in zip(high_cal,low_cal[::-1]):
+            new_slots.append(high)
+            new_slots.append(low)
+        new_slots.append(slots[7])
+        return new_slots
 
     def to_mongo(self, mealinfo, patient_id, wk):
         new_history = MealHistory(patient_id, wk)
