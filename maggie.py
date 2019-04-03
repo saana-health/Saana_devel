@@ -10,11 +10,13 @@ import test
 from datetime import date
 
 def add_maggie():
+    from utils import find_tuesday
+    TODAY = find_tuesday(date.today(),1)
     disease = get_any('tags','name','breast')['_id']
     symptoms = get_any('tags','name',['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','mouth & throat sore','nausea','cough','stomach acidity','sleeping problems'])
     treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
                                               'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
-    maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order= str(date.today()), plan = 7)
+    maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order= TODAY, plan = 7)
     drop('patients')
     add_patients(maggie)
 

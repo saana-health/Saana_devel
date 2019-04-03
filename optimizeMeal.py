@@ -312,9 +312,9 @@ class Optimizer:
         else:
             for i in range(len(mealinfo)):
                 if not i % 2:
-                    new_history.meal_list['day_'+str(i/2 + 1)] = [mealinfo[i]['meal']._id]
+                    new_history.meal_list['day_'+str(int(i/2) + 1)] = [mealinfo[i]['meal']._id]
                 else:
-                    new_history.meal_list['day_'+str(i/2 + 1)] += [mealinfo[i]['meal']._id]
+                    new_history.meal_list['day_'+str(int(i/2) + 1)] += [mealinfo[i]['meal']._id]
             # for i in range(len(mealinfo)2):
             #     new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
         his = add_meal_history(new_history, patient_id)
@@ -381,22 +381,24 @@ if __name__ == "__main__":
     except:
         pass
 
+    TEST = False
+
     print('----WK1----')
     TODAY = find_tuesday(date.today(),1)
     op = Optimizer(week = 1)
-    op.optimize()
-    #
+    op.optimize(TEST)
+
     # print('----WK2----')
     # TODAY = find_tuesday(date.today(),2)
     # op = Optimizer(week = 2)
-    # op.optimize()
+    # op.optimize(TEST)
     #
     # print('----WK3----')
     # TODAY = find_tuesday(date.today(),3)
     # op = Optimizer(week = 3)
-    # op.optimize()
+    # op.optimize(TEST)
     #
     # print('----WK4----')
     # TODAY = find_tuesday(date.today(),4)
     # op = Optimizer(week = 4)
-    # op.optimize()
+    # op.optimize(TEST)

@@ -236,25 +236,28 @@ def add_dummy_patients():
     treatment_drugs =[]
     # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
     #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)'])
-    dummy = Patient(name = 'Stephanie', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms],next_order = date.today(), plan = 7)
+    ONEWEEK = find_tuesday(date.today(),1)
+    TWOWEEK = find_tuesday(date.today(),2)
+
+    dummy = Patient(name = 'Stephanie', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order=ONEWEEK, plan = 7)
     add_patients(dummy)
 
     disease = get_any('tags','name','skin')['_id']
     symptoms = get_any('tags','name',['fatigue','inflammation'])
     comorbidities = get_any('tags','name',[''])
-    dummy = Patient(name = 'Sunny', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today() + timedelta(weeks=1), plan = 7)
+    dummy = Patient(name = 'Sunny', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = TWOWEEK, plan = 7)
     add_patients(dummy)
 
     disease = get_any('tags','name','pancreas')['_id']
     symptoms = get_any('tags','name',['cough','diarrhea','difficulty chewing','dry mouth','loss of or change of taste','weight loss'])
     comorbidities = get_any('tags','name',['diabetes'])
-    dummy = Patient(name = 'Min Joon', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today(), plan = 14)
+    dummy = Patient(name = 'Min Joon', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = ONEWEEK, plan = 14)
     add_patients(dummy)
 
     disease = get_any('tags','name','leukemia')['_id']
     symptoms = get_any('tags','name',['constipation','loss of appetite','dry mouth'])
     comorbidities = get_any('tags','name',['hypertension'])
-    dummy = Patient(name = 'Jacki', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = date.today(), plan = 14)
+    dummy = Patient(name = 'Jacki', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = TWOWEEK, plan = 14)
     add_patients(dummy)
 
 def find_tuesday(curr, wk = 1):
