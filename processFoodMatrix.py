@@ -32,7 +32,9 @@ def processFoodMatrixCSV(filename):
             if row[0]:
                 what_type = row[0].strip().lower()
             name = row[1].replace('\xc2',' ').replace('\xa0',' ').strip().lower()
-            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': [], 'minimize':{}}
+            if name == '':
+                continue
+            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': {}, 'minimize':{}}
             #loop through each column
             for j in range(2,len(row)):
                 #avoid
@@ -40,13 +42,25 @@ def processFoodMatrixCSV(filename):
                     master_dict[name]['avoid'].append(columns[j].strip().lower())
                 #prioritize
                 elif row[j] == 'P':
-                    master_dict[name]['prior'].append(columns[j].strip().lower())
+                    # master_dict[name]['prior'].append(columns[j].strip().lower())
+                    master_dict[name]['prior'][columns[j].strip().lower()] = 0
                 elif '|' in row[j]:
                     split = row[j].split('|')
                     min1 = split[0]
                     min2 = split[1]
                     master_dict[name]['minimize'][columns[j]] = {"min1":min1, "min2":min2}
+                elif is_number(row[j]):
+                    master_dict[name]['prior'][columns[j].strip().lower()] = float(row[j])
+
+
     return master_dict, [x for x in list(set(columns)) if x != '']
+
+def is_number(num):
+    try:
+        float(num)
+        return True
+    except:
+        return False
 
 if __name__ == "__main__":
     from maggie import add_maggie
@@ -55,5 +69,6 @@ if __name__ == "__main__":
     drop('tags')
     add_tags(master_dict)
     add_maggie()
+    pdb.set_trace()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

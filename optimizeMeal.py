@@ -78,9 +78,12 @@ class Optimizer:
 
             # prepare tags
             minimizes = {}
+            priors = {}
             for tag in tags:
                 minimizes.update(tag['minimize'])
-            priors = list(set(itertools.chain(*[tag_dict_to_class(tag).prior for tag in tags])))
+            for tag in tags:
+                priors.update(tag['prior'])
+
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
 
             score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
@@ -102,7 +105,6 @@ class Optimizer:
                 self.write_csv(slots[:num_meal], patient._id, self.week)
                 self.write_csv(slots[num_meal:], patient._id, self.week +1)
                 update_next_order(patient._id,find_tuesday(today,3))
-            pdb.set_trace()
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
@@ -137,7 +139,6 @@ class Optimizer:
             for min_item in minimizes.keys():
                 for ing in full_meal_info.keys():
                     if min_item in ing:
-                        minimize_list.append(min_item)
 
                         # If a unit is included in the value, get rid of it
                         if not isinstance(full_meal_info[ing],(float,)):
@@ -148,25 +149,31 @@ class Optimizer:
                         # if contain val above min 2
                         if contain_val > float(minimizes[min_item]['min2']):
                             score += DEDUCT_GR_MIN2
-                            continue
                         # if min1 < val < min2
                         elif contain_val > float(minimizes[min_item]['min1']):
                             score += DEDUCT_LT_MIN2
                         #if val < min1
                         elif contain_val < float(minimizes[min_item]['min1']):
-                            score += DEDUCT_LT_MIN1
+                            continue
+                            # score += DEDUCT_LT_MIN1
                         # This should never happen
                         else:
                             print('ERR')
                             raise ValueError
+                        minimize_list.append(min_item)
             ## PRIORITIZE
-            prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
-            for prior in priors:
-                for ingredient in meal.ingredients:
-                    if prior in ingredient and prior not in minimize_list + avoid_list:
+            prior_list = []
+            # prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
+            for prior in priors.keys():
+                for ingredient in meal.ingredients.keys():
+                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] < meal.ingredients[ingredient]:
                         prior_list.append(prior)
+                for nutrition in meal.nutrition.keys():
+                    if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] < float(meal.nutrition[nutrition].split(' ')[0]):
+                        prior_list.append(prior)
+
             prior_list = list(set(prior_list))
-            # prior_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list]))
+
             pos = len(prior_list)
             score += pos*ADD_PRIOR
 
@@ -184,7 +191,6 @@ class Optimizer:
                 score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list}]
             else:
                 score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list})
-
         return score_board, repeat_one_week
 
     def choose_meal(self,score_board,repeat_one_week, num_meal):
