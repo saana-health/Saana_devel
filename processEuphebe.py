@@ -55,12 +55,12 @@ def processNutrition(filename, full_columns= None):
     :param filename (str): to open:
     :return [Meal()]
     '''
+    from match_names import match_euphebe
     if full_columns is not None:
         convert_dic = match_euphebe(full_columns)
     else:
         convert_dic = {}
     print(' --- processNutrition() ----')
-
     columns = []
     items = []
 
@@ -82,7 +82,9 @@ def processNutrition(filename, full_columns= None):
         for i in range(len(columns)):
             name = columns[i].replace(' ('+units[i]+')','')
             if name in convert_dic.keys():
+                prev = name
                 name = convert_dic[name]
+                print('{} --> {}'.format(prev,name))
             columns[i] = name
 
         # loop through each row starting 3rd row to process ingredients
@@ -109,7 +111,9 @@ def processNutrition(filename, full_columns= None):
                 #this row is for ingredient
                 else:
                     if name in convert_dic.keys():
+                        prev = name
                         name = convert_dic[name]
+                        print('{} --> {}'.format(prev,name))
                     # ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
                     if name in ingredients.keys():
                         ingredients[name] += float(ingredients[name]) + float((row[3]))
@@ -122,8 +126,8 @@ def processNutrition(filename, full_columns= None):
                 is_name = True
                 new_item.ingredients = ingredients
                 new_item.nutrition = nutritions
-                if 'insoluble fiber' not in nutritions.keys():
-                    pdb.set_trace()
+                # if 'insoluble fiber' not in list(nutritions.keys()):
+                #     pdb.set_trace()
                 items.append(new_item)
                 ingredients = {}
                 nutritions = {}
@@ -307,11 +311,11 @@ def combine_nutrition(mapped):
                 # # Create a new key/value if doesnt exist
                 # except:
                 #     new_nutrition[nutrition] = item.nutrition[nutrition]
-            for each in new_nutrition:
-                if 'insoluble fiber' not in new_nutrition.keys():
-                    # pdb.set_trace()
-                    if 'insoluble fiber' not in item.nutrition.keys():
-                        pdb.set_trace()
+            # for each in new_nutrition:
+            #     if 'insoluble fiber' not in new_nutrition.keys():
+            #         # pdb.set_trace()
+            #         if 'insoluble fiber' not in item.nutrition.keys():
+            #             pdb.set_trace()
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
@@ -324,12 +328,10 @@ def process(path,menu_filename, nutrition_filename):
     from match_names import match_euphebe
     menus = processMenu(path+menu_filename)
     items, columns = processNutrition(path+nutrition_filename)
-    convert_dic = match_euphebe(columns)
-    items, columns = processNutrition(path+nutrition, convert_dic)
+    items, columns = processNutrition(path+nutrition_filename, columns)
     mapped, not_found = mapToMeal(menus, items)
     newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manual_map_0330.p')
     combined = combine_nutrition(newly_mapped)
-
 
     return combined
 
@@ -367,7 +369,7 @@ def histogram(combined):
 
 if __name__ == "__main__":
     combined = process(PATH, 'menu0328.csv', 'total2.csv')
-    histogram(combined)
+    # histogram(combined)
 
-    # drop('meals')
-    # add_meals(combined)
+    drop('meals')
+    add_meals(combined)

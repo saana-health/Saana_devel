@@ -12,13 +12,7 @@ PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
 def match_euphebe(euphebe_all):
     # get full lists from food tag matrix and euphebe of all nutritions and ingredients
-    # _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
-    # items, euphebe_all = processEuphebe.processNutrition(PATH+'total2.csv')
-
-    # combined = processEuphebe.process()
-
-    # remove matched from this list
-    tag_no_match = euphebe_all[:]
+    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
 
     # dictionary to be used to convert in 'processEuphebe()'
     convert_dic = {'pot':'potassium', 'sod': 'sodium', 'yukon gold potatoes': 'potato'}
@@ -35,8 +29,6 @@ def match_euphebe(euphebe_all):
                 print('{}  |  {}'.format(tag_keyword, euphebe_name))
                 if euphebe_name in tag_no_match:
                     tag_no_match.remove(euphebe_name)
-                # if tag_keyword in tag_no_match:
-                #     tag_no_match.remove(tag_keyword)
 
     #for Euphebe - keys are for Euphebe and values for food tags matrix
     keyword_dictionary = {'nut, nut butter':'nuts','brussels sprouts': 'brussel sprouts','vitamin k': 'vit k', 'insoluble fiber': 'totinfib','total fiber': 'totfib','turmeric (curcumin)': 'turmeric',\
@@ -47,28 +39,20 @@ def match_euphebe(euphebe_all):
     for tag_keyword in tag_no_match[:]:
         if tag_keyword not in keyword_dictionary.keys():
             continue
-        for euphebe_name in tag_no_match:
+        for euphebe_name in euphebe_all:
             val = keyword_dictionary[tag_keyword]
             if isinstance(val,(list,)):
                 for tag_keyword_ in val:
                     if tag_keyword_ in euphebe_name:
                         convert_dic[euphebe_name] = tag_keyword
                         print('{}  |  {}'.format(tag_keyword_, euphebe_name))
-                        if euphebe_name in tag_no_match:
-                            tag_no_match.remove(euphebe_name)
-                        if tag_keyword in tag_no_match:
-                            tag_no_match.remove(tag_keyword)
             else:
                 if val in euphebe_name:
                     convert_dic[euphebe_name] = tag_keyword
                     if euphebe_name in tag_no_match:
                         tag_no_match.remove(euphebe_name)
                     print('{}  |  {}'.format(tag_keyword, euphebe_name))
-                    if tag_keyword in tag_no_match:
-                        tag_no_match.remove(tag_keyword)
 
-    # pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
-    pickle.dump(convert_dic,open('euphebe_change_'+str(date.today()).replace('-','_')+'.p','wb'))
     return convert_dic
 
 def match_foodnerd():

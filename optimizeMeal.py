@@ -62,8 +62,8 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
-            assert date.today(),weekday() == 1
             today = TODAY
+            assert today.weekday() == 1
             # today = date.today()
             num_meal = patient.plan
             if not test and patient.next_order != today:
