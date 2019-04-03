@@ -90,6 +90,8 @@ class Optimizer:
             self.scoreboard_to_csv(score_board,patient._id)
             slots = self.choose_meal(score_board, repeat_one_week,num_meal)
 
+            assert len(slots) == 15
+
             if num_meal> 8:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
@@ -100,7 +102,7 @@ class Optimizer:
                 self.write_csv(slots[:num_meal], patient._id, self.week)
                 self.write_csv(slots[num_meal:], patient._id, self.week +1)
                 update_next_order(patient._id,find_tuesday(today,3))
-            # pprint.pprint([x['name'] for x in get_any('tags','_id',tag_ids)])
+            pdb.set_trace()
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
@@ -157,8 +159,6 @@ class Optimizer:
                         else:
                             print('ERR')
                             raise ValueError
-            if 'tex mex' in meal.name:
-                pdb.set_trace()
             ## PRIORITIZE
             prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
             for prior in priors:
@@ -194,8 +194,7 @@ class Optimizer:
         num_repeat = 0
         restart = False
 
-        if num_meal <= 8:
-            num_meal *= 2
+        num_meal = 15
         while len(slots) < num_meal:
             sorted_scores = sorted(score_board.keys(), reverse=True)
             for score in sorted_scores:
@@ -304,14 +303,14 @@ class Optimizer:
 
     def write_csv(self,slots,patient_id,wk):
         try:
-            existing_order = list(csv.reader(open('masterOrder/masterorder.csv','rb')))
+            existing_order = list(csv.reader(open('masterOrder/masterorder.csv','r')))
         except:
             existing_order = [['ID','Week','Day','meal_name','minimize','prior','avoid','supplier']]
         for index in range(len(slots)):
             meal = slots[index]
             row = [str(patient_id)[-5:], wk, 'day '+ str(index+1),meal['meal'].name, meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplierID]
             existing_order.append(row)
-        with open('masterOrder/masterorder.csv','wb') as csvfile:
+        with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(existing_order)
 
@@ -323,7 +322,7 @@ class Optimizer:
                 temp_list = [score]
                 temp_list += [meal['meal'],meal['minimize'],meal['prior'], meal['avoid'],meal['meal'].supplierID]
                 csv_list.append(temp_list)
-        with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.week)+'.csv','wb') as csvfile:
+        with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.week)+'.csv','w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_list)
         return True
@@ -368,17 +367,17 @@ if __name__ == "__main__":
     op = Optimizer(week = 1)
     op.optimize()
     #
-    print('----WK2----')
-    TODAY = find_tuesday(date.today(),2)
-    op = Optimizer(week = 2)
-    op.optimize()
-
-    print('----WK3----')
-    TODAY = find_tuesday(date.today(),3)
-    op = Optimizer(week = 3)
-    op.optimize()
-
-    print('----WK4----')
-    TODAY = find_tuesday(date.today(),4)
-    op = Optimizer(week = 4)
-    op.optimize()
+    # print('----WK2----')
+    # TODAY = find_tuesday(date.today(),2)
+    # op = Optimizer(week = 2)
+    # op.optimize()
+    #
+    # print('----WK3----')
+    # TODAY = find_tuesday(date.today(),3)
+    # op = Optimizer(week = 3)
+    # op.optimize()
+    #
+    # print('----WK4----')
+    # TODAY = find_tuesday(date.today(),4)
+    # op = Optimizer(week = 4)
+    # op.optimize()
