@@ -56,7 +56,7 @@ class Optimizer:
         for meal in self.meals.values():
             invent[meal.name] = 100
 
-    def optimize(self):
+    def optimize(self, test = True):
         '''
         optimize -> get_sscre_board -> choose_meal -> to_mongo & write_csv
         :return:
@@ -66,7 +66,7 @@ class Optimizer:
             today = TODAY
             # today = date.today()
             num_meal = patient.plan
-            if patient.next_order != today:
+            if not test and patient.next_order != today:
                 continue
 
             print('Processing   {}  !'.format(patient.name))
@@ -87,9 +87,9 @@ class Optimizer:
 
             ####### Start choosing meals ########
             # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
+            self.scoreboard_to_csv(score_board,patient._id)
             slots = self.choose_meal(score_board, repeat_one_week,num_meal)
 
-            self.scoreboard_to_csv(score_board,patient._id)
             if num_meal> 8:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
@@ -100,6 +100,7 @@ class Optimizer:
                 self.write_csv(slots[:num_meal], patient._id, self.week)
                 self.write_csv(slots[num_meal:], patient._id, self.week +1)
                 update_next_order(patient._id,find_tuesday(today,3))
+            # pprint.pprint([x['name'] for x in get_any('tags','_id',tag_ids)])
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
@@ -132,33 +133,40 @@ class Optimizer:
             full_meal_info.update(meal.nutrition)
 
             for min_item in minimizes.keys():
-                if min_item in full_meal_info.keys():
-                    minimize_list.append(min_item)
+                for ing in full_meal_info.keys():
+                    if min_item in ing:
+                        minimize_list.append(min_item)
 
-                    # If a unit is included in the value, get rid of it
-                    if not isinstance(full_meal_info[min_item],(float,)):
-                        contain_val = float(full_meal_info[min_item].split(' ')[0])
-                    else:
-                        contain_val = float(full_meal_info[min_item])
+                        # If a unit is included in the value, get rid of it
+                        if not isinstance(full_meal_info[ing],(float,)):
+                            contain_val = float(full_meal_info[ing].split(' ')[0])
+                        else:
+                            contain_val = float(full_meal_info[ing])
 
-                    # if contain val above min 2
-                    if contain_val > float(minimizes[min_item]['min2']):
-                        score += DEDUCT_GR_MIN2
-                        continue
-                    # if min1 < val < min2
-                    elif contain_val > float(minimizes[min_item]['min1']):
-                        score += DEDUCT_LT_MIN2
-                    #if val < min1
-                    elif contain_val < float(minimizes[min_item]['min1']):
-                        score += DEDUCT_LT_MIN1
-                    # This should never happen
-                    else:
-                        print('ERR')
-                        raise ValueError
-
+                        # if contain val above min 2
+                        if contain_val > float(minimizes[min_item]['min2']):
+                            score += DEDUCT_GR_MIN2
+                            continue
+                        # if min1 < val < min2
+                        elif contain_val > float(minimizes[min_item]['min1']):
+                            score += DEDUCT_LT_MIN2
+                        #if val < min1
+                        elif contain_val < float(minimizes[min_item]['min1']):
+                            score += DEDUCT_LT_MIN1
+                        # This should never happen
+                        else:
+                            print('ERR')
+                            raise ValueError
+            if 'tex mex' in meal.name:
+                pdb.set_trace()
             ## PRIORITIZE
             prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
-            prior_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list]))
+            for prior in priors:
+                for ingredient in meal.ingredients:
+                    if prior in ingredient and prior not in minimize_list + avoid_list:
+                        prior_list.append(prior)
+            prior_list = list(set(prior_list))
+            # prior_list += list(set([ingredient for ingredient in meal.ingredients if ingredient in priors and ingredient not in minimize_list]))
             pos = len(prior_list)
             score += pos*ADD_PRIOR
 
@@ -186,13 +194,17 @@ class Optimizer:
         num_repeat = 0
         restart = False
 
+        if num_meal <= 8:
+            num_meal *= 2
         while len(slots) < num_meal:
             sorted_scores = sorted(score_board.keys(), reverse=True)
             for score in sorted_scores:
+
                 if restart:
                     restart = False
                     break
                 for meal in score_board[score]:
+
                     supplier = meal['meal'].supplierID
 
                     if supplier == 'Euphebe' and meal_num_per_supplier[supplier] >= MEAL_PER_SUPPLIER_1:
@@ -201,7 +213,7 @@ class Optimizer:
                             continue
 
                     # ADD meal
-                    # print('-- {} -- chose'.format(meal))
+                    # print('{}: -- {} -- chose'.format(score,meal))
                     slots.append(meal)
 
                     # Update score board for this week
@@ -234,7 +246,7 @@ class Optimizer:
         assert len(slots) == num_meal
 
         # shuffle so that they don't look the same every week
-        shuffle(slots)
+        # shuffle(slots)
 
         ## OPTIONAL - how many repetition from past 2 weeks?
         repeat_cnt = 0
@@ -336,7 +348,7 @@ if __name__ == "__main__":
     DEDUCT_LT_MIN1 = -15
 
     # REPEAT
-    REPEAT_ZERO = -60
+    REPEAT_ZERO = -50
     REPEAT_ONE = -30
     REPEAT_TWO = -15
     REPEAT_CUM = - 5
@@ -351,20 +363,20 @@ if __name__ == "__main__":
     except:
         pass
 
-    # print('----WK1----')
-    # TODAY = find_tuesday(date.today(),1)
-    # op = Optimizer(week = 1)
-    # op.optimize()
+    print('----WK1----')
+    TODAY = find_tuesday(date.today(),1)
+    op = Optimizer(week = 1)
+    op.optimize()
     #
-    # print('----WK2----')
-    # TODAY = find_tuesday(date.today(),2)
-    # op = Optimizer(week = 2)
-    # op.optimize()
-    #
-    # print('----WK3----')
-    # TODAY = find_tuesday(date.today(),3)
-    # op = Optimizer(week = 3)
-    # op.optimize()
+    print('----WK2----')
+    TODAY = find_tuesday(date.today(),2)
+    op = Optimizer(week = 2)
+    op.optimize()
+
+    print('----WK3----')
+    TODAY = find_tuesday(date.today(),3)
+    op = Optimizer(week = 3)
+    op.optimize()
 
     print('----WK4----')
     TODAY = find_tuesday(date.today(),4)

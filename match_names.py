@@ -5,15 +5,15 @@ import pdb
 import pprint
 import pickle
 import time
+from datetime import date
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
-DATE = time.ctime()[4:10].replace(' ','_')
 
 # TODO: These functions can be combined into one really
 
-def match_euphebe():
+def match_euphebe(euphebe_all):
     # get full lists from food tag matrix and euphebe of all nutritions and ingredients
-    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
-    items, euphebe_all = processEuphebe.processNutrition(PATH+'total2.csv')
+    # _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
+    # items, euphebe_all = processEuphebe.processNutrition(PATH+'total2.csv')
 
     # combined = processEuphebe.process()
 
@@ -67,7 +67,9 @@ def match_euphebe():
                     if tag_keyword in tag_no_match:
                         tag_no_match.remove(tag_keyword)
 
-    pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
+    # pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
+    pickle.dump(convert_dic,open('euphebe_change_'+str(date.today()).replace('-','_')+'.p','wb'))
+    return convert_dic
 
 def match_foodnerd():
     from processFoodNerd import processNutrition
@@ -128,7 +130,7 @@ def match_frozenGarden():
     #for Euphebe - keys are for Euphebe and values for food tags matrix
     keyword_dictionary = {'nut, nut butter':'nuts','brussels sprouts': 'brussel sprouts','vitamin k': 'vit k', 'insoluble fiber': 'totinfib','total fiber': 'totfib','turmeric (curcumin)': 'turmeric',\
                           'peppers, bell': ['pepper, bell','bell pepper'], 'peppers, hot':['pepper, hot','jalapeno pepper','chili pepper','poblano pepper','serrano pepper'], 'spicy powders':\
-                              ['black pepper','curry, powder']}
+                              ['black pepper','curry, powder','cayenne']}
 
     print('------semi manual--------')
     for tag_keyword in tag_no_match[:]:
@@ -158,5 +160,5 @@ def match_frozenGarden():
 
 if __name__ == "__main__":
     # match_foodnerd()
-    # match_euphebe()
-    match_frozenGarden()
+    match_euphebe()
+    # match_frozenGarden()
