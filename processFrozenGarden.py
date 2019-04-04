@@ -20,16 +20,14 @@ def processNutrition(filename):
     :param filename:
     :return:
     '''
-    convert_dic = {}
-
-    columns = []
+    from s3bucket import get_image_url
     with open(filename) as csvfile:
         ingredients = {}
         nutritions = {}
 
         reader_list = list(csv.reader(csvfile))
-        meal_name = reader_list[1][0]
-        columns = [x.strip().lower() for x in reader_list[3]]
+        meal_name = reader_list[1][0].lower()
+        columns = [x.strip().lower().replace('.',',') for x in reader_list[3]]
         # for each in columns:
         #     # print(each.encode('utf-8').decode('unicode_escape'))
         #     # print(each.decode().encode('utf-8'))
@@ -44,18 +42,28 @@ def processNutrition(filename):
         # test = columns[-5][10]
 
         for row in range(4,len(reader_list)-2):
-            ingredients[reader_list[row][0].strip().lower()] = reader_list[row][1]
+            ingredients[reader_list[row][0].strip().lower().replace('.',',')] = reader_list[row][1]
         for ind in range(len(units)):
             if units[ind] == '':
                 continue
-            nutritions[columns[ind]] = reader_list[-2][ind] + ' ' + units[ind]
-        new_meal = Meal(name = meal_name, ingredients=ingredients, nutrition= nutritions, supplierID='FrozenGarden')
-        return list(ingredients.keys()) + list(set(columns))
-        pdb.set_trace
+            nutritions[columns[ind]] = reader_list[-2][ind].replace('.',',') + ' ' + units[ind]
+        new_meal = Meal(name = meal_name, ingredients=ingredients, nutrition= nutritions, supplierID='FrozenGarden', image=get_image_url(meal_name))
+        return new_meal, list(ingredients.keys()) + list(set(columns))
 
-
-if __name__ == "__main__":
+def process():
+    full_list = []
+    meals = []
+    from match_names import match_frozenGarden, change_names
     for filename in os.listdir(PATH):
         if filename[0] != '.':
-            print(filename)
-            processNutrition(PATH+filename)
+            meal, columns = processNutrition(PATH+filename)
+            meals.append(meal)
+            full_list += columns
+    convert_dic = match_frozenGarden(full_list)
+    meals = change_names(meals, convert_dic)
+    return meals
+
+if __name__ == "__main__":
+    from connectMongo import insert_meal
+    meals = process()
+    insert_meal(meals)

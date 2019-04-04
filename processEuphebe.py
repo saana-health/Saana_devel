@@ -312,36 +312,11 @@ def combine_nutrition(mapped):
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
-    ## saves into .p file
-    #pickle.dump(new_list, open('EuphebeMealInfo.p','wb'))
 
     return new_list
 
-def change_names(combined,convert_dic):
-    for meal in combined:
-        for ingredient in list(meal.ingredients.keys())[:]:
-            for key_word in convert_dic.keys():
-                if key_word in ingredient:
-                    #MANUAL
-                    if key_word == 'pot' and 'potato' in ingredient:
-                        continue
-                    meal.ingredients[convert_dic[key_word]] = meal.ingredients.pop(ingredient)
-                    # print('changed {} --> {}'.format(ingredient,convert_dic[key_word]))
-                    break
-        for nutrition in list(meal.nutrition.keys())[:]:
-            for key_word in convert_dic.keys():
-                if key_word in nutrition:
-                    #MANUAL
-                    if convert_dic[key_word] == 'cals' and nutrition != 'cals':
-                        continue
-                    if nutrition == 'fatcals':
-                        pdb.set_trace()
-                    meal.nutrition[convert_dic[key_word]] = meal.nutrition.pop(nutrition)
-                    # print('changed {} --> {}'.format(nutrition,convert_dic[key_word]))
-    return combined
-
 def process(path,menu_filename, nutrition_filename):
-    from match_names import match_euphebe
+    from match_names import match_euphebe, change_names
 
     menus = processMenu(path+menu_filename)
     items, columns = processNutrition(path+nutrition_filename)
@@ -350,14 +325,10 @@ def process(path,menu_filename, nutrition_filename):
     combined = combine_nutrition(newly_mapped)
 
     convert_dic = match_euphebe(columns)
+
     combined = change_names(combined,convert_dic)
 
     return combined
-
-    # from utils import create_histogram_insoluble
-    # create_histogram_insoluble(combined)
-
-    # add_meals(combined)
 
 def histogram(combined):
     from utils import create_histogram_insoluble, create_histogram

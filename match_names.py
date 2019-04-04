@@ -84,16 +84,12 @@ def match_foodnerd():
 
     pickle.dump(convert_dic,open('foodnerd_change.p','wb'))
 
-def match_frozenGarden():
+def match_frozenGarden(full_list):
     import processFrozenGarden
     PATH = os.path.join(os.getcwd(),'csv/frozenGarden/')
-    for filename in os.listdir(PATH):
-        if filename[0] != '.':
-            full_list = processFrozenGarden.processNutrition(PATH + filename)
     _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag313.csv')
 
-    tag_no_match = matrix_columns[:]
-    euphebe_no_match = full_list[:]
+    # euphebe_no_match = full_list[:]
     convert_dic = {}
     for each in convert_dic.values():
         matrix_columns.remove(each)
@@ -139,8 +135,32 @@ def match_frozenGarden():
                     print('{}  |  {}'.format(tag_keyword, euphebe_name))
                     if tag_keyword in tag_no_match:
                         tag_no_match.remove(tag_keyword)
-    pdb.set_trace()
+
+    return convert_dic
     # pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
+
+def change_names(combined,convert_dic):
+    for meal in combined:
+        for ingredient in list(meal.ingredients.keys())[:]:
+            for key_word in convert_dic.keys():
+                if key_word in ingredient:
+                    #MANUAL
+                    if key_word == 'pot' and 'potato' in ingredient:
+                        continue
+                    meal.ingredients[convert_dic[key_word]] = meal.ingredients.pop(ingredient)
+                    # print('changed {} --> {}'.format(ingredient,convert_dic[key_word]))
+                    break
+        for nutrition in list(meal.nutrition.keys())[:]:
+            for key_word in convert_dic.keys():
+                if key_word in nutrition:
+                    #MANUAL
+                    if convert_dic[key_word] == 'cals' and nutrition != 'cals':
+                        continue
+                    if nutrition == 'fatcals':
+                        pdb.set_trace()
+                    meal.nutrition[convert_dic[key_word]] = meal.nutrition.pop(nutrition)
+                    # print('changed {} --> {}'.format(nutrition,convert_dic[key_word]))
+    return combined
 
 if __name__ == "__main__":
     # match_foodnerd()
