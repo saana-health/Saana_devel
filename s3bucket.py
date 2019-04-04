@@ -52,7 +52,7 @@ def match_name_frozen():
 def upload_image(path,menu_photo_map, filetype):
     if filetype == 'jpg':
         filetype = 'jpeg'
-    extra_arg = {'ACL':'public-read','ContentType':'image/jpeg','ContentDisposition':'attachment'}
+    extra_arg = {'ACL':'public-read','ContentType':'image/'+filetype,'ContentDisposition':'attachment'}
     for menu in menu_photo_map:
         s3.meta.client.upload_file(path+menu_photo_map[menu],BUCKET,menu, extra_arg)
 
@@ -76,13 +76,19 @@ def get_url(bucket_name,key):
 def get_image_url(menu_name):
     return get_url(BUCKET,menu_name)
 
+def delete_all(password):
+    if password == 'thaslwns1!':
+        for each in list_obj()['Contents']:
+            key = each['Key']
+            obj = s3.Object(BUCKET,key)
+            obj.delete()
+
+
 BUCKET = 'minjoon-test-bucket'
 
 if __name__ == "__main__":
-    # for each in list_obj()['Contents']:
-    #     key = each['Key']
-    #     obj = s3.Object(BUCKET,key)
-    #     obj.delete()
+    extra_arg = {'ACL':'public-read','ContentType':'image/png','ContentDisposition':'attachment'}
+    s3.meta.client.upload_file('/home/min/Downloads/Saana-Logo-final.png', BUCKET, 'logo',extra_arg)
     ## EUPHEBE
     # euphebe_path = os.path.join(os.getcwd()+'/euphebe_photos/')
     # upload_image(euphebe_path,match_name())
@@ -91,12 +97,6 @@ if __name__ == "__main__":
     # frozen_path = os.path.join(os.getcwd()+'/frozengarden_photo/')
     # menu_photo_map, filetype = match_name_frozen()
     # upload_image(frozen_path,menu_photo_map, filetype)
-    # res = client.delete_objects(Bucket=BUCKET,\
-    #                             Delete = {'Objects':[{'Key':'Green+Protein'},{'Key':'Immunity'},{'Key':'Jungle+Breeze'}]})
-    # obj = s3.Object(BUCKET,'Green Protein')
-    # obj.delete()
-    # obj = s3.Object(BUCKET,'Jungle Breeze')
-    # obj.delete()
-    #
-    from pprint import pprint
-    pprint(list_obj())
+
+    # from pprint import pprint
+    # pprint(list_obj())
