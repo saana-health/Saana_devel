@@ -34,6 +34,7 @@ class Meal:
         self._id = dict['_id']
         return self
 
+
     __repr__ = __str__
 
 class MealList(list):

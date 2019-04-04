@@ -22,7 +22,7 @@ def match_euphebe(euphebe_all):
     tag_no_match = matrix_columns[:]
 
     for tag_keyword in matrix_columns:
-        print('--------')
+        # print('--------')
         for euphebe_name in euphebe_all:
             if tag_keyword in euphebe_name:
                 convert_dic[euphebe_name] = tag_keyword
@@ -35,7 +35,7 @@ def match_euphebe(euphebe_all):
                           'peppers, bell': ['pepper, bell','bell pepper'], 'peppers, hot':['pepper, hot','jalapeno pepper','chili pepper','poblano pepper','serrano pepper'], 'spicy powders':\
                               ['black pepper','curry, powder']}
 
-    print('------semi manual--------')
+    # print('------semi manual--------')
     for tag_keyword in tag_no_match[:]:
         if tag_keyword not in keyword_dictionary.keys():
             continue
@@ -45,13 +45,13 @@ def match_euphebe(euphebe_all):
                 for tag_keyword_ in val:
                     if tag_keyword_ in euphebe_name:
                         convert_dic[euphebe_name] = tag_keyword
-                        print('{}  |  {}'.format(tag_keyword_, euphebe_name))
+                        # print('{}  |  {}'.format(tag_keyword_, euphebe_name))
             else:
                 if val in euphebe_name:
                     convert_dic[euphebe_name] = tag_keyword
                     if euphebe_name in tag_no_match:
                         tag_no_match.remove(euphebe_name)
-                    print('{}  |  {}'.format(tag_keyword, euphebe_name))
+                    # print('{}  |  {}'.format(tag_keyword, euphebe_name))
 
     return convert_dic
 
