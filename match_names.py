@@ -26,7 +26,7 @@ def match_euphebe(euphebe_all):
         for euphebe_name in euphebe_all:
             if tag_keyword in euphebe_name:
                 convert_dic[euphebe_name] = tag_keyword
-                print('{}  |  {}'.format(tag_keyword, euphebe_name))
+                # print('{}  |  {}'.format(tag_keyword, euphebe_name))
                 if euphebe_name in tag_no_match:
                     tag_no_match.remove(euphebe_name)
 

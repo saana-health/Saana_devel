@@ -56,7 +56,7 @@ def processNutrition(filename):
     :return [Meal()]
     '''
     convert_dic = {}
-    print(' --- processNutrition() ----')
+    # print(' --- processNutrition() ----')
     columns = []
     items = []
 
@@ -80,7 +80,7 @@ def processNutrition(filename):
             if name in convert_dic.keys():
                 prev = name
                 name = convert_dic[name]
-                print('{} --> {}'.format(prev,name))
+                # print('{} --> {}'.format(prev,name))
             columns[i] = name
 
         # loop through each row starting 3rd row to process ingredients
@@ -109,7 +109,7 @@ def processNutrition(filename):
                     if name in convert_dic.keys():
                         prev = name
                         name = convert_dic[name]
-                        print('{} --> {}'.format(prev,name))
+                        # print('{} --> {}'.format(prev,name))
                     # ingredients[change_name(lookup_dict,name.replace('  ',''))] = row[3]
                     if name in ingredients.keys():
                         ingredients[name] += float(ingredients[name]) + float((row[3]))
@@ -162,7 +162,7 @@ def mapToMeal(menus,items):
     :return: { str: [Meal()]}
     '''
 
-    print(' --- mapToMeal() ----')
+    # print(' --- mapToMeal() ----')
     bucket = [x for x in items]
     mapped = {}
     not_found = []
@@ -199,10 +199,10 @@ def mapToMeal(menus,items):
     # print number of one to many mapped items and unmapped items
     # print('{}/{} not found'.format(cnt,len(items)))
     # print('{}/{} found twice'.format(cnt2,len(items)))
-    for item_li in mapped.values():
-        for item in item_li:
-            if 'insoluble fiber' not in item.nutrition.keys():
-                print(item)
+    # for item_li in mapped.values():
+    #     for item in item_li:
+    #         if 'insoluble fiber' not in item.nutrition.keys():
+                # print(item)
     return mapped, not_found
 
 def manual_input(menus, not_found, mapped, filename = ''):
@@ -222,7 +222,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
             for menu in menus:
                 if SequenceMatcher(None,menu,each.name).ratio() > 0.5:
                     # if menu in manual_map and each in manual_map[menu]:
-                    #     continue
+                    #     continue    pdb.set_trace()
                     # Below for matching for the first time
                     print('----------------------')
                     x = input('Is "{}" part of "{}"? [Yes: 1 / No: 0]: '.format(each, menu))
@@ -272,18 +272,15 @@ def combine_nutrition(mapped):
     :return: [Meals()]
     '''
     #
-    for item_li in mapped.values():
-        for item in item_li:
-            if 'insoluble fiber' not in item.nutrition.keys():
-                print(item)
-
-    #
-
-    print(' --- combine_nutrition ---')
+    # for item_li in mapped.values():
+    #     for item in item_li:
+    #         if 'insoluble fiber' not in item.nutrition.keys():
+    #             # print(item)
+    from s3bucket import get_image_url
     new_list = []
     # loop through
     for menu_name in mapped.keys():
-        new_meal = Meal(name = menu_name, supplierID = 'Euphebe')
+        new_meal = Meal(name = menu_name, supplierID = 'Euphebe', image = get_image_url(menu_name))
         new_nutrition = {}
         new_ingredients = {}
         for item in mapped[menu_name]:
@@ -322,7 +319,6 @@ def combine_nutrition(mapped):
 
 def change_names(combined,convert_dic):
     for meal in combined:
-        print(meal)
         for ingredient in list(meal.ingredients.keys())[:]:
             for key_word in convert_dic.keys():
                 if key_word in ingredient:
@@ -391,8 +387,10 @@ def histogram(combined):
 
 
 if __name__ == "__main__":
+    from connectMongo import insert_meal
     combined = process(PATH, 'menu0328.csv', 'total2.csv')
     # histogram(combined)
 
-    drop('meals')
-    add_meals(combined)
+    drop('meal_infos')
+    insert_meal(combined)
+    # add_meals(combined)

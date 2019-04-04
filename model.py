@@ -4,7 +4,7 @@ class Meal:
     '''
     This class should follow the db schema designed for meal info
     '''
-    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',quantity = 0):
+    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',quantity = 0, image = ''):
         self._id = _id
         self.name = name
         self.ingredients = ingredients
@@ -12,6 +12,7 @@ class Meal:
         self.type = type
         self.supplierID = supplierID
         self.quantity = quantity
+        self.image = image
 
     def __str__(self):
         return str(self.name.encode('ascii','ignore'))

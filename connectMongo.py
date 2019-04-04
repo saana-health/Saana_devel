@@ -16,6 +16,8 @@ def insert_meal(meals):
     '''
     meal_dictionaries = []
     for meal in meals:
+        if db.meal_infos.find({'name':meal.name}).count() > 0:
+            continue
         meal_dic = {}
         meal_dic['name'] =  meal.name
         meal_dic['nutrition'] = meal.nutrition
@@ -23,9 +25,10 @@ def insert_meal(meals):
         meal_dic['quantity'] = meal.quantity
         meal_dic['ingredients'] = get_ingredient(meal.ingredients)
         meal_dic['supplier_id'] = meal.supplierID
+        meal_dic['image'] = meal.image
         meal_dictionaries.append(meal_dic)
-
-    db.meal_infos.insert_many(meal_dictionaries)
+    if meal_dictionaries != []:
+        db.meal_infos.insert_many(meal_dictionaries)
 
 def get_ingredient(ingredients):
     '''
