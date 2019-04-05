@@ -47,6 +47,7 @@ class MealList(list):
             if getattr(meal,feature_name) == value:
                 return meal
 
+
 class Patient:
     def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = '', next_order = '', plan = 7):
         self.name = name
@@ -59,6 +60,11 @@ class Patient:
         self._id = _id
         self.next_order = next_order
         self.plan = plan
+
+    def __str__(self):
+        return str(self._id)
+
+    __repr__ = __str__
 
 
 class Tag:
@@ -95,4 +101,16 @@ class MealHistory:
 
     __repr__ = __str__
 
+class Order:
+    def __init__(self,patient_id = '', patient_meal_id = [], herb_id=[], week_start_date= '', week_end_date= ''):
+        self.patient_id = patient_id
+        self.patient_meal_id = patient_meal_id
+        self.herb_id = herb_id
+        self.week_start_date = week_start_date
+        self.week_end_date = week_end_date
+
+    def __str__(self):
+        return str(self.patient_id) + ' |  '+ str(self.week_start_date)
+
+    __repr__ = __str__
 

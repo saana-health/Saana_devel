@@ -4,7 +4,7 @@ import pdb
 import itertools
 from model import Meal,MealHistory, MealList, Patient
 import csv
-from connectMongdo import add_meal_history,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order
+from connectMongo import add_meal_history,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order
 from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
@@ -22,13 +22,24 @@ class Optimizer:
         self.patients = self._get_patients()
         self.week = week
 
+    #######CHANGED#########
     def _get_meals(self):
         '''
 
         :return: {_id: Meal()}
         '''
         hash_meal = {}
-        meals = [meal for meal in get_all_meals()]
+        # meals = [meal for meal in get_all_meals()]
+        temp_meals= get_all_meals()
+        meals = []
+        for temp in temp_meals:
+            ingredients = {}
+            for ingredient in temp['ingredients']:
+                name = get_any('mst_food_ingredients','_id',ingredient['food_ingredient_id'])['name']
+
+                ingredients[name] = ingredient['quantity']
+            temp['ingredients'] = ingredients
+            meals.append(temp)
         for meal in meals:
             hash_meal[meal['_id']] = meal_dict_to_class(meal)
         return hash_meal
@@ -44,12 +55,31 @@ class Optimizer:
             hash_tag[tag['_id']] = tag_dict_to_class(tag)
         return hash_tag
 
+    #######CHANGED#########
     def _get_patients(self):
         '''
 
         :return: [Patient()]
         '''
-        return [patient_dict_to_class(patient) for patient in get_all_patients()]
+        patient_obj = []
+        from connectMongo import get_comorbidities, get_drugs, get_symptoms, get_disease
+        patients = get_all_patients()
+        for patient in patients:
+            #TODO: check subscription ()
+            comorbidities = get_comorbidities(patient['_id'])
+            disease = get_disease(patient['_id'])
+            sypmtoms = get_symptoms(patient['_id'])
+            drugs = get_drugs(patient['_id'])
+
+            new_patient = Patient(comorbidities=comorbidities, disease=disease, _id = patient['_id'], symptoms=sypmtoms, treatment_drugs=drugs)
+            patient_obj.append(new_patient)
+
+        return patient_obj
+
+
+
+        # return [patient_dict_to_class(patient) for patient in get_all_patients()]
+    ####################
 
     def _check_inventory(self):
         invent = {}
@@ -96,7 +126,6 @@ class Optimizer:
             assert len(slots) == 15
 
             slots = self.reorder_slots(slots)
-
             if num_meal> 8:
                 self.to_mongo(slots,patient._id, self.week)
                 self.write_csv(slots,patient._id, self.week)
@@ -347,6 +376,12 @@ class Optimizer:
         return True
 
 if __name__ == "__main__":
+    ################
+    # a = Optimizer(1)
+    # a._get_meals()
+    ################
+
+
     # # Euphebe
     # MAX_MEAL_PER_SUPPLIER_1 = 12
     # MIN_MEAL_PER_SUPPLIER_1 = 12
@@ -381,7 +416,7 @@ if __name__ == "__main__":
     except:
         pass
 
-    TEST = False
+    TEST = True
 
     print('----WK1----')
     TODAY = find_tuesday(date.today(),1)

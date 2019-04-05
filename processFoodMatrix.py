@@ -2,7 +2,7 @@ import csv
 import pprint
 import os
 import pdb
-from connectMongdo import add_tags, drop
+from connectMongo import add_tags, drop
 from model import Tag
 PATH = os.path.join(os.getcwd(),'csv/')
 
@@ -68,7 +68,6 @@ if __name__ == "__main__":
     # generate_keyword(columns)
     drop('tags')
     add_tags(master_dict)
-    add_maggie()
-    pdb.set_trace()
+    # add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

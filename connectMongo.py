@@ -75,6 +75,46 @@ def get_any(collection, attr, val):
     else:
         return None
 
+# def add_user()
+
+# def add_order(slots,id,start_date,end_date):
+#     '''
+#
+#     :param order: [Meal()] - slots
+#     :param id:
+#     :return:
+#     '''
+#     meal_id = []
+#     for meal in slots:
+#         meal_id.append(meal._id)
+
+
+def get_comorbidities(patient_id):
+    li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
+    return [list(x.values())[0] for x in li]
+
+def get_disease(patient_id):
+    li = list(db.patient_diseases.find({'patient_id':patient_id},{'disease_id':1, '_id':0}))
+    return [list(x.values())[0] for x in li]
+
+def get_symptoms(patient_id):
+    li = list(db.patient_symptoms.find({'patient_id':patient_id},{'symptom_id':1, '_id':0}))
+    return [list(x.values())[0] for x in li]
+
+def get_drugs(patient_id):
+    li = list(db.patient_drug.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
+    return [list(x.values())[0] for x in li]
+
+def get_all_meals():
+    return list(db.meal_infos.find())
+    # cursor = db.meal_infos.find()
+    # meals = MealList()
+    # for meal in cursor:
+    #     # meals.append(Meal().import_dict(meal))
+    #     meals.append(meal)
+    #
+    # return meals
+
 ################## OLD ##################33
 
 def add_patients(patients):
@@ -132,47 +172,6 @@ def add_meal_history(meal_history,id):
     else:
         db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
     return True
-
-# def find_meal(name):
-#     '''
-#     This function finds a meal based on its name
-#     :param name: str - name of a meal
-#     :return: {mealInfo}
-#     '''
-#     meal = db.meals.find_one({"name":name})
-#     return meal
-
-# def find_patient(name = '', object_id = ''):
-#     '''
-#     This function finds a patient based on her/his name
-#     :param name: str - name of a patient
-#     :return: {(patient info)}
-#     '''
-#     if name:
-#         patient = db.patients.find_one({"name":name})
-#     else:
-#         patient = db.patients.find_one({"_id": object_id})
-#     return patient
-
-# def find_disease(name):
-#     tags = db.tags.find()
-#     for each in tags:
-#         if name.lower() in each['name'].lower():
-#             return each['_id']
-
-# def find_tag(object_id):
-#     from utils import tag_dict_to_class
-#     tag = db.tags.find_one({'_id':object_id})
-#     return tag_dict_to_class(tag)
-
-def get_all_meals():
-    cursor = db.meals.find()
-    meals = MealList()
-    for meal in cursor:
-        # meals.append(Meal().import_dict(meal))
-        meals.append(meal)
-
-    return meals
 
 def get_mealinfo_by_patient(id):
     mealinfo = db.mealInfo.find_one({'patient_id': id})
