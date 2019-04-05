@@ -10,7 +10,7 @@ from connectMongdo import add_meals, drop
 import random
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
-
+from utils import similar
 '''
 Processing flow
 processMenu()
@@ -22,14 +22,7 @@ processMenu()
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
-def similar(a,b,r):
-    '''
-    A util function to check if two strings are 'similar', defined by the value below. This is used for mapping items to meals
-    :param a: (str) string 1 to compare
-    :param b: (str) string 2 to compare
-    :return: True if similar, False otherwise
-    '''
-    return SequenceMatcher(None,a,b).ratio() > r
+
 
 def processMenu(filename):
     '''

@@ -4,6 +4,7 @@ import csv
 import pdb
 from model import Meal, Tag, Patient
 from datetime import date, timedelta
+from difflib import SequenceMatcher
 
 # def export_mixpanel_to_csv(filename):
 #     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
@@ -270,6 +271,15 @@ def find_tuesday(curr, wk = 1):
         curr = curr + timedelta(days = 1)
         weekday = curr.weekday()
     return curr
+
+def similar(a,b,r):
+    '''
+    A util function to check if two strings are 'similar', defined by the value below. This is used for mapping items to meals
+    :param a: (str) string 1 to compare
+    :param b: (str) string 2 to compare
+    :return: True if similar, False otherwise
+    '''
+    return SequenceMatcher(None,a,b).ratio() > r
 
 if __name__ == "__main__":
     # auto_add_meal()
