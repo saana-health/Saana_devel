@@ -115,6 +115,17 @@ def get_all_meals():
     #
     # return meals
 
+def add_order(order,id):
+    db.orders.insert_one(order.to_dic())
+    # existing_history = db.mealInfo.find_one({'patient_id': id})
+    # if existing_history is None:
+    #     meal_history_dict = {}
+    #     meal_history_dict['patient_id'] = meal_history.patient_id
+    #     meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
+    #     db.mealInfo.insert_one(meal_history_dict)
+    # else:
+    #     db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
+    # return True
 ################## OLD ##################33
 
 def add_patients(patients):
@@ -157,21 +168,7 @@ def add_meals(meal_list = [],pickle_name = ''):
     meals.insert_many(l)
     return True
 
-def add_meal_history(meal_history,id):
-    '''
-    This function adds meal info (list of meals ordered/planned for a week) to the MongoDB database
-    :param meal_history: [class MealHistory]
-    :return: True if successful
-    '''
-    existing_history = db.mealInfo.find_one({'patient_id': id})
-    if existing_history is None:
-        meal_history_dict = {}
-        meal_history_dict['patient_id'] = meal_history.patient_id
-        meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
-        db.mealInfo.insert_one(meal_history_dict)
-    else:
-        db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
-    return True
+
 
 def get_mealinfo_by_patient(id):
     mealinfo = db.mealInfo.find_one({'patient_id': id})

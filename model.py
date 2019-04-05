@@ -112,5 +112,14 @@ class Order:
     def __str__(self):
         return str(self.patient_id) + ' |  '+ str(self.week_start_date)
 
+    def to_dic(self):
+        dic = {}
+        dic['patient_id'] = self.patient_id
+        dic['patient_meal_id'] = self.patient_meal_id
+        dic['herb_id'] = self.herb_id
+        dic['week_start_date'] = self.week_start_date
+        dic['week_end_date'] = self.week_end_date
+        return dic
+
     __repr__ = __str__
 

@@ -2,14 +2,14 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import pdb
 import itertools
-from model import Meal,MealHistory, MealList, Patient
+from model import Meal,Order, MealList, Patient
 import csv
-from connectMongo import add_meal_history,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order
+from connectMongo import add_order,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order
 from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
 import pprint
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
 
@@ -131,10 +131,10 @@ class Optimizer:
                 self.write_csv(slots,patient._id, self.week)
                 update_next_order(patient._id,find_tuesday(today,2))
             else:
-                self.to_mongo(slots[:num_meal], patient._id, self.week)
-                self.to_mongo(slots[num_meal:], patient._id, self.week +1)
-                self.write_csv(slots[:num_meal], patient._id, self.week)
-                self.write_csv(slots[num_meal:], patient._id, self.week +1)
+                self.to_mongo(slots[:num_meal], patient._id)
+                self.to_mongo(slots[num_meal:], patient._id)
+                # self.write_csv(slots[:num_meal], patient._id, self.week)
+                # self.write_csv(slots[num_meal:], patient._id, self.week +1)
                 update_next_order(patient._id,find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
@@ -331,22 +331,22 @@ class Optimizer:
         new_slots.append(slots[7])
         return new_slots
 
-    def to_mongo(self, mealinfo, patient_id, wk):
-        new_history = MealHistory(patient_id, wk)
+    def to_mongo(self, mealinfo, patient_id):
+        new_order = Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo], week_start_date=datetime.today(),week_end_date=datetime.today()+timedelta(weeks=1))
         # for 6 meals
-        if len(mealinfo) <= 8:
-            for i in range(len(mealinfo)):
-                new_history.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
+        # if len(mealinfo) <= 8:
+            # for i in range(len(mealinfo)):
+            #     new_order.meal_list['day_'+str(i+1)] = [mealinfo[i]['meal']._id]
         # for 12 meals
-        else:
-            for i in range(len(mealinfo)):
-                if not i % 2:
-                    new_history.meal_list['day_'+str(int(i/2) + 1)] = [mealinfo[i]['meal']._id]
-                else:
-                    new_history.meal_list['day_'+str(int(i/2) + 1)] += [mealinfo[i]['meal']._id]
+        # else:
+        #     for i in range(len(mealinfo)):
+        #         if not i % 2:
+        #             new_order.meal_list['day_'+str(int(i/2) + 1)] = [mealinfo[i]['meal']._id]
+        #         else:
+        #             new_order.meal_list['day_'+str(int(i/2) + 1)] += [mealinfo[i]['meal']._id]
             # for i in range(len(mealinfo)2):
-            #     new_history.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
-        his = add_meal_history(new_history, patient_id)
+            #     new_order.meal_list['day_'+str(i+1)] = [mealinfo[2*i]['meal']._id, mealinfo[2*i+1]['meal']._id]
+        his = add_order(new_order, patient_id)
         return True
 
     def write_csv(self,slots,patient_id,wk):
