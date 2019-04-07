@@ -87,8 +87,6 @@ def get_any(collection, attr, val):
 #     meal_id = []
 #     for meal in slots:
 #         meal_id.append(meal._id)
-
-
 def get_comorbidities(patient_id):
     li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
@@ -126,6 +124,17 @@ def add_order(order,id):
     # else:
     #     db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
     # return True
+
+def get_order(patient_id,week_start_date):
+    '''
+
+    :param patient_id: ObjectId()
+    :param week_start_date: date.date()
+    :return:
+    '''
+    # pdb.set_trace()
+    return list(db.orders.find({'patient_id':patient_id, 'week_start_date':week_start_date},{'patient_meal_id':1, '_id':0}))
+
 ################## OLD ##################33
 
 def add_patients(patients):
@@ -167,8 +176,6 @@ def add_meals(meal_list = [],pickle_name = ''):
         l.append(new_dict)
     meals.insert_many(l)
     return True
-
-
 
 def get_mealinfo_by_patient(id):
     mealinfo = db.mealInfo.find_one({'patient_id': id})
