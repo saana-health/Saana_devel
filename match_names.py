@@ -140,9 +140,9 @@ def match_frozenGarden(full_list):
     # pickle.dump(convert_dic,open('euphebe_change_'+DATE+'.p','wb'))
 
 def match_veestro(full_list):
-    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag313.csv')
+    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
 
-    convert_dic = {}
+    convert_dic = {'calories':'cals'}
     for each in convert_dic.values():
         matrix_columns.remove(each)
 
@@ -191,26 +191,29 @@ def match_veestro(full_list):
     return convert_dic
 
 def change_names(combined,convert_dic):
-    for meal in combined:
+    for meal in combined[:]:
         for ingredient in list(meal.ingredients.keys())[:]:
             for key_word in convert_dic.keys():
                 if key_word in ingredient:
                     #MANUAL
                     if key_word == 'pot' and 'potato' in ingredient:
                         continue
+                    combined.remove(meal)
                     meal.ingredients[convert_dic[key_word]] = meal.ingredients.pop(ingredient)
+                    combined.append(meal)
                     # print('changed {} --> {}'.format(ingredient,convert_dic[key_word]))
                     break
         for nutrition in list(meal.nutrition.keys())[:]:
             for key_word in convert_dic.keys():
                 if key_word in nutrition:
                     #MANUAL
-                    if convert_dic[key_word] == 'cals' and nutrition != 'cals':
-                        continue
+                    # if convert_dic[key_word] == 'cals' and nutrition != 'cals':
+                    #     continue
                     if nutrition == 'fatcals':
                         pdb.set_trace()
+                    combined.remove(meal)
                     meal.nutrition[convert_dic[key_word]] = meal.nutrition.pop(nutrition)
-                    # print('changed {} --> {}'.format(nutrition,convert_dic[key_word]))
+                    combined.append(meal)
     return combined
 
 if __name__ == "__main__":
