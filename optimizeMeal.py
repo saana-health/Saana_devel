@@ -300,8 +300,16 @@ class Optimizer:
 
     def _repeating_meals(self,patient_id,start_date):
         prev_order = get_order(patient_id,start_date + timedelta(weeks=-1))
-        # pdb.set_trace()
-        return None, None
+        prev_two_order = get_order(patient_id,start_date + timedelta(weeks=-2))
+        if prev_order == []:
+            prev_order = None
+        else:
+            prev_order = [self.meals[x] for x in prev_order[0]['patient_meal_id']]
+        if prev_two_order == []:
+            prev_twp_order = None
+        else:
+            prev_two_order = [self.meals[x] for x in prev_two_order[0]['patient_meal_id']]
+        return prev_order, prev_two_order
 
     def reorder_slots(self,slots):
         '''
@@ -396,7 +404,7 @@ if __name__ == "__main__":
     ################
     TEST = True
 
-    TODAY = find_tuesday(date.today(),1)
+    TODAY = find_tuesday(date.today(),2)
 
     op = Optimizer()
     op.optimize(TEST)
