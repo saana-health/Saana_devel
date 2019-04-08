@@ -3,7 +3,7 @@ import csv
 import pprint
 from pdb import set_trace
 from model import Patient
-from connectMongdo import get_any, add_patients, drop
+from connectMongo import get_any, add_patients, drop
 import ast
 import pickle
 import test

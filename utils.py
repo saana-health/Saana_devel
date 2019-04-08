@@ -6,36 +6,6 @@ from model import Meal, Tag, Patient
 from datetime import date, timedelta
 from difflib import SequenceMatcher
 
-# def export_mixpanel_to_csv(filename):
-#     TOKEN = '8cfc96a92162cdef9f20674d125c37f5'
-#     SECRET = '1261347a3eb35286683e32a2731e4f4d'
-#
-#     mp = Mixpanel(SECRET, token = TOKEN)
-#
-#     mp.export_people(filename,
-#                     {},
-#                     format='csv')
-#
-# def process_mixpanel_csv(filename):
-#     with open(filename) as csvfile:
-#         reader_list = list(csv.reader(csvfile))
-#         columns = [x.replace('$','') for x in reader_list[0]]
-#
-#         matrix = [[0 for x in range(len(reader_list[0]))] for y in range(len(reader_list))]
-#
-#         for i in range(len(reader_list)):
-#             for j in range(len(reader_list[i])):
-#                 content = reader_list[i][j]
-#                 content = content.replace("'",'')
-#                 if content and content[0] == '[':
-#                     if content[1] == 'u':
-#                         content = content.replace('$','').replace('[u','').replace('[','').replace(']','')
-#                 matrix[i][j] = content
-#
-#     with open ('mixpanelData.csv','wb',) as csvfile:
-#         writer = csv.writer(csvfile)
-#         writer.writerows(matrix)
-
 def unicodetoascii(text):
     print(text)
     uni2ascii = {
@@ -147,66 +117,6 @@ def create_histogram(combined,keywords,filter = [],filename = ''):
 
     print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
-
-def create_histogram_insoluble(combined):
-    '''
-
-    :param combined: [Meal]
-    :return:
-    '''
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from textwrap import wrap
-    ret = False
-    pair = {}
-    unit = ''
-    for meal in combined:
-        print(meal)
-        tot = 0.00
-        sol = 0.00
-        both = False
-        # if 'cannellini' in meal.name:
-        #     pdb.set_trace()
-        for nutrition in meal.nutrition.keys():
-            if 'totfib' in nutrition:
-                tot = float(meal.nutrition[nutrition].split(' ')[0])
-                if both:
-                    pair[meal.name] = tot - sol
-                    break
-                both = True
-            elif 'totsolfib' in nutrition:
-                sol = float(meal.nutrition[nutrition].split(' ')[0])
-                if both:
-                    pair[meal.name] = tot - sol
-                    break
-                both = True
-            else:
-                continue
-
-
-
-    x_label = ['\n'.join(wrap(l,35)) for l in pair.keys()]
-    # x_label = pair.keys()
-    y_label = pair.values()
-
-    sorted_x_label = [x for _,x in sorted(zip(y_label,x_label))]
-    ind = np.arange(len(x_label))
-
-    fig, ax = plt.subplots()
-
-    ax.barh(ind,sorted(y_label))
-    ax.set_yticks(ind)
-    ax.set_yticklabels(sorted_x_label)
-    for i,v in enumerate(y_label):
-        ax.text(v+3,i+0.25, str(v),color='blue',fontweight='bold')
-    plt.title('insoluable')
-    plt.tight_layout()
-    figure = plt.gcf()
-    figure.set_size_inches(16,12)
-
-    plt.savefig('figures/insoluableFib')
-    # plt.show()
-
 
 def meal_dict_to_class(meal):
     return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplier_id'], quantity = meal['quantity'])

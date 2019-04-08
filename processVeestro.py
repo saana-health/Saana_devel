@@ -90,5 +90,6 @@ if __name__ == '__main__':
     combined = combine_mealinfo(ingredient_meals, nutrition_meals, photo_meals)
     full_list = ingredient_list + nutrition_list
     convert_dic = match_veestro(full_list)
+    pdb.set_trace()
     combined2 = change_names(combined,convert_dic)
     insert_meal(combined)

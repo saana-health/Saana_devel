@@ -4,7 +4,7 @@ import pdb
 import itertools
 from model import Meal,Order, MealList, Patient
 import csv
-from connectMongo import add_order,get_all_meals, get_mealinfo_by_patient, get_all_tags, get_all_patients, get_any, update_next_order, get_order
+from connectMongo import add_order,get_all_meals, get_all_tags, get_all_patients, get_any, update_next_order, get_order
 from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
@@ -68,12 +68,12 @@ class Optimizer:
             #TODO: check subscription ()
             comorbidities = get_comorbidities(patient['_id'])
             disease = get_disease(patient['_id'])
-            sypmtoms = get_symptoms(patient['_id'])
+            symptoms = get_symptoms(patient['_id'])
             drugs = get_drugs(patient['_id'])
             # PROBABLY ERROR HERE IN DEPLOYMENT
-            name = patient['name']
-
-            new_patient = Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'], symptoms=sypmtoms, treatment_drugs=drugs)
+            name = 'Maggie'#patient['first_name']
+            new_patient = Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
+                                  symptoms=symptoms, treatment_drugs=drugs)
             patient_obj.append(new_patient)
 
         return patient_obj
@@ -124,9 +124,7 @@ class Optimizer:
             # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
             self.scoreboard_to_csv(score_board,patient._id)
             slots = self.choose_meal(score_board, repeat_one_week,num_meal)
-
             assert len(slots) == 15
-
             slots = self.reorder_slots(slots)
             if num_meal> 8:
                 end_date = find_tuesday(start_date,2)
@@ -134,14 +132,9 @@ class Optimizer:
                 self.write_csv(slots,patient._id,start_date,end_date)
                 update_next_order(patient._id,find_tuesday(today,2))
             else:
-                end_date = find_tuesday(start_date,2)
-                self.to_mongo(slots[:num_meal], patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,start_date,end_date)
-
-                next_start_date = end_date
                 end_date = find_tuesday(start_date,3)
-                self.to_mongo(slots[num_meal:], patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,next_start_date,end_date)
+                self.to_mongo(slots, patient._id,start_date,end_date)
+                self.write_csv(slots,patient._id,start_date,end_date)
                 update_next_order(patient._id,find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
@@ -179,7 +172,7 @@ class Optimizer:
                     if min_item in ing:
 
                         # If a unit is included in the value, get rid of it
-                        if not isinstance(full_meal_info[ing],(float,)):
+                        if not isinstance(full_meal_info[ing],(float,)) and not isinstance(full_meal_info[ing],int):
                             contain_val = float(full_meal_info[ing].split(' ')[0])
                         else:
                             contain_val = float(full_meal_info[ing])
@@ -192,8 +185,7 @@ class Optimizer:
                             score += DEDUCT_LT_MIN2
                         #if val < min1
                         elif contain_val < float(minimizes[min_item]['min1']):
-                            continue
-                            # score += DEDUCT_LT_MIN1
+                            score += DEDUCT_LT_MIN1
                         # This should never happen
                         else:
                             print('ERR')
@@ -310,30 +302,6 @@ class Optimizer:
         prev_order = get_order(patient_id,start_date + timedelta(weeks=-1))
         # pdb.set_trace()
         return None, None
-    #     '''
-    #     #TODO: fix wk_num
-    #     :param patient_id:
-    #     :return:
-    #     '''
-    #     wk_num = self.week
-    #     mealinfo = get_mealinfo_by_patient(patient_id)
-    #     prev_list = []
-    #     prev2_list = []
-    #     week1 = []
-    #     week2 = []
-    #     if mealinfo is None:
-    #         return None, None
-    #
-    #     if 'week_' + str(wk_num -1) in mealinfo.keys():
-    #             prev_week = mealinfo['week_'+str(wk_num -1)]
-    #             prev_list = list(set(itertools.chain(*[x for x in prev_week['meal_list'].values()])))
-    #             week1 = [self.meals[k] for k in prev_list]
-    #
-    #     if 'week_' + str(wk_num -2) in mealinfo.keys():
-    #         prev2_week = mealinfo['week_'+str(wk_num -2)]
-    #         prev2_list = list(set(itertools.chain(*[x for x in prev2_week['meal_list'].values()])))
-    #         week2 = [self.meals[k] for k in prev2_list]
-    #     return week1,week2
 
     def reorder_slots(self,slots):
         '''
@@ -352,7 +320,9 @@ class Optimizer:
         return new_slots
 
     def to_mongo(self, mealinfo, patient_id,start_date,end_date):
-        new_order = Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo], week_start_date=start_date, week_end_date=end_date)
+        new_order = Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo],\
+                          week_start_date=start_date, week_end_date=end_date)
+        add_order(new_order, patient_id)
         return True
 
     def write_csv(self,slots,patient_id,start_date,end_date):
@@ -362,7 +332,8 @@ class Optimizer:
             existing_order = [['ID','date','meal_name','minimize','prior','avoid','supplier']]
         for index in range(len(slots)):
             meal = slots[index]
-            row = [str(patient_id)[-5:],str(start_date+timedelta(days=index)),meal['meal'].name, meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplierID]
+            row = [str(patient_id)[-5:],str(start_date.date()+timedelta(days=index)),meal['meal'].name,\
+                   meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplierID]
             existing_order.append(row)
         with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
@@ -429,9 +400,9 @@ if __name__ == "__main__":
 
     op = Optimizer()
     op.optimize(TEST)
-    TODAY = find_tuesday(date.today(),2)
-
-    op = Optimizer()
-    op.optimize(TEST)
+    # TODAY = find_tuesday(date.today(),2)
+    #
+    # op = Optimizer()
+    # op.optimize(TEST)
 
 

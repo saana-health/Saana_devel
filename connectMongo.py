@@ -100,7 +100,7 @@ def get_symptoms(patient_id):
     return [list(x.values())[0] for x in li]
 
 def get_drugs(patient_id):
-    li = list(db.patient_drug.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
+    li = list(db.patient_drugs.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
 
 def get_all_meals():
@@ -135,14 +135,35 @@ def get_order(patient_id,week_start_date):
     # pdb.set_trace()
     return list(db.orders.find({'patient_id':patient_id, 'week_start_date':week_start_date},{'patient_meal_id':1, '_id':0}))
 
-################## OLD ##################33
-
 def add_patients(patients):
     if not isinstance(patients,(list,)):
         patients = [patients]
-    collection_patients = db.patients
-    pa = [{'name':x.name, 'treatment_drugs': x.treatment_drugs, 'Cancers':x.disease, 'symptoms':x.symptoms, 'comorbidities':x.comorbidities, 'next_order': str(x.next_order), 'plan': x.plan} for x in patients]
-    result = collection_patients.insert_many(pa)
+
+    for patient in patients:
+        user_id = list(db.users.find({'first_name':'Maggie'}))[0]['_id']
+        patient_id = list(db.patient.find({'user_id':user_id}))[0]['_id']
+        comos = []
+        drugs = []
+        symps = []
+        for como in patient.comorbidities:
+            row = {'patient_id':patient_id, 'comorbidity_id':como}
+            comos.append(row)
+        for drug in patient.treatment_drugs:
+            row = {'patient_id':patient_id, 'drug_id':drug}
+            drugs.append(row)
+        for symp in patient.symptoms:
+            row= {'patient_id': patient_id, 'symptom_id':symp}
+            symps.append(row)
+        db.patient_diseases.insert({'patient_id':patient_id, 'disease_id':patient.disease})
+        if drugs != []:
+            db.patient_drugs.insert_many(drugs)
+        if comos!= []:
+            db.patient_comorbidities.insert_many(comos)
+        if symps!= []:
+            db.patient_symptoms.insert_many(symps)
+
+################## OLD ##################33
+
 
 def add_tags(tag_dict):
     '''
@@ -185,7 +206,7 @@ def get_all_tags():
     return db.tags.find()
 
 def get_all_patients():
-    return db.patients.find()
+    return db.patient.find()
 
 def drop(collection):
     parser = getattr(db,collection)

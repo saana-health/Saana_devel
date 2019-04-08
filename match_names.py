@@ -160,9 +160,10 @@ def match_veestro(full_list):
                 #     tag_no_match.remove(tag_keyword)
 
     #for Euphebe - keys are for Euphebe and values for food tags matrix
-    keyword_dictionary = {'nut, nut butter':'nuts','brussels sprouts': 'brussel sprouts','vitamin k': 'vit k', 'insoluble fiber': 'totinfib','total fiber': 'totfib','turmeric (curcumin)': 'turmeric',\
-                          'peppers, bell': ['pepper, bell','bell pepper'], 'peppers, hot':['pepper, hot','jalapeno pepper','chili pepper','poblano pepper','serrano pepper'], 'spicy powders':\
-                              ['black pepper','curry, powder','cayenne']}
+    keyword_dictionary = {'nut, nut butter':'nuts','brussels sprouts': 'brussel sprouts','vitamin k': 'vit k', 'insoluble fiber':\
+        'totinfib','total fiber': 'totfib','turmeric (curcumin)': 'turmeric', 'peppers, bell': ['pepper, bell','bell pepper'],\
+                          'peppers, hot':['pepper, hot','jalapeno pepper','chili pepper','poblano pepper','serrano pepper'],\
+                          'spicy powders': ['black pepper','curry, powder','cayenne']}
 
     print('------semi manual--------')
     for tag_keyword in tag_no_match[:]:
