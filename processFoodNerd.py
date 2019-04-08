@@ -5,8 +5,9 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
-from connectMongdo import add_meals
+from connectMongo import insert_meal
 from utils import unicodetoascii
+from match_names import match_euphebe
 
 PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
 
@@ -39,18 +40,12 @@ def processNutrition(filename):
         prev_type = ''
         # loop through each row starting 3rd row
         for i in range(4,len(reader_list)):
-            pdb.set_trace()
             first_word = reader_list[i][0].split(' ')[0]
             if first_word  in ['Breakfast','Lunch','Dinner']:
                 type = first_word.lower()
             elif first_word != '':
                 name = reader_list[i][0].lower()
                 ingredient = reader_list[i][1].lower()#unicodetoascii(reader_list[i][1]).lower()
-
-                ### PYTHON 2
-                #name = unicodetoascii(reader_list[i][0]).lower()
-                # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                ###
 
                 if ingredient in convert_dic.keys():
                     ingredient = convert_dic[ingredient]
@@ -96,6 +91,7 @@ def processNutrition(filename):
 if __name__ == "__main__":
     # from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
+    insert_meal(meals)
     # from utils import create_histogram
     # create_histogram(meals,'tomato')
     # add_meals(meals)

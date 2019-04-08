@@ -4,7 +4,8 @@ import pdb
 import itertools
 from model import Meal,Order, MealList, Patient
 import csv
-from connectMongo import add_order,get_all_meals, get_all_tags, get_all_patients, get_any, update_next_order, get_order
+from connectMongo import add_order,get_all_meals, get_all_tags, get_all_patients, get_any, update_next_order,\
+    get_order,get_subscription, get_next_order
 from random import shuffle
 import os
 from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
@@ -70,6 +71,7 @@ class Optimizer:
             disease = get_disease(patient['_id'])
             symptoms = get_symptoms(patient['_id'])
             drugs = get_drugs(patient['_id'])
+            # pdb.set_trace()
             # PROBABLY ERROR HERE IN DEPLOYMENT
             name = 'Maggie'#patient['first_name']
             new_patient = Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
@@ -94,6 +96,8 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
+            patient.plan = get_subscription(patient._id)
+            patient.next_order = get_next_order(patient._id)
             today = self.today
             start_date = today
             assert today.weekday() == 1
@@ -124,6 +128,7 @@ class Optimizer:
             # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
             self.scoreboard_to_csv(score_board,patient._id)
             slots = self.choose_meal(score_board, repeat_one_week,num_meal)
+            # pdb.set_trace()
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
             if num_meal> 8:
@@ -196,7 +201,7 @@ class Optimizer:
             # prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
             for prior in priors.keys():
                 for ingredient in meal.ingredients.keys():
-                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] < meal.ingredients[ingredient]:
+                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] < float(meal.ingredients[ingredient]):
                         prior_list.append(prior)
                 for nutrition in meal.nutrition.keys():
                     if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] < float(meal.nutrition[nutrition].split(' ')[0]):
@@ -225,13 +230,53 @@ class Optimizer:
 
     def choose_meal(self,score_board,repeat_one_week, num_meal):
         # list for saving meals
-        slots = []
-        meal_num_per_supplier = {'Euphebe':0, 'FoodNerd': 0}
         num_repeat = 0
+        slots = []
+        bucket = {'Euphebe':[], 'FoodNerd': [], 'FrozenGarden':[], 'Veestro':[]}
         restart = False
-
         num_meal = 15
-        while len(slots) < num_meal:
+        five_meal_supplier = None
+        ten_meal_supplier = None
+
+        while True:
+            if len(bucket['Veestro']) == 15:
+                slots = bucket['Veestro']
+                break
+            if five_meal_supplier is None:
+                if len(bucket['FoodNerd']) == 5:
+                    five_meal_supplier = 'FoodNerd'
+                elif len(bucket['FrozenGarden']) == 5:
+                    five_meal_supplier = 'FrozenGarden'
+            if ten_meal_supplier is None:
+                if len(bucket['Veestro']) == 10:
+                    five_meal_supplier = 'Veestro'
+                elif len(bucket['Euphebe']) == 10:
+                    five_meal_supplier = 'Euphebe'
+            if None not in [five_meal_supplier, ten_meal_supplier]:
+                slots = five_meal_supplier[:5] + ten_meal_supplier[:10]
+                break
+
+
+            # if len(bucket['Veestro']) == 15:
+            #     slots = bucket['Veestro']
+            #     break
+            # elif len(bucket['Euphebe']) == 10:
+            #     ten_meal_supplier = 'Euphebe'
+            #     if len(bucket['FoodNerd']) == 5 and five_meal_supplier != 'Euphebe':
+            #         slots = bucket['Euphebe'] + bucket['FoodNerd']
+            #         break
+            #     elif len(bucket['FrozenGarden']) == 5:
+            #         slots = bucket['Euphebe'] + bucket['FrozenGarden']
+            #         break
+            # elif len(bucket['Veestro']) == 10:
+            #     ten_meal_supplier = 'Veestro'
+            #     if len(bucket['FoodNerd']) == 5:
+            #         slots = bucket['Veestro'] + bucket['FoodNerd']
+            #         break
+            #     elif len(bucket['FrozenGarden']) == 5:
+            #         slots = bucket['Veestro'] + bucket['FrozenGarden']
+            #         break
+
             sorted_scores = sorted(score_board.keys(), reverse=True)
             for score in sorted_scores:
 
@@ -241,15 +286,10 @@ class Optimizer:
                 for meal in score_board[score]:
 
                     supplier = meal['meal'].supplierID
+                    if meal['meal'].type.lower() == 'breakfast':
+                        continue
 
-                    if supplier == 'Euphebe' and meal_num_per_supplier[supplier] >= MEAL_PER_SUPPLIER_1:
-                            continue
-                    elif supplier == 'FoodNerd' and meal_num_per_supplier[supplier] >= MEAL_PER_SUPPLIER_2:
-                            continue
-
-                    # ADD meal
-                    # print('{}: -- {} -- chose'.format(score,meal))
-                    slots.append(meal)
+                    bucket[supplier].append(meal)
 
                     # Update score board for this week
                     score_board[score].remove(meal)
@@ -304,7 +344,10 @@ class Optimizer:
         if prev_order == []:
             prev_order = None
         else:
-            prev_order = [self.meals[x] for x in prev_order[0]['patient_meal_id']]
+            try:
+                prev_order = [self.meals[x] for x in prev_order[0]['patient_meal_id']]
+            except:
+                pdb.set_trace()
         if prev_two_order == []:
             prev_twp_order = None
         else:
@@ -377,6 +420,11 @@ if __name__ == "__main__":
     #MEAL PER SUPPLIER
     MEAL_PER_SUPPLIER_1 = 12
     MEAL_PER_SUPPLIER_2 = 0
+    EUPHEBE = 10
+    FOODNERD = 5
+    VEESTRO = 15,10
+    FROZENGARDEN = 5
+
 
     ## CAUTION: ALWAYS ADD NUMBERS IN CODE AS THEIR VALUES ARE NEGATIVES
     # MINUS
@@ -402,7 +450,7 @@ if __name__ == "__main__":
         pass
 
     ################
-    TEST = True
+    TEST = False
 
     TODAY = find_tuesday(date.today(),2)
 

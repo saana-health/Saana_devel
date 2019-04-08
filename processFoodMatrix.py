@@ -52,7 +52,6 @@ def processFoodMatrixCSV(filename):
                 elif is_number(row[j]):
                     master_dict[name]['prior'][columns[j].strip().lower()] = float(row[j])
 
-
     return master_dict, [x for x in list(set(columns)) if x != '']
 
 def is_number(num):

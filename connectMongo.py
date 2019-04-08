@@ -154,13 +154,33 @@ def add_patients(patients):
         for symp in patient.symptoms:
             row= {'patient_id': patient_id, 'symptom_id':symp}
             symps.append(row)
-        db.patient_diseases.insert({'patient_id':patient_id, 'disease_id':patient.disease})
+        db.patient_diseases.insert_one({'patient_id':patient_id, 'disease_id':patient.disease})
         if drugs != []:
             db.patient_drugs.insert_many(drugs)
         if comos!= []:
             db.patient_comorbidities.insert_many(comos)
         if symps!= []:
             db.patient_symptoms.insert_many(symps)
+
+def get_subscription(patient_id):
+    sub = list(db.patient_subscription.find({'patient_id':patient_id}))
+    if sub == []:
+        return False
+    subscription_id = sub[0]['subscription_id']
+    interval = list(db.mst_subscriptions.find({'_id':subscription_id}))[0]['interval_count']
+    if interval == 2:
+        return 7
+    elif interval == 1:
+        return 15
+    print('wrong subscription')
+    assert False
+
+def get_next_order(patient_id):
+    patient = db.patient.find({'_id':patient_id})[0]
+    if 'next_order' not in patient.keys():
+        return None
+    return patient['next_order']
+
 
 ################## OLD ##################33
 
@@ -220,7 +240,7 @@ def update_quantity():
 
 def update_next_order(patient_id, next_order):
     parser = db.patients.find()
-    return db.patients.update({'_id':patient_id},{'$set':{'next_order':str(next_order)}})
+    return db.patient.update({'_id':patient_id},{'$set':{'next_order':next_order}})
 
 if __name__ == "__main__":
     # test = get_any('mst_food_ingredients','name','shallots, fresh, chodpped')

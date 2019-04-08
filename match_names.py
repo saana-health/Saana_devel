@@ -208,8 +208,8 @@ def change_names(combined,convert_dic):
             for key_word in convert_dic.keys():
                 if key_word in nutrition:
                     #MANUAL
-                    # if convert_dic[key_word] == 'cals' and nutrition != 'cals':
-                    #     continue
+                    if convert_dic[key_word] == 'cals' and nutrition != 'cals':
+                        continue
                     if nutrition == 'fatcals':
                         pdb.set_trace()
                     combined.remove(meal)
