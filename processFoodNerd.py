@@ -7,12 +7,9 @@ from model import Meal
 from difflib import SequenceMatcher
 from connectMongo import insert_meal
 from utils import unicodetoascii
-from match_names import match_euphebe
+from match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
-
-def similar(a,b):
-    return SequenceMatcher(None,a,b).ratio() > 0.76
 
 def processNutrition(filename):
     '''
@@ -21,7 +18,6 @@ def processNutrition(filename):
     :return:
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
-    convert_dic = pickle.load(open('foodnerd_change.p' , 'rb'))
     columns = []
     units = []
     meals = []
@@ -33,31 +29,25 @@ def processNutrition(filename):
         is_name = True
 
         #first row
-        columns = [convert_dic[x.lower()] if x.lower() in convert_dic.keys() else x.lower().replace('.',',') for x in list(reader_list[1])]
-        # columns = [change_name(lookup_dict,x.replace('.',',')) for x in list(reader_list[1])]
-        units = [y.replace('\xc2\xb5g','ng') for y in list(reader_list[2])]
+        columns = [x.lower().replace('.',',') for x in list(reader_list[1])]
+        units = reader_list[2]
 
         prev_type = ''
         # loop through each row starting 3rd row
         for i in range(4,len(reader_list)):
             first_word = reader_list[i][0].split(' ')[0]
+            # Type
             if first_word  in ['Breakfast','Lunch','Dinner']:
                 type = first_word.lower()
+
+            # Meal name
             elif first_word != '':
                 name = reader_list[i][0].lower()
-                ingredient = reader_list[i][1].lower()#unicodetoascii(reader_list[i][1]).lower()
+                ingredient = reader_list[i][1].lower().replace('.',',')
 
-                if ingredient in convert_dic.keys():
-                    ingredient = convert_dic[ingredient]
-                else:
-                    ingredient = ingredient.replace('.',',')
-                try:
-                    ingredients[ingredient] = float(reader_list[i][3])*150
-                except:
-                    print(reader_list[i][3])
-                continue
-                if ingredient not in full_list:
-                    full_list.append(ingredient)
+                # TODO: grams measurement
+                ingredients[ingredient] = float(reader_list[i][3])*150
+                full_list.append(ingredient)
             elif first_word == '':
                 if reader_list[i][1] == 'TOTAL':
                     for j in range(4,len(reader_list[i])):
@@ -68,31 +58,18 @@ def processNutrition(filename):
                     ingredients = {}
                     nutritions = {}
                 elif '%' not in reader_list[i][1] and reader_list[i][1] != '':
-                    ### PYTHON 2
-                    # ingredient = change_name(lookup_dict,unicodetoascii(reader_list[i][1]))
-                    #unicodetoascii(reader_list[i][1]).lower()
-                    ###
-
-                    ingredient = reader_list[i][1].lower()
-                    # ingredient = change_name(lookup_dict, reader_list[i][1]))
-                    if ingredient in convert_dic.keys():
-                        ingredient = convert_dic[ingredient]
-                    else:
-                        ingredient = ingredient.replace('.',',')
-                    try:
-                        # TODO: conversion
+                    ingredient = reader_list[i][1].lower().replace('.',',')
+                    if reader_list[i][3] != '':
                         ingredients[ingredient] = float(reader_list[i][3])*150
-                    except:
-                        print(reader_list[i][3])
                     if ingredient not in full_list:
                         full_list.append(ingredient)
-    return meals, full_list + columns
+    return meals, list(set(full_list + columns))
 
 if __name__ == "__main__":
-    # from matchNames import change_name
     meals,full_list = processNutrition(PATH+'nutrition.csv')
+    convert_dic = match_euphebe(full_list)
+    changed_meals = change_names(meals,convert_dic)
     insert_meal(meals)
+
     # from utils import create_histogram
     # create_histogram(meals,'tomato')
-    # add_meals(meals)
-    # pdb.set_trace()

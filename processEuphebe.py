@@ -355,6 +355,5 @@ if __name__ == "__main__":
     combined = process(PATH, 'menu0328.csv', 'total2.csv')
     # histogram(combined)
 
-    drop('meal_infos')
+    # drop('meal_infos')
     insert_meal(combined)
-    # add_meals(combined)
