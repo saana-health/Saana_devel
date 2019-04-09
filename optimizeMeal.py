@@ -109,7 +109,7 @@ class Optimizer:
             score_board = {}
 
             # get all tags
-            tag_ids = patient.symptoms+[patient.disease]+patient.treatment_drugs+patient.comorbidities
+            tag_ids = patient.symptoms+patient.disease+patient.treatment_drugs+patient.comorbidities
             tags = get_any('tags','_id',tag_ids)
 
             # prepare tags
@@ -121,7 +121,6 @@ class Optimizer:
                 priors.update(tag['prior'])
 
             avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
-
             score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
 
             ####### Start choosing meals ########
@@ -201,10 +200,10 @@ class Optimizer:
             # prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
             for prior in priors.keys():
                 for ingredient in meal.ingredients.keys():
-                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] < float(meal.ingredients[ingredient]):
+                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.ingredients[ingredient]):
                         prior_list.append(prior)
                 for nutrition in meal.nutrition.keys():
-                    if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] < float(meal.nutrition[nutrition].split(' ')[0]):
+                    if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.nutrition[nutrition].split(' ')[0]):
                         prior_list.append(prior)
 
             prior_list = list(set(prior_list))
@@ -255,27 +254,6 @@ class Optimizer:
             if None not in [five_meal_supplier, ten_meal_supplier]:
                 slots = five_meal_supplier[:5] + ten_meal_supplier[:10]
                 break
-
-
-            # if len(bucket['Veestro']) == 15:
-            #     slots = bucket['Veestro']
-            #     break
-            # elif len(bucket['Euphebe']) == 10:
-            #     ten_meal_supplier = 'Euphebe'
-            #     if len(bucket['FoodNerd']) == 5 and five_meal_supplier != 'Euphebe':
-            #         slots = bucket['Euphebe'] + bucket['FoodNerd']
-            #         break
-            #     elif len(bucket['FrozenGarden']) == 5:
-            #         slots = bucket['Euphebe'] + bucket['FrozenGarden']
-            #         break
-            # elif len(bucket['Veestro']) == 10:
-            #     ten_meal_supplier = 'Veestro'
-            #     if len(bucket['FoodNerd']) == 5:
-            #         slots = bucket['Veestro'] + bucket['FoodNerd']
-            #         break
-            #     elif len(bucket['FrozenGarden']) == 5:
-            #         slots = bucket['Veestro'] + bucket['FrozenGarden']
-            #         break
 
             sorted_scores = sorted(score_board.keys(), reverse=True)
             for score in sorted_scores:
@@ -450,7 +428,7 @@ if __name__ == "__main__":
         pass
 
     ################
-    TEST = False
+    TEST = True
 
     TODAY = find_tuesday(date.today(),2)
 

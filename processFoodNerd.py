@@ -66,10 +66,12 @@ def processNutrition(filename):
     return meals, list(set(full_list + columns))
 
 if __name__ == "__main__":
+    print('Adding FoodNerd meals')
     meals,full_list = processNutrition(PATH+'nutrition.csv')
     convert_dic = match_euphebe(full_list)
     changed_meals = change_names(meals,convert_dic)
     insert_meal(meals)
+    print('Done')
 
     # from utils import create_histogram
     # create_histogram(meals,'tomato')

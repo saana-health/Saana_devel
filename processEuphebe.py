@@ -351,9 +351,8 @@ def histogram(combined):
 
 
 if __name__ == "__main__":
+    print('Adding Euphebe meals')
     from connectMongo import insert_meal
     combined = process(PATH, 'menu0328.csv', 'total2.csv')
-    # histogram(combined)
-
-    # drop('meal_infos')
     insert_meal(combined)
+    print('Done')

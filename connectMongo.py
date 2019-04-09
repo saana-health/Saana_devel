@@ -115,15 +115,6 @@ def get_all_meals():
 
 def add_order(order,id):
     db.orders.insert_one(order.to_dic())
-    # existing_history = db.mealInfo.find_one({'patient_id': id})
-    # if existing_history is None:
-    #     meal_history_dict = {}
-    #     meal_history_dict['patient_id'] = meal_history.patient_id
-    #     meal_history_dict['week_' + str(meal_history.week_num)] = {'meal_list': meal_history.meal_list}
-    #     db.mealInfo.insert_one(meal_history_dict)
-    # else:
-    #     db.mealInfo.update({'patient_id':id},{'$set': {'week_'+str(meal_history.week_num): {'meal_list':meal_history.meal_list}}})
-    # return True
 
 def get_order(patient_id,week_start_date):
     '''
@@ -141,7 +132,7 @@ def add_patients(patients):
 
     for patient in patients:
         user_id = list(db.users.find({'first_name':'Maggie'}))[0]['_id']
-        patient_id = list(db.patient.find({'user_id':user_id}))[0]['_id']
+        patient_id = list(db.patients.find({'user_id':user_id}))[0]['_id']
         comos = []
         drugs = []
         symps = []
@@ -176,7 +167,7 @@ def get_subscription(patient_id):
     assert False
 
 def get_next_order(patient_id):
-    patient = db.patient.find({'_id':patient_id})[0]
+    patient = db.patients.find({'_id':patient_id})[0]
     if 'next_order' not in patient.keys():
         return None
     return patient['next_order']
@@ -226,7 +217,7 @@ def get_all_tags():
     return db.tags.find()
 
 def get_all_patients():
-    return db.patient.find()
+    return db.patients.find()
 
 def drop(collection):
     parser = getattr(db,collection)
@@ -240,7 +231,7 @@ def update_quantity():
 
 def update_next_order(patient_id, next_order):
     parser = db.patients.find()
-    return db.patient.update({'_id':patient_id},{'$set':{'next_order':next_order}})
+    return db.patients.update({'_id':patient_id},{'$set':{'next_order':next_order}})
 
 if __name__ == "__main__":
     # test = get_any('mst_food_ingredients','name','shallots, fresh, chodpped')
