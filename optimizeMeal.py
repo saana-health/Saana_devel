@@ -238,6 +238,7 @@ class Optimizer:
         ten_meal_supplier = None
 
         while True:
+            # print(1)
             if len(bucket['Veestro']) == 15:
                 slots = bucket['Veestro']
                 break
