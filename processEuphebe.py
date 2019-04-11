@@ -6,7 +6,6 @@ import os
 from model import Meal
 from difflib import SequenceMatcher
 import re
-from connectMongdo import add_meals, drop
 import random
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
@@ -21,8 +20,6 @@ processMenu()
 '''
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
-
-
 
 def processMenu(filename):
     '''
@@ -348,7 +345,6 @@ def histogram(combined):
     # create_histogram(combined,['onion','tomato'])
     # create_histogram(combined,['garlic'])
     # create_histogram(combined,['tempeh'])
-
 
 if __name__ == "__main__":
     print('Adding Euphebe meals')

@@ -62,16 +62,21 @@ def list_obj():
 
 def check_obj(bucket_name,key):
     try:
+        try:
+            list_obj()
+        except:
+            print('Possible error with credentials')
         s3.Object(bucket_name,key).load()
         return True
     except:
+        print('Error getting s3.object.load()')
         return False
 
 def get_url(bucket_name,key):
     if check_obj(bucket_name,key):
         return 'https://'+bucket_name+'.s3.amazonaws.com/'+key.replace(' ','+')
     else:
-        return ''
+        return 'https://'+bucket_name+'.s3.amazonaws.com/squareLogo'
 
 def get_image_url(menu_name):
     return get_url(BUCKET,menu_name)
@@ -88,7 +93,7 @@ BUCKET = 'minjoon-test-bucket'
 
 if __name__ == "__main__":
     extra_arg = {'ACL':'public-read','ContentType':'image/png','ContentDisposition':'attachment'}
-    s3.meta.client.upload_file('/home/min/Downloads/Saana-Logo-final.png', BUCKET, 'logo',extra_arg)
+    s3.meta.client.upload_file('/home/min/Downloads/saana-square-white.png', BUCKET, 'squareLogo',extra_arg)
     ## EUPHEBE
     # euphebe_path = os.path.join(os.getcwd()+'/euphebe_photos/')
     # upload_image(euphebe_path,match_name())

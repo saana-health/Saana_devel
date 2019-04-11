@@ -5,7 +5,6 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
-from connectMongdo import add_meals
 # from utils import unicodetoascii
 import re
 
