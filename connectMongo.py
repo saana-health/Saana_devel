@@ -14,7 +14,6 @@ password = urllib.parse.quote_plus(DATABASE_PASSWORD)
 
 client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password))
 db = client.saana_db
-pdb.set_trace()
 ################ NEW ################a
 
 def insert_meal(meals):
