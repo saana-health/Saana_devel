@@ -2,10 +2,19 @@ from pymongo import MongoClient
 import pickle
 import pdb
 import pprint
+import os
+import urllib.parse
 from model import Meal, MealHistory,MealList
 
-client = MongoClient()
+DATABASE_USER = os.environ.get("DATABASE_USER",'')
+DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD",'')
+
+username = urllib.parse.quote_plus(DATABASE_USER)
+password = urllib.parse.quote_plus(DATABASE_PASSWORD)
+
+client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password))
 db = client.saana_db
+pdb.set_trace()
 ################ NEW ################a
 
 def insert_meal(meals):

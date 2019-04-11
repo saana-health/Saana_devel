@@ -9,6 +9,10 @@ s3 = boto3.resource('s3')
 client= boto3.client('s3')
 
 def match_name():
+    '''
+    function for matching images with menus for EUPHEBE
+    :return: {menu_name:filename}
+    '''
     mypath = os.path.join(os.getcwd()+'/euphebe_photos/')
     filenames = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath,f))]
 
@@ -65,6 +69,7 @@ def check_obj(bucket_name,key):
         try:
             list_obj()
         except:
+            pdb.set_trace()
             print('Possible error with credentials')
         s3.Object(bucket_name,key).load()
         return True

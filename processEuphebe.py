@@ -287,18 +287,6 @@ def combine_nutrition(mapped):
                     new_nutrition[nutrition] = str(float(new_nutrition[nutrition].split(' ')[0]) + float(val.split(' ')[0])) + ' ' +val.split(' ')[1]
                 else:
                     new_nutrition[nutrition] = val
-                ######## ERROR ###########
-                # try:
-                #     # pdb.set_trace()
-                #     new_nutrition[nutrition] += str(float(new_nutrition[nutrition].split[0]) + float(item.split(' ')[0])) + item.split(' ')[1]
-                # # Create a new key/value if doesnt exist
-                # except:
-                #     new_nutrition[nutrition] = item.nutrition[nutrition]
-            # for each in new_nutrition:
-            #     if 'insoluble fiber' not in new_nutrition.keys():
-            #         # pdb.set_trace()
-            #         if 'insoluble fiber' not in item.nutrition.keys():
-            #             pdb.set_trace()
         new_meal.nutrition = new_nutrition
         new_meal.ingredients = new_ingredients
         new_list.append(new_meal)
