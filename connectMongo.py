@@ -12,7 +12,7 @@ DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD",'')
 username = urllib.parse.quote_plus(DATABASE_USER)
 password = urllib.parse.quote_plus(DATABASE_PASSWORD)
 
-client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password))
+client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password), authSource='saana_db')
 db = client.saana_db
 ################ NEW ################a
 
