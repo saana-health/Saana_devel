@@ -19,6 +19,7 @@ def processNutrition(filename):
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
     from s3bucket import get_image_url
+    from connectMongo import get_supplier
     columns = []
     units = []
     meals = []
@@ -54,7 +55,7 @@ def processNutrition(filename):
                     for j in range(4,len(reader_list[i])):
                         if reader_list[i][j].replace('.','').isdigit() and float(reader_list[i][j]) != 0:
                             nutritions[columns[j]] = str(float(reader_list[i][j])) + ' ' + units[j]
-                    new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = 'FoodNerd', image = get_image_url(name))
+                    new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = get_supplier('FoodNerd')['_id'], image = get_image_url(name))
                     meals.append(new_meal)
                     ingredients = {}
                     nutritions = {}

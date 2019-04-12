@@ -82,18 +82,6 @@ def get_any(collection, attr, val):
     else:
         return None
 
-# def add_user()
-
-# def add_order(slots,id,start_date,end_date):
-#     '''
-#
-#     :param order: [Meal()] - slots
-#     :param id:
-#     :return:
-#     '''
-#     meal_id = []
-#     for meal in slots:
-#         meal_id.append(meal._id)
 def get_comorbidities(patient_id):
     li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
@@ -112,13 +100,6 @@ def get_drugs(patient_id):
 
 def get_all_meals():
     return list(db.meal_infos.find())
-    # cursor = db.meal_infos.find()
-    # meals = MealList()
-    # for meal in cursor:
-    #     # meals.append(Meal().import_dict(meal))
-    #     meals.append(meal)
-    #
-    # return meals
 
 def add_order(order,id):
     db.orders.insert_one(order.to_dic())
@@ -138,7 +119,7 @@ def add_patients(patients):
         patients = [patients]
 
     for patient in patients:
-        user_id = db.users.insert_one({'name':patient.name}).inserted_id
+        user_id = db.users.insert_one({'name':patient.name, 'role':'patient'}).inserted_id
         patient_id = db.patients.insert_one({'user_id':user_id}).inserted_id
         subscription_id = db.mst_subscriptions.find_one({'interval_count':2})['_id']
         patient_subscription_id = db.patient_subscription.insert_one({'patient_id':patient_id, 'subscription_id':subscription_id,\
@@ -184,9 +165,20 @@ def get_next_order(patient_id):
         return None
     return patient['next_order']
 
+def update_next_order(patient_id, next_order):
+    parser = db.patients.find()
+    return db.patients.update({'_id':patient_id},{'$set':{'next_order':next_order}})
+
+def get_all_patients():
+    return db.patients.find()
+
+def add_supplier(name):
+    return db.users.insert_one({'first_name':name, 'role':'supplier'})
+
+def get_supplier(name):
+    return db.users.find_one({'first_name':name})
 
 ################## OLD ##################33
-
 
 def add_tags(tag_dict):
     '''
@@ -198,38 +190,12 @@ def add_tags(tag_dict):
     result = tags.insert_many(tag_dict.values())
     return True
 
-def add_meals(meal_list = [],pickle_name = ''):
-    '''
-
-    :param pickle_name: (str)name of the pickle
-    :return: True
-    '''
-    if not meal_list:
-        meal_list = pickle.load( open(pickle_name,'rb'))
-    meals = db.meals
-
-    l = []
-    for each in meal_list:
-        new_dict = {}
-        new_dict['name'] = each.name
-        new_dict['nutrition'] = each.nutrition
-        new_dict['ingredients'] = each.ingredients
-        new_dict['supplierID'] = each.supplierID
-        new_dict['quantity'] = each.quantity
-        new_dict['type'] = each.type
-        l.append(new_dict)
-    meals.insert_many(l)
-    return True
-
 def get_mealinfo_by_patient(id):
     mealinfo = db.mealInfo.find_one({'patient_id': id})
     return mealinfo
 
 def get_all_tags():
     return db.tags.find()
-
-def get_all_patients():
-    return db.patients.find()
 
 def drop(collection):
     parser = getattr(db,collection)
@@ -241,9 +207,7 @@ def update_quantity():
     for each in parser:
         db.meals.update({'_id': each['_id']},{'$set':{'quantity':random.randint(0,10)}})
 
-def update_next_order(patient_id, next_order):
-    parser = db.patients.find()
-    return db.patients.update({'_id':patient_id},{'$set':{'next_order':next_order}})
+
 
 if __name__ == "__main__":
     # test = get_any('mst_food_ingredients','name','shallots, fresh, chodpped')

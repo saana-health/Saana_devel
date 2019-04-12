@@ -20,6 +20,7 @@ def processNutrition(filename):
     :return:
     '''
     from s3bucket import get_image_url
+    from connectMongo import get_supplier
     with open(filename) as csvfile:
         ingredients = {}
         nutritions = {}
@@ -37,7 +38,7 @@ def processNutrition(filename):
             if units[ind] == '' and columns[ind] != 'calories':
                 continue
             nutritions[columns[ind]] = reader_list[-2][ind].replace('.',',') + ' ' + units[ind]
-        new_meal = Meal(name = meal_name, ingredients=ingredients, nutrition= nutritions, supplierID='FrozenGarden', image=get_image_url(meal_name))
+        new_meal = Meal(name = meal_name, ingredients=ingredients, nutrition= nutritions, supplierID=get_supplier('FrozenGarden')['_id'], image=get_image_url(meal_name))
         return new_meal, list(set(list(ingredients.keys()) + columns))
 
 def process():

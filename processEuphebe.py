@@ -267,10 +267,11 @@ def combine_nutrition(mapped):
     #         if 'insoluble fiber' not in item.nutrition.keys():
     #             # print(item)
     from s3bucket import get_image_url
+    from connectMongo import get_supplier
     new_list = []
     # loop through
     for menu_name in mapped.keys():
-        new_meal = Meal(name = menu_name, supplierID = 'Euphebe', image = get_image_url(menu_name))
+        new_meal = Meal(name = menu_name, supplierID = get_supplier('Euphebe')['_id'], image = get_image_url(menu_name))
         new_nutrition = {}
         new_ingredients = {}
         for item in mapped[menu_name]:
