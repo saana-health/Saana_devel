@@ -119,7 +119,7 @@ def add_patients(patients):
         patients = [patients]
 
     for patient in patients:
-        user_id = db.users.insert_one({'name':patient.name, 'role':'patient'}).inserted_id
+        user_id = db.users.insert_one({'first_name':patient.name, 'role':'patient'}).inserted_id
         patient_id = db.patients.insert_one({'user_id':user_id}).inserted_id
         subscription_id = db.mst_subscriptions.find_one({'interval_count':2})['_id']
         patient_subscription_id = db.patient_subscription.insert_one({'patient_id':patient_id, 'subscription_id':subscription_id,\
@@ -173,7 +173,7 @@ def get_all_patients():
     return db.patients.find()
 
 def add_supplier(name):
-    return db.users.insert_one({'first_name':name, 'role':'supplier'})
+    return db.users.insert_one({'first_name':name, 'last_name':name, 'email': name+'@example.com','role':'supplier'})
 
 def get_supplier(name):
     return db.users.find_one({'first_name':name})
