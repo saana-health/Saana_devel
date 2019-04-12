@@ -14,7 +14,6 @@ password = urllib.parse.quote_plus(DATABASE_PASSWORD)
 
 client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password), authSource='saana_db')
 db = client.saana_db
-################ NEW ################a
 
 def insert_meal(meals):
     '''
@@ -139,8 +138,13 @@ def add_patients(patients):
         patients = [patients]
 
     for patient in patients:
-        user_id = list(db.users.find({'first_name':'Maggie'}))[0]['_id']
-        patient_id = list(db.patients.find({'user_id':user_id}))[0]['_id']
+        user_id = db.users.insert_one({'name':patient.name}).inserted_id
+        patient_id = db.patients.insert_one({'user_id':user_id}).inserted_id
+        subscription_id = db.mst_subscriptions.find_one({'interval_count':2})['_id']
+        patient_subscription_id = db.patient_subscription.insert_one({'patient_id':patient_id, 'subscription_id':subscription_id,\
+                                                                      'status':'active'})
+
+
         comos = []
         drugs = []
         symps = []

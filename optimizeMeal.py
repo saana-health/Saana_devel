@@ -102,7 +102,7 @@ class Optimizer:
             start_date = today
             assert today.weekday() == 1
             num_meal = patient.plan
-            if not test and patient.next_order != today:
+            if patient.next_order is not None and not test and patient.next_order != today:
                 continue
 
             print('Processing   {}  on {}!'.format(patient.name,str(today)))
@@ -127,7 +127,6 @@ class Optimizer:
             # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
             self.scoreboard_to_csv(score_board,patient._id)
             slots = self.choose_meal(score_board, repeat_one_week,num_meal)
-            # pdb.set_trace()
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
             if num_meal> 8:
@@ -238,7 +237,7 @@ class Optimizer:
         ten_meal_supplier = None
 
         while True:
-            # print(1)
+
             if len(bucket['Veestro']) == 15:
                 slots = bucket['Veestro']
                 break
@@ -249,11 +248,11 @@ class Optimizer:
                     five_meal_supplier = 'FrozenGarden'
             if ten_meal_supplier is None:
                 if len(bucket['Veestro']) == 10:
-                    five_meal_supplier = 'Veestro'
+                    ten_meal_supplier = 'Veestro'
                 elif len(bucket['Euphebe']) == 10:
-                    five_meal_supplier = 'Euphebe'
+                    ten_meal_supplier = 'Euphebe'
             if None not in [five_meal_supplier, ten_meal_supplier]:
-                slots = five_meal_supplier[:5] + ten_meal_supplier[:10]
+                slots = bucket[five_meal_supplier][:5] + bucket[ten_meal_supplier][:10]
                 break
 
             sorted_scores = sorted(score_board.keys(), reverse=True)
@@ -421,8 +420,6 @@ if __name__ == "__main__":
     # PLUS
     ADD_PRIOR = 10
 
-    from connectMongdo import drop
-    drop('orders')
     try:
         os.remove('masterOrder/masterorder.csv')
     except:
