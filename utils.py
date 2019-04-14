@@ -193,11 +193,11 @@ def similar(a,b,r):
 
 def suppliers():
     from connectMongo import add_supplier
-    add_supplier('Euphebe')
-    add_supplier('FoodNerd')
-    add_supplier('Veestro')
-    add_supplier('FrozenGarden')
-    # add_supplier('FoodFlo')
+    # add_supplier('Euphebe')
+    # add_supplier('FoodNerd')
+    # add_supplier('Veestro')
+    # add_supplier('FrozenGarden')
+    add_supplier('FoodFlo')
 
 if __name__ == "__main__":
     # auto_add_meal()
