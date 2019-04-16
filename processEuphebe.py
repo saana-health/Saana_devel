@@ -310,7 +310,7 @@ def process(path,menu_filename, nutrition_filename):
     return combined
 
 def histogram(combined):
-    from utils import create_histogram_insoluble, create_histogram
+    from utils import create_histogram
     # # ## Bell peppers
     create_histogram(combined,['pepper'],['jalapeno','serrano','poblano','chili','flake','curry','black','hot'],\
                      filename='Bell peppers (red, green, yellow, bell')

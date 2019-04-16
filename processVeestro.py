@@ -4,7 +4,7 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
-from connectMongo import get_ingredient,insert_meal
+from connectMongo import insert_meal
 from utils import similar
 from match_names import match_euphebe, change_names
 

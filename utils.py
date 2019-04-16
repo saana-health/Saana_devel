@@ -191,17 +191,14 @@ def similar(a,b,r):
     '''
     return SequenceMatcher(None,a,b).ratio() > r
 
-def suppliers():
-    from connectMongo import add_supplier
-    # add_supplier('Euphebe')
-    # add_supplier('FoodNerd')
-    # add_supplier('Veestro')
-    # add_supplier('FrozenGarden')
-    add_supplier('FoodFlo')
+def add_suppliers():
+    import connectMongo
+    for name in ['Euphebe','FoodNerd','Veestro','FrozenGarden','FoodFlo']:
+        connectMongo.db.users.insert_one({'first_name':name, 'email': name+'@example.com', 'role':'supplier'})
 
 if __name__ == "__main__":
     # auto_add_meal()
     # from maggie import add_maggie
     # add_maggie()
     # add_dummy_patients()
-    suppliers()
+    add_suppliers()

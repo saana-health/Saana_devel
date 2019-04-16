@@ -5,7 +5,6 @@ import csv
 import connectMongo
 import os
 import utils
-import pprint
 from bson import ObjectId
 from datetime import date, timedelta, datetime
 
@@ -357,7 +356,7 @@ class Optimizer:
     def to_mongo(self, mealinfo, patient_id,start_date,end_date):
         new_order = model.Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo],\
                           week_start_date=start_date, week_end_date=end_date)
-        connectMongo.add_order(new_order, patient_id)
+        connectMongo.db.orders.insert_one(new_order.class_to_dict())
         return True
 
     def write_csv(self,slots,patient_id,start_date,end_date):
