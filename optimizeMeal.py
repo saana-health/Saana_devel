@@ -1,18 +1,13 @@
-from pymongo import MongoClient
-from bson.objectid import ObjectId
 import pdb
 import itertools
-from model import Meal,Order, MealList, Patient
+import model
 import csv
-from connectMongo import add_order,get_all_meals, get_all_tags, get_all_patients, get_any, update_next_order,\
-    get_order,get_subscription, get_next_order
-from random import shuffle
+import connectMongo
 import os
-from utils import meal_dict_to_class, tag_dict_to_class, patient_dict_to_class, find_tuesday
+import utils
 import pprint
+from bson import ObjectId
 from datetime import date, timedelta, datetime
-import time
-DATE = time.ctime()[4:10].replace(' ','_')
 
 class Optimizer:
 
@@ -31,18 +26,18 @@ class Optimizer:
         '''
         hash_meal = {}
         # meals = [meal for meal in get_all_meals()]
-        temp_meals= get_all_meals()
+        temp_meals= connectMongo.get_all_meals()
         meals = []
         for temp in temp_meals:
             ingredients = {}
             for ingredient in temp['ingredients']:
-                name = get_any('mst_food_ingredients','_id',ingredient['food_ingredient_id'])['name']
+                name = connectMongo.get_any('mst_food_ingredients','_id',ingredient['food_ingredient_id'])['name']
 
                 ingredients[name] = ingredient['quantity']
             temp['ingredients'] = ingredients
             meals.append(temp)
         for meal in meals:
-            hash_meal[meal['_id']] = meal_dict_to_class(meal)
+            hash_meal[meal['_id']] = utils.meal_dict_to_class(meal)
         return hash_meal
 
     def _get_tags(self):
@@ -51,9 +46,9 @@ class Optimizer:
         :return: {_id: Tag()}
         '''
         hash_tag = {}
-        tags = [tag for tag in get_all_tags()]
+        tags = [tag for tag in connectMongo.get_all_tags()]
         for tag in tags:
-            hash_tag[tag['_id']] = tag_dict_to_class(tag)
+            hash_tag[tag['_id']] = utils.tag_dict_to_class(tag)
         return hash_tag
 
     #######CHANGED#########
@@ -64,7 +59,7 @@ class Optimizer:
         '''
         patient_obj = []
         from connectMongo import get_comorbidities, get_drugs, get_symptoms, get_disease
-        patients = get_all_patients()
+        patients = connectMongo.get_all_patients()
         for patient in patients:
             #TODO: check subscription ()
             comorbidities = get_comorbidities(patient['_id'])
@@ -74,7 +69,7 @@ class Optimizer:
             # pdb.set_trace()
             # PROBABLY ERROR HERE IN DEPLOYMENT
             name = 'Maggie'#patient['first_name']
-            new_patient = Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
+            new_patient = model.Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
                                   symptoms=symptoms, treatment_drugs=drugs)
             patient_obj.append(new_patient)
 
@@ -96,8 +91,8 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
-            patient.plan = get_subscription(patient._id)
-            patient.next_order = get_next_order(patient._id)
+            patient.plan = connectMongo.get_subscription(patient._id)
+            patient.next_order = connectMongo.get_next_order(patient._id)
             today = self.today
             start_date = today
             assert today.weekday() == 1
@@ -110,7 +105,7 @@ class Optimizer:
 
             # get all tags
             tag_ids = patient.symptoms+patient.disease+patient.treatment_drugs+patient.comorbidities
-            tags = get_any('tags','_id',tag_ids)
+            tags = connectMongo.get_any('tags','_id',tag_ids)
 
             # prepare tags
             minimizes = {}
@@ -120,7 +115,7 @@ class Optimizer:
             for tag in tags:
                 priors.update(tag['prior'])
 
-            avoids = list(set(itertools.chain(*[tag_dict_to_class(tag).avoid for tag in tags])))
+            avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
             score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
 
             ####### Start choosing meals ########
@@ -130,15 +125,15 @@ class Optimizer:
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
             if num_meal> 8:
-                end_date = find_tuesday(start_date,2)
+                end_date = utils.find_tuesday(start_date,2)
                 self.to_mongo(slots,patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
-                update_next_order(patient._id,find_tuesday(today,2))
+                connectMongo.update_next_order(patient._id,utils.find_tuesday(today,2))
             else:
-                end_date = find_tuesday(start_date,3)
+                end_date = utils.find_tuesday(start_date,3)
                 self.to_mongo(slots, patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
-                update_next_order(patient._id,find_tuesday(today,3))
+                connectMongo.update_next_order(patient._id,utils.find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
@@ -230,7 +225,18 @@ class Optimizer:
         # list for saving meals
         num_repeat = 0
         slots = []
-        bucket = {'Euphebe':[], 'FoodNerd': [], 'FrozenGarden':[], 'Veestro':[]}
+        # bucket = {'Euphebe': [], 'FoodNerd': [], 'Veestro': [], 'FrozenGarden': []}
+        bucket = {}
+        suppliers = connectMongo.get_many('users','role','supplier')
+
+        # manual matching suppliers with their ID
+        Veestro = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Veestro'][0]
+        Euphebe = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Euphebe'][0]
+        FoodNerd = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FoodNerd'][0]
+        FrozenGarden = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FrozenGarden'][0]
+
+        for supplier in [x['_id'] for x in suppliers]:
+            bucket[supplier] = []
         restart = False
         num_meal = 15
         five_meal_supplier = None
@@ -238,19 +244,19 @@ class Optimizer:
 
         while True:
 
-            if len(bucket['Veestro']) == 15:
-                slots = bucket['Veestro']
+            if len(bucket[Veestro]) == 15:
+                slots = bucket[Veestro]
                 break
             if five_meal_supplier is None:
-                if len(bucket['FoodNerd']) == 5:
-                    five_meal_supplier = 'FoodNerd'
-                elif len(bucket['FrozenGarden']) == 5:
-                    five_meal_supplier = 'FrozenGarden'
+                if len(bucket[FoodNerd]) == 5:
+                    five_meal_supplier = FoodNerd
+                elif len(bucket[FrozenGarden]) == 5:
+                    five_meal_supplier = FrozenGarden
             if ten_meal_supplier is None:
-                if len(bucket['Veestro']) == 10:
-                    ten_meal_supplier = 'Veestro'
-                elif len(bucket['Euphebe']) == 10:
-                    ten_meal_supplier = 'Euphebe'
+                if len(bucket[Veestro]) == 10:
+                    ten_meal_supplier = Veestro
+                elif len(bucket[Euphebe]) == 10:
+                    ten_meal_supplier = Euphebe
             if None not in [five_meal_supplier, ten_meal_supplier]:
                 slots = bucket[five_meal_supplier][:5] + bucket[ten_meal_supplier][:10]
                 break
@@ -317,8 +323,8 @@ class Optimizer:
         return slots
 
     def _repeating_meals(self,patient_id,start_date):
-        prev_order = get_order(patient_id,start_date + timedelta(weeks=-1))
-        prev_two_order = get_order(patient_id,start_date + timedelta(weeks=-2))
+        prev_order = connectMongo.get_order(patient_id,start_date + timedelta(weeks=-1))
+        prev_two_order = connectMongo.get_order(patient_id,start_date + timedelta(weeks=-2))
         if prev_order == []:
             prev_order = None
         else:
@@ -349,9 +355,9 @@ class Optimizer:
         return new_slots
 
     def to_mongo(self, mealinfo, patient_id,start_date,end_date):
-        new_order = Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo],\
+        new_order = model.Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo],\
                           week_start_date=start_date, week_end_date=end_date)
-        add_order(new_order, patient_id)
+        connectMongo.add_order(new_order, patient_id)
         return True
 
     def write_csv(self,slots,patient_id,start_date,end_date):
@@ -428,7 +434,7 @@ if __name__ == "__main__":
     ################
     TEST = True
 
-    TODAY = find_tuesday(date.today(),2)
+    TODAY = utils.find_tuesday(date.today(),2)
 
     op = Optimizer()
     op.optimize(TEST)
