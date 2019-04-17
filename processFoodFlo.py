@@ -5,7 +5,7 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
-from connectMongo import insert_meal
+import connectMongo
 from utils import unicodetoascii
 from match_names import match_euphebe, change_names
 
@@ -19,9 +19,6 @@ def processNutrition(filename):
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
     from s3bucket import get_image_url
-    from connectMongo import get_supplier
-    columns = []
-    units = []
     meals = []
     full_list = []
     with open(filename) as csvfile:
@@ -47,7 +44,8 @@ def processNutrition(filename):
                     for j in range(4,len(reader_list[i])):
                         if reader_list[i][j].strip().replace('.','').isdigit() and float(reader_list[i][j]) != 0:
                             nutritions[columns[j]] = str(float(reader_list[i][j])) + ' ' + units[j]
-                    new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = get_supplier('FoodFlo')['_id'], image = get_image_url(name))
+                    new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = connectMongo.db.users.find_one(\
+                        {'first_name':'FoodFlo'})['_id'], image = get_image_url(name))
                     meals.append(new_meal)
                     ingredients = {}
                     nutritions = {}
@@ -63,7 +61,7 @@ if __name__ == "__main__":
     meals,full_list = processNutrition(PATH+'nutrition.csv')
     convert_dic = match_euphebe(full_list)
     changed_meals = change_names(meals,convert_dic)
-    insert_meal(meals)
+    connectMongo.insert_meal(meals)
     print('Done')
 
     # from utils import create_histogram

@@ -4,14 +4,13 @@ import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
-from connectMongo import insert_meal
+import connectMongo
 from utils import similar
 from match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/Veestro/')
 
 def processIngredients(filename):
-    from connectMongo import get_supplier
     with open(filename) as csvfile:
         meals = []
         full_list = []
@@ -22,7 +21,7 @@ def processIngredients(filename):
             name = row[0].lower()
             if name != '':
                 if is_new_meal:
-                    new_meal = Meal(name = name, supplierID = get_supplier('Veestro')['_id'])
+                    new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Veestro'})['_id'])
                     is_new_meal = False
                 else:
                     full_list.append(name)
@@ -90,5 +89,5 @@ if __name__ == '__main__':
     full_list = ingredient_list + nutrition_list
     convert_dic = match_euphebe(full_list)
     combined2 = change_names(combined,convert_dic)
-    insert_meal(combined2)
+    connectMongo.insert_meal(combined2)
     print('Done')

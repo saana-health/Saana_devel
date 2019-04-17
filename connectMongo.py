@@ -26,11 +26,13 @@ def insert_meal(meals):
     meal_dictionaries = []
     for meal in meals:
         # Skip if a meal already exists in the DB
-       if db.meal_infos.find({'name':meal.name}).count() > 0:
+        if db.meal_infos.find({'name':meal.name}).count() > 0:
             continue
-       meal_dictionaries.append(meal.class_to_dict())
+        meal_dictionaries.append(meal.class_to_dict())
     if meal_dictionaries != []:
         db.meal_infos.insert_many(meal_dictionaries)
+        # except:
+        #     pdb.set_trace()
 
 def add_patients(patients):
     '''
@@ -71,34 +73,7 @@ def add_patients(patients):
         if symps!= []:
             db.patient_symptoms.insert_many(symps)
 
-def add_tags(tag_dict):
-    '''
-    This function adds tag_dict into a db on MongoDB atlas
-    :param tag_dict: return dictionary of processFoodMatrix.processFoodMatrixCSV
-    :return: True/False based on successfulness
-    '''
-    tags = db.tags
-    result = tags.insert_many(tag_dict.values())
-    return True
-
 # GET
-
-def get_any(collection, attr, val):
-    '''
-
-    :param collection: str - name of the collection
-    :param attr: str - name of an attribute
-    :param val: ? - value
-    :return: ObjectId()/None -  found/not found
-    '''
-    parser = getattr(db,collection)
-    if isinstance(val,(list,)):
-        return list(parser.find({attr:{"$in":val}}))
-    x = list(parser.find({attr:val}))
-    if len(x) > 0:
-        return x[0]
-    else:
-        return None
 
 def get_comorbidities(patient_id):
     li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
@@ -110,25 +85,11 @@ def get_disease(patient_id):
 
 def get_symptoms(patient_id):
     li = list(db.patient_symptoms.find({'patient_id':patient_id},{'symptom_id':1, '_id':0}))
-    pdb.set_trace()
     return [list(x.values())[0] for x in li]
 
 def get_drugs(patient_id):
     li = list(db.patient_drugs.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
-
-def get_all_meals():
-    return list(db.meal_infos.find())
-
-def get_order(patient_id,week_start_date):
-    '''
-
-    :param patient_id: ObjectId()
-    :param week_start_date: date.date()
-    :return:
-    '''
-    # pdb.set_trace()
-    return list(db.orders.find({'patient_id':patient_id, 'week_start_date':week_start_date},{'patient_meal_id':1, '_id':0}))
 
 def get_subscription(patient_id):
     sub = list(db.patient_subscription.find({'patient_id':patient_id}))
@@ -149,23 +110,24 @@ def get_next_order(patient_id):
         return None
     return patient['next_order']
 
-def get_all_patients():
-    return db.patients.find()
-
-def get_supplier(name):
-    return db.users.find_one({'first_name':name})
-
-def get_many(collection, attr, val):
+def get_ingredient(ingredients):
     '''
-
-    :param collection: str - name of the collection
-    :param attr: str - name of an attribute
-    :param val: ? - value
-    :return: ObjectId()/None -  found/not found
+    get ingredient id and quantity by its name
+    :param ingredients: [str]
+    :return: [{_id, quantity}]
     '''
-    parser = getattr(db,collection)
-    x = list(parser.find({attr:val}))
-    return x
+    ingredients_field = []
+    for ingredient in ingredients.keys():
+        return_dict = {}
+        quantity = ingredients[ingredient]
+        obj = db.mst_food_ingredients.find_one({'name':ingredient})
+        if obj is None:
+            return_dict['food_ingredient_id'] = db.mst_food_ingredients.insert_one({'name':ingredient}).inserted_id
+        else:
+            return_dict['food_ingredient_id'] = obj['_id']
+        return_dict['quantity'] = quantity
+        ingredients_field.append(return_dict)
+    return ingredients_field
 
 # Update
 
@@ -173,15 +135,5 @@ def update_next_order(patient_id, next_order):
     parser = db.patients.find()
     return db.patients.update({'_id':patient_id},{'$set':{'next_order':next_order}})
 
-def get_all_tags():
-    return db.tags.find()
-
-# Delete
-
-def drop(collection):
-    parser = getattr(db,collection)
-    return parser.drop()
-
 if __name__ == "__main__":
-    # test = get_any('mst_food_ingredients','name','shallots, fresh, chodpped')
     pdb.set_trace()

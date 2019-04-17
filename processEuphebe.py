@@ -1,12 +1,11 @@
 import csv
 import pickle
-import pprint
 import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
+import connectMongo
 import re
-import random
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
 from utils import similar
@@ -267,11 +266,11 @@ def combine_nutrition(mapped):
     #         if 'insoluble fiber' not in item.nutrition.keys():
     #             # print(item)
     from s3bucket import get_image_url
-    from connectMongo import get_supplier
     new_list = []
     # loop through
     for menu_name in mapped.keys():
-        new_meal = Meal(name = menu_name, supplierID = get_supplier('Euphebe')['_id'], image = get_image_url(menu_name))
+        new_meal = Meal(name = menu_name, supplierID = connectMongo.db.users.find_one({'first_name':'Euphebe'})\
+                ['_id'], image = get_image_url(menu_name))
         new_nutrition = {}
         new_ingredients = {}
         for item in mapped[menu_name]:
@@ -337,7 +336,6 @@ def histogram(combined):
 
 if __name__ == "__main__":
     print('Adding Euphebe meals')
-    from connectMongo import insert_meal
     combined = process(PATH, 'menu0328.csv', 'total2.csv')
-    insert_meal(combined)
+    connectMongo.insert_meal(combined)
     print('Done')

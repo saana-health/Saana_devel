@@ -2,8 +2,8 @@ import csv
 import pprint
 import os
 import pdb
-from connectMongo import add_tags, drop
-from model import Tag
+import connectMongo
+import model
 PATH = os.path.join(os.getcwd(),'csv/')
 
 
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     from maggie import add_maggie
     master_dict, columns = processFoodMatrixCSV('foodtag0328.csv')
     # generate_keyword(columns)
-    drop('tags')
-    add_tags(master_dict)
+    connectMongo.db.tags.drop()
+    connectMongo.db.tags.insert_many(list(master_dict.values()))
     # add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))
     # pdb.set_trace()

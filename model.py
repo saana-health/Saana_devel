@@ -1,4 +1,7 @@
 from bson.objectid import ObjectId
+import connectMongo
+import pdb
+
 # Parent object class for easily converting between dict and class
 class MongoObject:
     def dict_to_class(self,dict):
@@ -9,6 +12,11 @@ class MongoObject:
     def class_to_dict(self):
         dic = {}
         for attr in [attr for attr in dir(self) if not attr.startswith('__') and not callable(getattr(self,attr))]:
+            if attr == '_id':
+                continue
+            if attr == 'ingredients':
+                dic[attr] = connectMongo.get_ingredient(self.ingredients)
+                continue
             dic[attr] = getattr(self,attr)
         return dic
 

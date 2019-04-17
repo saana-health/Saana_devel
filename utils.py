@@ -139,8 +139,8 @@ def auto_add_meal():
     add_meals(processEuphebe.process(PATH))
     add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
 
+'''
 def add_dummy_patients():
-    from connectMongdo import add_patients, get_any
     disease = get_any('tags','name','brain')['_id']
     symptoms = get_any('tags','name',['constipation','difficulty to swallow','dry mouth','nausea'])
     comorbidities = get_any('tags','name',['hypertension'])
@@ -170,7 +170,7 @@ def add_dummy_patients():
     comorbidities = get_any('tags','name',['hypertension'])
     dummy = Patient(name = 'Jacki', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = TWOWEEK, plan = 14)
     add_patients(dummy)
-
+'''
 def find_tuesday(curr, wk = 1):
     weekday = curr.weekday()
     while True:
