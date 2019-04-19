@@ -92,7 +92,15 @@ def get_drugs(patient_id):
     return [list(x.values())[0] for x in li]
 
 def get_subscription(patient_id):
+    '''
+    Gets subscription - 7 for 'interval_count == 2' and 15 for ' == 1'
+    :param patient_id: ObjectId()
+    :return: 7 or 15
+    '''
     sub = list(db.patient_subscription.find({'patient_id':patient_id}))
+    # Should be only one or no subscription
+    assert len(sub) < 2
+
     if sub == []:
         return False
     subscription_id = sub[0]['subscription_id']
@@ -103,12 +111,6 @@ def get_subscription(patient_id):
         return 15
     print('wrong subscription')
     assert False
-
-def get_next_order(patient_id):
-    patient = db.patients.find({'_id':patient_id})[0]
-    if 'next_order' not in patient.keys():
-        return None
-    return patient['next_order']
 
 def get_ingredient(ingredients):
     '''

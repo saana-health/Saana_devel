@@ -15,12 +15,11 @@ def add_maggie():
     disease = connectMongo.db.tags.find_one({'name':'breast'})['_id']
     symptoms = connectMongo.db.tags.find({'name': {'$in':['diarrhea','dry mouth','dry skin','fatigue','loss of appetite','mouth & throat sore',\
                                                          'nausea','cough','stomach acidity','sleeping problems']}},{'_id':1})
-    pdb.set_trace()
-    # treatment_drugs = get_any('tags','name', ['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
-    #                                           'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)']})
+    treatment_drugs = connectMongo.db.tags.find({'name':{'$in':['docetaxel (taxotere)','carboplatin (paraplatin)','trastuzumab (herceptin)','pertuzumab (perjeta)',\
+                                              'olanzapine (zyprexa)','prochlorperazine (compazine)','ondanstetron (zofran)','ioperamide (imodium)']}},{'_id':1})
     maggie = Patient(name = 'Maggie', comorbidities= [], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order= TODAY, plan = 7)
-    drop('patients')
-    add_patients(maggie)
+    # drop('patients')
+    connectMongo.add_patients(maggie)
 
 def previous():
     # maggie_id = get_any('patients','name','Maggie')['_id']#'[0]['_id']

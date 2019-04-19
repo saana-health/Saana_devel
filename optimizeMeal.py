@@ -9,36 +9,42 @@ from datetime import date, timedelta, datetime
 
 class Optimizer:
 
-    def __init__(self):
+    def __init__(self, test = True):
+        '''
+        meals: {_id: Meal()}
+        tags: {_id: Tag()}
+        # inventory:  ?
+        patients: [Patient()]
+        today: datetime.datetime()
+        '''
+        self.today = datetime.combine(TODAY,datetime.min.time())
+        # check today is tuesday
+        assert self.today.weekday() == 1
+        self.test = test
         self.meals = self._get_meals()
         self.tags = self._get_tags()
-        self.inventory = self._check_inventory()
         self.patients = self._get_patients()
-        self.today = datetime.combine(TODAY,datetime.min.time())
 
-    #######CHANGED#########
     def _get_meals(self):
         '''
+        gets all meals in db in {_id:Meal(object)} structure
 
         :return: {_id: Meal()}
         '''
-        hash_meal = {}
-        # meals = [meal for meal in get_all_meals()]
-        temp_meals= list(connectMongo.db.meal_infos.find())
-        meals = []
-        for temp in temp_meals:
+        map_meal = {}
+        meals_dict= list(connectMongo.db.meal_infos.find())
+        for temp in meals_dict:
             ingredients = {}
             for ingredient in temp['ingredients']:
                 name = connectMongo.db.mst_food_ingredients.find_one({'_id':ingredient['food_ingredient_id']})['name']
                 ingredients[name] = ingredient['quantity']
             temp['ingredients'] = ingredients
-            meals.append(temp)
-        for meal in meals:
-            hash_meal[meal['_id']] = utils.meal_dict_to_class(meal)
-        return hash_meal
+            map_meal[temp['_id']] = utils.meal_dict_to_class(temp)
+        return map_meal
 
     def _get_tags(self):
         '''
+        Gets all tags
 
         :return: {_id: Tag()}
         '''
@@ -50,30 +56,61 @@ class Optimizer:
 
     def _get_patients(self):
         '''
+        Get all patients
 
         :return: [Patient()]
         '''
         patient_obj = []
         patients = connectMongo.db.patients.find()
         for patient in patients:
-            #TODO: check subscription ()
+            # Skip if subscription is not active or not order cycle
+            if not self._check_subscription(patient['_id']):
+                continue
+            #get tags
             comorbidities = connectMongo.get_comorbidities(patient['_id'])
             disease = connectMongo.get_disease(patient['_id'])
             symptoms = connectMongo.get_symptoms(patient['_id'])
             drugs = connectMongo.get_drugs(patient['_id'])
-            # PROBABLY ERROR HERE IN DEPLOYMENT
             user_id = connectMongo.db.patients.find_one({'_id':patient['_id']})['user_id']
             name = connectMongo.db.users.find_one({'_id':user_id})['first_name']
+
             new_patient = model.Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
                                   symptoms=symptoms, treatment_drugs=drugs)
             patient_obj.append(new_patient)
 
         return patient_obj
 
-    def _check_inventory(self):
-        invent = {}
-        for meal in self.meals.values():
-            invent[meal.name] = 100
+    def _check_subscription(self, patient_id):
+        '''
+        Checks subscription status
+
+        :param patient_id: ObjectId()
+        :return: True / False
+        '''
+        if self.test:
+            return True
+
+        patient_subscription = connectMongo.db.patient_subscriptions.find_one({'patient_id':patient_id})
+        pdb.set_trace()
+        # No subscription
+        if patient_subscription is None:
+            return False
+
+        # Inactive status
+        if patient_subscription['status'] != 'active':
+            return False
+
+        # Weekly order
+        if connectMongo.db.mst_subscriptions.find_one({'_id':patient_subscription['subscription_id']})['interval_count']\
+            == 1:
+            return True
+
+        # order if not ordered last week
+        order_lastWeek = connectMongo.db.orders.find_one({'patient_id':patient_id, 'week_start_date':self.today + timedelta(weeks=-1)})
+        if order_lastWeek is None:
+           return True
+        else:
+            return False
 
     def optimize(self, test = True):
         '''
@@ -81,14 +118,14 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
-            patient.plan = connectMongo.get_subscription(patient._id)
-            patient.next_order = connectMongo.get_next_order(patient._id)
+            # plan either 7 or 15
+            num_meal = connectMongo.get_subscription(patient._id)
+
+            ## deprecated
+            # patient.next_order = connectMongo.get_next_order(patient._id)
+
             today = self.today
             start_date = today
-            assert today.weekday() == 1
-            num_meal = patient.plan
-            if patient.next_order is not None and not test and patient.next_order != today:
-                continue
 
             print('Processing   {}  on {}!'.format(patient.name,str(today)))
             score_board = {}
@@ -104,14 +141,14 @@ class Optimizer:
                 minimizes.update(tag['minimize'])
             for tag in tags:
                 priors.update(tag['prior'])
-
             avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
-            score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
 
-            ####### Start choosing meals ########
-            # assert MEAL_PER_SUPPLIER_1 + MEAL_PER_SUPPLIER_2 == num_meal
+            ## Get scoreboard ##
+            score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
             self.scoreboard_to_csv(score_board,patient._id)
-            slots = self.choose_meal(score_board, repeat_one_week,num_meal)
+
+            ## Start choosing meals ##
+            slots = self.choose_meal(score_board, repeat_one_week)
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
             test = list(tags)
@@ -127,37 +164,48 @@ class Optimizer:
                 connectMongo.update_next_order(patient._id,utils.find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
+        '''
+        create a scoring system based on minimize, avoid and prior tags
+
+        :param patient: Patient()
+        :param minimizes: {str: {min1: str(int), min2: str(int)} }
+        :param avoids: [ str ]
+        :param priors: { str: int}
+        :return: {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]}, [Meal()]
+        '''
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
         repeat_one_week, repeat_two_week= self._repeating_meals(patient._id,self.today)
-        if repeat_one_week is None:
-            repeat_one_week = []
-        if repeat_two_week is None:
-            repeat_two_week = []
         score_board = {}
 
         for meal in self.meals.values():
             score = 100
+            # TODO: quantity
             # if meal.quantity == 0:
             #     continue
 
-            ## AOVID
+            # arrays for storing matched contents
             avoid_list = []
-            # should_avoid = False
+            minimize_list = []
+            prior_list = []
 
+            ## AVOID ##
+            # avoid_list is avoid tags that MATCHED
+            ## DELETE this line if I see again
+            # should_avoid = False
             for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
                 if each in avoids:
                     avoid_list.append(each)
                     score += DEDUCT_AVOID
                     break
 
-            ## MINIMIZE
-            minimize_list = []
+            ## MINIMIZE ##
             full_meal_info = {}
             full_meal_info.update(meal.ingredients)
             full_meal_info.update(meal.nutrition)
 
             for min_item in minimizes.keys():
                 for ing in full_meal_info.keys():
+                    # if matched
                     if min_item in ing:
 
                         # If a unit is included in the value, get rid of it
@@ -166,13 +214,13 @@ class Optimizer:
                         else:
                             contain_val = float(full_meal_info[ing])
 
-                        # if contain val above min 2
+                        # if (val > min2)
                         if contain_val > float(minimizes[min_item]['min2']):
                             score += DEDUCT_GR_MIN2
-                        # if min1 < val < min2
+                        # if (min1 < val < min2)
                         elif contain_val > float(minimizes[min_item]['min1']):
                             score += DEDUCT_LT_MIN2
-                        #if val < min1
+                        #if (val < min1)
                         elif contain_val < float(minimizes[min_item]['min1']):
                             score += DEDUCT_LT_MIN1
                         # This should never happen
@@ -180,19 +228,21 @@ class Optimizer:
                             print('ERR')
                             raise ValueError
                         minimize_list.append(min_item)
+
             ## PRIORITIZE
-            prior_list = []
+            ## DELETE this line if I see again
             # prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
             for prior in priors.keys():
+                # if 1) string matched 2) not in min or avoid list and 3) content value above threshold
                 for ingredient in meal.ingredients.keys():
                     if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.ingredients[ingredient]):
                         prior_list.append(prior)
                 for nutrition in meal.nutrition.keys():
                     if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.nutrition[nutrition].split(' ')[0]):
                         prior_list.append(prior)
-
             prior_list = list(set(prior_list))
 
+            # ADD points for priors
             pos = len(prior_list)
             score += pos*ADD_PRIOR
 
@@ -210,16 +260,16 @@ class Optimizer:
                 score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list}]
             else:
                 score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list})
+
         return score_board, repeat_one_week
 
-    def choose_meal(self,score_board,repeat_one_week, num_meal):
+    def choose_meal(self,score_board,repeat_one_week)
         # list for saving meals
         num_repeat = 0
-        slots = []
         bucket = {}
         suppliers = list(connectMongo.db.users.find({'role':'supplier'}))
 
-        # manual matching suppliers with their ID
+        # manual matching suppliers with their ID (ObjectId)
         Veestro = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Veestro'][0]
         Euphebe = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Euphebe'][0]
         FoodNerd = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FoodNerd'][0]
@@ -313,22 +363,31 @@ class Optimizer:
         return slots
 
     def _repeating_meals(self,patient_id,start_date):
+        '''
+        Check previously ordered meals
+
+        :param patient_id: ObjectId()
+        :param start_date: datetime.datetime()
+        :return: [Meal()] or None, [Meal()] or None
+        '''
         # prev_order = connectMongo.get_order(patient_id,start_date + timedelta(weeks=-1))
-        prev_order = list(connectMongo.db.orders.find({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-1)},\
-                                                      {'patient_meal':1, '_id':0}))
-        prev_two_order = list(connectMongo.db.orders.find({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-2)},\
-                                                      {'patient_meal':1, '_id':0}))
-        if prev_order == []:
-            prev_order = None
-        else:
+        prev_order = connectMongo.db.orders.find_one({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-1)})
+        prev_two_order = connectMongo.db.orders.find_one({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-2)})
+
+        if prev_order is not None:
+            # for catching errors
             try:
-                prev_order = [self.meals[x] for x in prev_order[0]['patient_meal_id']]
+                prev_order = [self.meals[x] for x in prev_order['patient_meal_id']]
             except:
                 pdb.set_trace()
-        if prev_two_order == []:
-            prev_twp_order = None
         else:
-            prev_two_order = [self.meals[x] for x in prev_two_order[0]['patient_meal_id']]
+            prev_order = []
+
+        if prev_two_order is not None:
+            prev_two_order = [self.meals[x] for x in prev_two_order['patient_meal_id']]
+        else:
+            prev_two_order = []
+
         return prev_order, prev_two_order
 
     def reorder_slots(self,slots):

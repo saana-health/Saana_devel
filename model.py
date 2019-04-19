@@ -1,4 +1,3 @@
-from bson.objectid import ObjectId
 import connectMongo
 import pdb
 
@@ -19,7 +18,6 @@ class MongoObject:
                 continue
             dic[attr] = getattr(self,attr)
         return dic
-
 
 # inheriting classes from MongoObject
 
