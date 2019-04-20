@@ -151,17 +151,16 @@ class Optimizer:
             slots = self.choose_meal(score_board, repeat_one_week)
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
-            test = list(tags)
+
+            # Save the result to csv and update on mongo
             if num_meal> 8:
                 end_date = utils.find_tuesday(start_date,2)
                 self.to_mongo(slots,patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
-                connectMongo.update_next_order(patient._id,utils.find_tuesday(today,2))
             else:
                 end_date = utils.find_tuesday(start_date,3)
                 self.to_mongo(slots, patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
-                connectMongo.update_next_order(patient._id,utils.find_tuesday(today,3))
 
     def get_score_board(self, patient, minimizes, avoids, priors):
         '''
@@ -263,7 +262,14 @@ class Optimizer:
 
         return score_board, repeat_one_week
 
-    def choose_meal(self,score_board,repeat_one_week)
+    def choose_meal(self,score_board,repeat_one_week):
+        '''
+        Choosing meals
+        :param score_board:  {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]}
+        :param repeat_one_week: [Meal()]
+        :return: [Meal()]
+        '''
+
         # list for saving meals
         num_repeat = 0
         bucket = {}
@@ -284,6 +290,7 @@ class Optimizer:
 
         while True:
 
+            # Check if two suppliers can be chosen
             if len(bucket[Veestro]) == 15:
                 slots = bucket[Veestro]
                 break
@@ -307,6 +314,7 @@ class Optimizer:
                 if restart:
                     restart = False
                     break
+
                 for meal in score_board[score]:
 
                     supplier = meal['meal'].supplierID
@@ -315,7 +323,7 @@ class Optimizer:
 
                     bucket[supplier].append(meal)
 
-                    # Update score board for this week
+                    # Update score board for meal just selected
                     score_board[score].remove(meal)
                     new_score = score + REPEAT_ZERO
                     if new_score in score_board.keys():
@@ -344,9 +352,6 @@ class Optimizer:
         # slots filled up
         assert len(slots) == num_meal
 
-        # shuffle so that they don't look the same every week
-        # shuffle(slots)
-
         ## OPTIONAL - how many repetition from past 2 weeks?
         repeat_cnt = 0
         repeat_same_week = {}
@@ -358,7 +363,6 @@ class Optimizer:
             else:
                 repeat_same_week[each['meal'].name] = 1
         print('{} repetitions from last week'.format(repeat_cnt))
-        ##
 
         return slots
 
@@ -393,9 +397,10 @@ class Optimizer:
     def reorder_slots(self,slots):
         '''
         reorder based on calories
-        :param slots:
-        :return:
+        :param slots:[Meal()]
+        :return: [Meal()]
         '''
+        #sort by calories
         slots = sorted(slots, key = lambda meal: float(meal['meal'].nutrition['cals'].split(' ')[0]),reverse=True)
         high_cal = slots[:7]
         low_cal = slots[8:]
@@ -427,6 +432,12 @@ class Optimizer:
             writer.writerows(existing_order)
 
     def scoreboard_to_csv(self,score_board,patient_id):
+        '''
+        Save score_board to csv
+        :param score_board: {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]},
+        :param patient_id: ObjectId()
+        :return: True
+        '''
         sorted_score = sorted(score_board.keys(),reverse = True)
         csv_list = [[patient_id],['score','meal','minimize','prior','avoid','supplierID']]
         for score in sorted_score:
@@ -440,27 +451,6 @@ class Optimizer:
         return True
 
 if __name__ == "__main__":
-    ################
-    # a = Optimizer(1)
-    # a._get_meals()
-    ################
-
-    ##### SCORING VARIABLES ######
-    # # Euphebe
-    # MAX_MEAL_PER_SUPPLIER_1 = 12
-    # MIN_MEAL_PER_SUPPLIER_1 = 12
-    # # FoodNerd
-    # MAX_MEAL_PER_SUPPLIER_2 = 0
-    # MIN_MEAL_PER_SUPPLIER_2 = 0
-
-    #MEAL PER SUPPLIER
-    MEAL_PER_SUPPLIER_1 = 12
-    MEAL_PER_SUPPLIER_2 = 0
-    EUPHEBE = 10
-    FOODNERD = 5
-    VEESTRO = 15,10
-    FROZENGARDEN = 5
-
 
     ## CAUTION: ALWAYS ADD NUMBERS IN CODE AS THEIR VALUES ARE NEGATIVES
     # MINUS
@@ -483,16 +473,11 @@ if __name__ == "__main__":
     except:
         pass
 
-    ################
     TEST = True
 
     TODAY = utils.find_tuesday(date.today(),2)
 
     op = Optimizer()
     op.optimize(TEST)
-    # TODAY = find_tuesday(date.today(),2)
-    #
-    # op = Optimizer()
-    # op.optimize(TEST)
 
 

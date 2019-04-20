@@ -1,12 +1,9 @@
 import csv
-import pickle
 import pprint
 import pdb
 import os
 from model import Meal
-from difflib import SequenceMatcher
 import connectMongo
-from utils import unicodetoascii
 from match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/FoodFlo/')

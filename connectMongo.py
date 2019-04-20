@@ -131,11 +131,5 @@ def get_ingredient(ingredients):
         ingredients_field.append(return_dict)
     return ingredients_field
 
-# Update
-
-def update_next_order(patient_id, next_order):
-    parser = db.patients.find()
-    return db.patients.update({'_id':patient_id},{'$set':{'next_order':next_order}})
-
 if __name__ == "__main__":
     pdb.set_trace()

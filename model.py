@@ -26,6 +26,17 @@ class Meal(MongoObject):
     This class should follow the db schema designed for meal info
     '''
     def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',quantity = 0, image = ''):
+        '''
+
+        :param _id: ObjectId()
+        :param name: Str
+        :param ingredients: {str: str}
+        :param nutrition: {str: str}
+        :param type: str
+        :param supplierID: ObjectId()
+        :param quantity: int
+        :param image: str
+        '''
         self._id = _id
         self.name = name
         self.ingredients = ingredients
@@ -47,7 +58,21 @@ class Meal(MongoObject):
     __repr__ = __str__
 
 class Patient(MongoObject):
-    def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = '', next_order = '', plan = 7):
+    def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = '', plan = 7):
+        '''
+
+        :param _id:  ObjectId()
+        :param name: str
+        :param comorbidities: [ObjectId()]
+        :param disease: ObjectId()
+        :param symptoms: [ObjectId()]
+        :param weight: int
+        :param treatment_drugs: [ObjectId]
+        :param disease_stage:
+        :param feet:
+        :param surgery:
+        :param plan:
+        '''
         self.name = name
         self.weight = weight
         self.treatment_drugs = treatment_drugs
@@ -56,7 +81,6 @@ class Patient(MongoObject):
         self.disease = disease
         self.symptoms = symptoms
         self._id = _id
-        self.next_order = next_order
         self.plan = plan
 
     def __str__(self):
@@ -69,6 +93,15 @@ class Tag(MongoObject):
     This class should follow the db schema designed for tag info
     '''
     def __init__(self, _id = '',name = '', minimize= {}, prior = [], type = '',avoid=[]):
+        '''
+
+        :param _id: ObjectId()
+        :param name: str
+        :param minimize: {ObjectId(): float}
+        :param prior: {ObjectId(): float}
+        :param type: str
+        :param avoid: {ObjectId(): float}
+        '''
         self._id = _id
         self.name = name
         self.avoid = avoid
@@ -84,22 +117,16 @@ class Tag(MongoObject):
 
     __repr__ = __str__
 
-class MealHistory(MongoObject):
-    '''
-    This class is for modeling 'Meal info' for writing to/ reading from Mongodb
-    '''
-    def __init__(self, patient_id, week_num):
-        self.patient_id = patient_id
-        self.week_num = week_num
-        self.meal_list = {}
-
-    def __str__(self):
-        return '{} - {}wk'.format(self.patient_id, self.week_num)
-
-    __repr__ = __str__
-
 class Order(MongoObject):
     def __init__(self,patient_id = '', patient_meal_id = [], herb_id=[], week_start_date= '', week_end_date= ''):
+        '''
+
+        :param patient_id: ObjectId()
+        :param patient_meal_id: [ObjectId()]
+        :param herb_id: [ObjectId()]
+        :param week_start_date: datetime.datetime()
+        :param week_end_date: datetime.datetime()
+        '''
         self.patient_id = patient_id
         self.patient_meal_id = patient_meal_id
         self.herb_id = herb_id

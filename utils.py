@@ -6,47 +6,14 @@ from model import Meal, Tag, Patient
 from datetime import date, timedelta
 from difflib import SequenceMatcher
 
-def unicodetoascii(text):
-    print(text)
-    uni2ascii = {
-            ord('\xe2\x80\x99'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\x9c'.decode('utf-8')): ord('"'),
-            ord('\xe2\x80\x9d'.decode('utf-8')): ord('"'),
-            ord('\xe2\x80\x9e'.decode('utf-8')): ord('"'),
-            ord('\xe2\x80\x9f'.decode('utf-8')): ord('"'),
-            ord('\xc3\xa9'.decode('utf-8')): ord('e'),
-            ord('\xe2\x80\x9c'.decode('utf-8')): ord('"'),
-            ord('\xe2\x80\x93'.decode('utf-8')): ord('-'),
-            ord('\xe2\x80\x92'.decode('utf-8')): ord('-'),
-            ord('\xe2\x80\x94'.decode('utf-8')): ord('-'),
-            ord('\xe2\x80\x94'.decode('utf-8')): ord('-'),
-            ord('\xe2\x80\x98'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\x9b'.decode('utf-8')): ord("'"),
-
-            ord('\xe2\x80\x90'.decode('utf-8')): ord('-'),
-            ord('\xe2\x80\x91'.decode('utf-8')): ord('-'),
-
-            ord('\xe2\x80\xb2'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\xb3'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\xb4'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\xb5'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\xb6'.decode('utf-8')): ord("'"),
-            ord('\xe2\x80\xb7'.decode('utf-8')): ord("'"),
-
-            ord('\xe2\x81\xba'.decode('utf-8')): ord("+"),
-            ord('\xe2\x81\xbb'.decode('utf-8')): ord("-"),
-            ord('\xe2\x81\xbc'.decode('utf-8')): ord("="),
-            ord('\xe2\x81\xbd'.decode('utf-8')): ord("("),
-            ord('\xc2\xac\xc2\xb5'.decode('utf-8')): ord("n")
-
-                            }
-    return text.decode('utf-8').translate(uni2ascii).encode('ascii')
-
 def create_histogram(combined,keywords,filter = [],filename = ''):
     '''
-
-    :param combined: [Meal]
-    :return:
+    Creates a histogram
+    :param combined: [Meal()]
+    :param keywords: [str]
+    :param filter: [str]
+    :param filename: str
+    :return: None
     '''
     import numpy as np
     import matplotlib.pyplot as plt
@@ -119,25 +86,29 @@ def create_histogram(combined,keywords,filter = [],filename = ''):
     # plt.show()
 
 def meal_dict_to_class(meal):
+    '''
+    Convert dict to class Meal() - same as Meal.dict_to_class()
+    :param meal: {}
+    :return: Meal()
+    '''
     return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], quantity = meal['quantity'])
 
 def tag_dict_to_class(tag):
+    '''
+    Convert dict to Tag()
+    :param tag:
+    :return: Tag()
+    '''
     return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
 
 def patient_dict_to_class(patient):
+    '''
+    Convert dict to Patient()
+    :param patient:
+    :return: Patient()
+    '''
     parse_date = [int(x) for x in patient['next_order'].split('-')]
     return Patient(name = patient['name'],_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'], next_order = date(parse_date[0],parse_date[1],parse_date[2]),plan = patient['plan'])
-
-def auto_add_meal():
-    import os
-    import processFoodNerd
-    import processEuphebe
-    from connectMongdo import drop, add_meals
-    FOOD_NERD_PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
-    PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
-    drop('meals')
-    add_meals(processEuphebe.process(PATH))
-    add_meals(processFoodNerd.processNutrition(FOOD_NERD_PATH + 'nutrition.csv')[0])
 
 '''
 def add_dummy_patients():
@@ -171,7 +142,15 @@ def add_dummy_patients():
     dummy = Patient(name = 'Jacki', comorbidities= [x['_id'] for x in comorbidities], treatment_drugs = [x['_id'] for x in treatment_drugs], disease = disease, symptoms = [x['_id'] for x in symptoms], next_order = TWOWEEK, plan = 14)
     add_patients(dummy)
 '''
+
 def find_tuesday(curr, wk = 1):
+    '''
+    Get the next coming tuesday (Today if today is tuesday)
+    :param curr: datetime.datetime()
+    :param wk: int
+    :return: datetime.datetime()
+    '''
+
     weekday = curr.weekday()
     while True:
         if weekday == 1:
@@ -192,13 +171,13 @@ def similar(a,b,r):
     return SequenceMatcher(None,a,b).ratio() > r
 
 def add_suppliers():
+    '''
+    Util func for adding suppliers
+    :return: None
+    '''
     import connectMongo
     for name in ['Euphebe','FoodNerd','Veestro','FrozenGarden','FoodFlo']:
         connectMongo.db.users.insert_one({'first_name':name, 'email': name+'@example.com', 'role':'supplier'})
 
 if __name__ == "__main__":
-    # auto_add_meal()
-    # from maggie import add_maggie
-    # add_maggie()
-    # add_dummy_patients()
     add_suppliers()
