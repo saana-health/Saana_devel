@@ -1,11 +1,6 @@
-import processEuphebe
-import processFoodMatrix
+from process import processFoodMatrix
 import os
-import pdb
-import pprint
-import pickle
-import time
-from datetime import date
+
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
 def match_euphebe(euphebe_all):
