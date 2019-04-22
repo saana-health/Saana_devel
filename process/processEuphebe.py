@@ -1,7 +1,7 @@
 import csv
 import pickle
-import pdb
 import os
+# from model import Meal
 from model import Meal
 from difflib import SequenceMatcher
 import connectMongo
@@ -265,7 +265,7 @@ def combine_nutrition(mapped):
     #     for item in item_li:
     #         if 'insoluble fiber' not in item.nutrition.keys():
     #             # print(item)
-    from s3bucket import get_image_url
+    from tools.s3bucket import get_image_url
     new_list = []
     # loop through
     for menu_name in mapped.keys():
@@ -294,7 +294,7 @@ def combine_nutrition(mapped):
     return new_list
 
 def process(path,menu_filename, nutrition_filename):
-    from match_names import match_euphebe, change_names
+    from process.match_names import match_euphebe, change_names
 
     menus = processMenu(path+menu_filename)
     items, columns = processNutrition(path+nutrition_filename)

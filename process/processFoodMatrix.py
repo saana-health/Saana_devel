@@ -1,9 +1,7 @@
 import csv
-import pprint
 import os
-import pdb
 import connectMongo
-import model
+
 PATH = os.path.join(os.getcwd(),'csv/')
 
 
@@ -62,7 +60,6 @@ def is_number(num):
         return False
 
 if __name__ == "__main__":
-    from maggie import add_maggie
     master_dict, columns = processFoodMatrixCSV('foodtag0328.csv')
     # generate_keyword(columns)
     connectMongo.db.tags.drop()

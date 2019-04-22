@@ -1,6 +1,5 @@
 import csv
 import connectMongo
-import pdb
 import os
 from model import Meal
 from difflib import SequenceMatcher
@@ -17,7 +16,7 @@ def processNutrition(filename):
     :param filename:
     :return:
     '''
-    from s3bucket import get_image_url
+    from tools.s3bucket import get_image_url
     with open(filename) as csvfile:
         ingredients = {}
         nutritions = {}
@@ -42,7 +41,7 @@ def processNutrition(filename):
 def process():
     full_list = []
     meals = []
-    from match_names import change_names, match_euphebe
+    from process.match_names import change_names, match_euphebe
     for filename in os.listdir(PATH):
         if filename[0] != '.':
             meal, columns = processNutrition(PATH+filename)
