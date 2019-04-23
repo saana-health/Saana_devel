@@ -1,7 +1,6 @@
 import csv
 import pickle
 import os
-# from model import Meal
 from model import Meal
 from difflib import SequenceMatcher
 import connectMongo
@@ -205,7 +204,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
     manual_map = {}
     left_over = []
     if filename:
-        manual_map = pickle.load(open(filename,'rb'))
+        manual_map = pickle.load(open('./process/'+filename,'rb'))
     else:
         for each in not_found:
             for menu in menus:
@@ -234,7 +233,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
                                     manual_map[menu] = [each]
                             else:
                                 continue
-        pickle.dump(manual_map,open('euphebe_manualMap'+time.ctime().replace(' ','_')+'.p','wb'))
+        pickle.dump(manual_map,open('./process/euphebe_manualMap'+time.ctime().replace(' ','_')+'.p','wb'))
 
     for each in manual_map.keys():
         if each not in menus:

@@ -1,7 +1,7 @@
 #!/bin/bash
-python processEuphebe.py
-python processFoodNerd.py
-python processFrozenGarden.py
-python processVeestro.py
-python processFoodFlo.py
+python ./process/processEuphebe.py
+python ./process/processFoodNerd.py
+python ./process/processFrozenGarden.py
+python ./process/processVeestro.py
+python ./process/processFoodFlo.py
 
