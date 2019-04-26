@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 
+# dump folder
+dump/
+
 # MasterOrder folder
 masterOrder/
 scoreboard/
