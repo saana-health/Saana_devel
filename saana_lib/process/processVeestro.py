@@ -1,9 +1,9 @@
 import csv
 import os
-from model import Meal
-import connectMongo
-from utils import similar
-from process.match_names import match_euphebe, change_names
+from ..model import Meal
+from .. import connectMongo
+from ..utils import similar
+from .match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/Veestro/')
 

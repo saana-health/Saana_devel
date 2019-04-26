@@ -1,6 +1,6 @@
 import csv
 import os
-import connectMongo
+from .. import connectMongo
 
 PATH = os.path.join(os.getcwd(),'csv/')
 

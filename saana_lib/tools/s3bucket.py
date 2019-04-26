@@ -1,6 +1,6 @@
 import os
 import pdb
-from process import processEuphebe
+from ..process import processEuphebe
 from difflib import SequenceMatcher
 import boto3
 
@@ -74,7 +74,7 @@ def check_obj(bucket_name,key):
         s3.Object(bucket_name,key).load()
         return True
     except:
-        print('Error getting s3.object.load()')
+        print('Error getting s3.object.load() - this name/meal {} is not in the bucket'.format(key))
         return False
 
 def get_url(bucket_name,key):

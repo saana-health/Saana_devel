@@ -1,4 +1,4 @@
-from process import processFoodMatrix
+from . import processFoodMatrix
 import os
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')

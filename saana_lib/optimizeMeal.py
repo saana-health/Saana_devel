@@ -1,11 +1,32 @@
 import pdb
 import itertools
-import model
+from . import model, connectMongo, utils
 import csv
-import connectMongo
 import os
-import utils
 from datetime import date, timedelta, datetime
+
+DEDUCT_AVOID = -60
+DEDUCT_GR_MIN2 = -60
+DEDUCT_LT_MIN2 = -30
+DEDUCT_LT_MIN1 = -15
+
+# REPEAT
+REPEAT_ZERO = -50
+REPEAT_ONE = -30
+REPEAT_TWO = -15
+REPEAT_CUM = - 5
+
+# PLUS
+ADD_PRIOR = 10
+
+try:
+    os.remove('masterOrder/masterorder.csv')
+except:
+    pass
+
+TEST = True
+
+TODAY = utils.find_tuesday(date.today(),2)
 
 class Optimizer:
 
@@ -454,28 +475,6 @@ if __name__ == "__main__":
 
     ## CAUTION: ALWAYS ADD NUMBERS IN CODE AS THEIR VALUES ARE NEGATIVES
     # MINUS
-    DEDUCT_AVOID = -60
-    DEDUCT_GR_MIN2 = -60
-    DEDUCT_LT_MIN2 = -30
-    DEDUCT_LT_MIN1 = -15
-
-    # REPEAT
-    REPEAT_ZERO = -50
-    REPEAT_ONE = -30
-    REPEAT_TWO = -15
-    REPEAT_CUM = - 5
-
-    # PLUS
-    ADD_PRIOR = 10
-
-    try:
-        os.remove('masterOrder/masterorder.csv')
-    except:
-        pass
-
-    TEST = True
-
-    TODAY = utils.find_tuesday(date.today(),2)
 
     op = Optimizer()
     op.optimize(TEST)

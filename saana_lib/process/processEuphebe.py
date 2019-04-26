@@ -1,13 +1,13 @@
 import csv
 import pickle
 import os
-from model import Meal
+from ..model import Meal
+from .. import connectMongo
+from ..utils import similar
 from difflib import SequenceMatcher
-import connectMongo
 import re
 import time
 DATE = time.ctime()[4:10].replace(' ','_')
-from utils import similar
 '''
 Processing flow
 processMenu()
@@ -203,9 +203,9 @@ def manual_input(menus, not_found, mapped, filename = ''):
     '''
     manual_map = {}
     left_over = []
-    if filename:
-        manual_map = pickle.load(open('./process/'+filename,'rb'))
-    else:
+    try:
+        manual_map = pickle.load(open('./pickle/'+filename,'rb'))
+    except:
         for each in not_found:
             for menu in menus:
                 if SequenceMatcher(None,menu,each.name).ratio() > 0.5:
@@ -233,7 +233,7 @@ def manual_input(menus, not_found, mapped, filename = ''):
                                     manual_map[menu] = [each]
                             else:
                                 continue
-        pickle.dump(manual_map,open('./process/euphebe_manualMap'+time.ctime().replace(' ','_')+'.p','wb'))
+            pickle.dump(manual_map,open('./pickle/euphebe_manualMap'+time.ctime().replace(' ','_')+'.p','wb'))
 
     for each in manual_map.keys():
         if each not in menus:
@@ -264,7 +264,7 @@ def combine_nutrition(mapped):
     #     for item in item_li:
     #         if 'insoluble fiber' not in item.nutrition.keys():
     #             # print(item)
-    from tools.s3bucket import get_image_url
+    from ..tools.s3bucket import get_image_url
     new_list = []
     # loop through
     for menu_name in mapped.keys():
@@ -293,12 +293,12 @@ def combine_nutrition(mapped):
     return new_list
 
 def process(path,menu_filename, nutrition_filename):
-    from process.match_names import match_euphebe, change_names
+    from .match_names import match_euphebe, change_names
 
     menus = processMenu(path+menu_filename)
     items, columns = processNutrition(path+nutrition_filename)
     mapped, not_found = mapToMeal(menus, items)
-    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manual_map_0330.p')
+    newly_mapped = manual_input(menus,not_found,mapped,'euphebe_manualMap_0425.p')
     combined = combine_nutrition(newly_mapped)
 
     convert_dic = match_euphebe(columns)
@@ -308,7 +308,7 @@ def process(path,menu_filename, nutrition_filename):
     return combined
 
 def histogram(combined):
-    from utils import create_histogram
+    from ..utils import create_histogram
     # # ## Bell peppers
     create_histogram(combined,['pepper'],['jalapeno','serrano','poblano','chili','flake','curry','black','hot'],\
                      filename='Bell peppers (red, green, yellow, bell')

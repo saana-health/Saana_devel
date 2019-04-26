@@ -2,7 +2,7 @@
 # from mixpanel_api import Mixpanel
 import csv
 import pdb
-from model import Meal, Tag, Patient
+from .model import Meal, Tag, Patient
 from datetime import date, timedelta
 from difflib import SequenceMatcher
 
