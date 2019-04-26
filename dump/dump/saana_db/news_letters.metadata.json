@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"saana_db.news_letters"},{"v":2,"unique":true,"key":{"email":1},"name":"email_1","ns":"saana_db.news_letters","background":true}],"uuid":"4ffd3c45acb64fd49ea9f50dc98cf5aa"}
