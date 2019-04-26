@@ -41,14 +41,17 @@ def processFoodMatrixCSV(filename):
                 if row[j] == 'A':
                     master_dict[name]['avoid'].append(columns[j].strip().lower())
                 #prioritize
+                # Letter 'P' basically converted into zero
                 elif row[j] == 'P':
                     # master_dict[name]['prior'].append(columns[j].strip().lower())
                     master_dict[name]['prior'][columns[j].strip().lower()] = 0
+                # Minimize
                 elif '|' in row[j]:
                     split = row[j].split('|')
                     min1 = split[0]
                     min2 = split[1]
                     master_dict[name]['minimize'][columns[j]] = {"min1":min1, "min2":min2}
+                # prioritize above threshold
                 elif is_number(row[j]):
                     master_dict[name]['prior'][columns[j].strip().lower()] = float(row[j])
 

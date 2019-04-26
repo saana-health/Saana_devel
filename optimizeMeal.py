@@ -64,8 +64,8 @@ class Optimizer:
         patients = connectMongo.db.patients.find()
         for patient in patients:
             # Skip if subscription is not active or not order cycle
-            if not self._check_subscription(patient['_id']):
-                continue
+            # if not self._check_subscription(patient['_id']):
+            #     continue
             #get tags
             comorbidities = connectMongo.get_comorbidities(patient['_id'])
             disease = connectMongo.get_disease(patient['_id'])
