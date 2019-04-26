@@ -1,10 +1,8 @@
 import csv
-import pprint
-import pdb
 import os
-from model import Meal
-import connectMongo
-from match_names import match_euphebe, change_names
+from ..model import Meal
+from .. import connectMongo
+from .match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/FoodFlo/')
 
@@ -15,7 +13,7 @@ def processNutrition(filename):
     :return:
     #TODO: unit conversion (right now, everything is set to 1 unit = 150g
     '''
-    from s3bucket import get_image_url
+    from ..tools.s3bucket import get_image_url
     meals = []
     full_list = []
     with open(filename) as csvfile:

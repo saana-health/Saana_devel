@@ -1,6 +1,6 @@
 import os
 import pdb
-import processEuphebe
+from ..process import processEuphebe
 from difflib import SequenceMatcher
 import boto3
 
@@ -17,8 +17,8 @@ def match_name():
     filenames = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath,f))]
 
     menus = processEuphebe.processMenu('./csv/Euphebe/menu0328.csv')
-    items, columns = processEuphebe.processNutrition(PATH+'total2.csv')
-    mapped, not_found = processEuphebe.mapToMeal(menus,items)
+    items, columns = processEuphebe.processNutrition(PATH + 'total2.csv')
+    mapped, not_found = processEuphebe.mapToMeal(menus, items)
     newly_mapped = processEuphebe.manual_input(menus, not_found, mapped, 'euphebe_manual_map_0330.p')
 
     menu_photo_map = {}
@@ -39,7 +39,7 @@ def match_name_frozen():
     filenames = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath,f))]
     print(filenames)
 
-    from processFrozenGarden import process
+    from process.processFrozenGarden import process
     menus = [x.name for x in process()]
 
     menu_photho_map = {}
@@ -74,7 +74,7 @@ def check_obj(bucket_name,key):
         s3.Object(bucket_name,key).load()
         return True
     except:
-        print('Error getting s3.object.load()')
+        print('Error getting s3.object.load() - this name/meal {} is not in the bucket'.format(key))
         return False
 
 def get_url(bucket_name,key):

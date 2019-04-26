@@ -1,4 +1,4 @@
-import connectMongo
+from . import connectMongo
 import pdb
 
 # Parent object class for easily converting between dict and class
