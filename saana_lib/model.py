@@ -42,7 +42,7 @@ class Meal(MongoObject):
         self.ingredients = ingredients
         self.nutrition = nutrition
         self.type = type
-        self.supplierID = supplierID
+        self.supplier_id = supplierID
         self.quantity = quantity
         self.image = image
 

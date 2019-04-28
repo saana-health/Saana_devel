@@ -9,6 +9,7 @@ DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
 DEDUCT_LT_MIN2 = -30
 DEDUCT_LT_MIN1 = -15
+DEDUCT_LT_MIN1_VEESTRO = - 20
 
 # REPEAT
 REPEAT_ZERO = -50
@@ -60,7 +61,9 @@ class Optimizer:
                 name = connectMongo.db.mst_food_ingredients.find_one({'_id':ingredient['food_ingredient_id']})['name']
                 ingredients[name] = ingredient['quantity']
             temp['ingredients'] = ingredients
-            map_meal[temp['_id']] = utils.meal_dict_to_class(temp)
+            new_meal = model.Meal()
+            new_meal.dict_to_class(temp)
+            map_meal[temp['_id']] = new_meal#utils.meal_dict_to_class(temp)
         return map_meal
 
     def _get_tags(self):
@@ -242,7 +245,10 @@ class Optimizer:
                             score += DEDUCT_LT_MIN2
                         #if (val < min1)
                         elif contain_val < float(minimizes[min_item]['min1']):
-                            score += DEDUCT_LT_MIN1
+                            if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
+                                score += DEDUCT_LT_MIN1_VEESTRO
+                            else:
+                                score += DEDUCT_LT_MIN1
                         # This should never happen
                         else:
                             print('ERR')
@@ -338,11 +344,13 @@ class Optimizer:
 
                 for meal in score_board[score]:
 
-                    supplier = meal['meal'].supplierID
+                    supplier = meal['meal'].supplier_id
                     if meal['meal'].type.lower() == 'breakfast':
                         continue
-
-                    bucket[supplier].append(meal)
+                    try:
+                        bucket[supplier].append(meal)
+                    except:
+                        pdb.set_trace()
 
                     # Update score board for meal just selected
                     score_board[score].remove(meal)
@@ -446,7 +454,7 @@ class Optimizer:
         for index in range(len(slots)):
             meal = slots[index]
             row = [str(patient_id)[-5:],str(start_date.date()+timedelta(days=index)),meal['meal'].name,\
-                   meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplierID]
+                   meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplier_id]
             existing_order.append(row)
         with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
@@ -460,11 +468,11 @@ class Optimizer:
         :return: True
         '''
         sorted_score = sorted(score_board.keys(),reverse = True)
-        csv_list = [[patient_id],['score','meal','minimize','prior','avoid','supplierID']]
+        csv_list = [[patient_id],['score','meal','minimize','prior','avoid','supplier_id']]
         for score in sorted_score:
             for meal in score_board[score]:
                 temp_list = [score]
-                temp_list += [meal['meal'],meal['minimize'],meal['prior'], meal['avoid'],meal['meal'].supplierID]
+                temp_list += [meal['meal'],meal['minimize'],meal['prior'], meal['avoid'],meal['meal'].supplier_id]
                 csv_list.append(temp_list)
         with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.today.date())+'.csv','w') as csvfile:
             writer = csv.writer(csvfile)

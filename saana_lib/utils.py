@@ -85,22 +85,6 @@ def create_histogram(combined,keywords,filter = [],filename = ''):
     print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
 
-def meal_dict_to_class(meal):
-    '''
-    Convert dict to class Meal() - same as Meal.dict_to_class()
-    :param meal: {}
-    :return: Meal()
-    '''
-    return Meal(_id = meal['_id'],name = meal['name'], ingredients = meal['ingredients'], nutrition = meal['nutrition'], type = meal['type'], supplierID = meal['supplierID'], quantity = meal['quantity'])
-
-def tag_dict_to_class(tag):
-    '''
-    Convert dict to Tag()
-    :param tag:
-    :return: Tag()
-    '''
-    return Tag(_id = tag['_id'],name = tag['name'], prior = tag['prior'], type = tag['type'], avoid = tag['avoid'],minimize = tag['minimize'])
-
 def patient_dict_to_class(patient):
     '''
     Convert dict to Patient()
