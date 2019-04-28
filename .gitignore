@@ -4,6 +4,7 @@ __pycache__/
 
 # dump folder
 dump/
+dump.zip
 
 # MasterOrder folder
 masterOrder/
