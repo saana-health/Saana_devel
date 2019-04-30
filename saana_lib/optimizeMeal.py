@@ -191,6 +191,7 @@ class Optimizer:
                 end_date = utils.find_tuesday(start_date,3)
                 self.to_mongo(slots, patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
+            break
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -451,7 +452,12 @@ class Optimizer:
         return new_slots
 
     def to_mongo(self, mealinfo, patient_id,start_date,end_date):
-        new_order = model.Order(patient_id = patient_id,patient_meal_id = [meal['meal']._id for meal in mealinfo],\
+        patient_meal_id = []
+        for meal in mealinfo:
+            patient_meal = model.Patient_meal(patient_id, meal['meal']._id, 'pending', datetime.today())
+            return_id = connectMongo.db.patient_meal.insert_one(patient_meal.class_to_dict()).inserted_id
+            patient_meal_id.append(return_id)
+        new_order = model.Order(patient_id = patient_id,patient_meal_id = patient_meal_id,\
                           week_start_date=start_date, week_end_date=end_date)
         connectMongo.db.order.insert_one(new_order.class_to_dict())
         return True

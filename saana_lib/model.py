@@ -138,3 +138,13 @@ class Order(MongoObject):
 
     __repr__ = __str__
 
+class Patient_meal(MongoObject):
+    def __init__(self, patient_id = '', meal_id = '', status= '', shippping_date= ''):
+        self.patient_id = patient_id
+        self.meal_id = meal_id
+        self.status = status
+        self.shipping_date = shippping_date
+
+    def __str__(self):
+        return str(self.patient_id) + ' | ' + str(self.meal_id)
+
