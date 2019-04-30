@@ -85,6 +85,11 @@ def create_histogram(combined,keywords,filter = [],filename = ''):
     print(' TOTAL {} FOUND '.format(cnt))
     # plt.show()
 
+def tag_dict_to_class(dict):
+    new_tag = Tag()
+    new_tag.dict_to_class(dict)
+    return new_tag
+
 def patient_dict_to_class(patient):
     '''
     Convert dict to Patient()

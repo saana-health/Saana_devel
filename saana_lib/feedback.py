@@ -1,4 +1,4 @@
-import connectMongo
+from . import connectMongo
 import pprint
 import pdb
 from bson import ObjectId
@@ -15,7 +15,7 @@ def get_lateset_symptoms(patient_id):
     dict = {'worsen':[], 'better':[]}
     for symptom_id in symptom_ids:
         recent_logs = list(connectMongo.db.patient_symptoms.find({'symptom_id':symptom_id}).sort([('created_at',-1)]).limit(2))
-        if recent_logs[0]['symptoms_scale'] - recent_logs[1]['symptoms_scale'] >= 0:
+        if len(recent_logs) == 2 and recent_logs[0]['symptoms_scale'] - recent_logs[1]['symptoms_scale'] >= 0:
             dict['worsen'].append(symptom_id)
         else:
             dict['better'].append(symptom_id)

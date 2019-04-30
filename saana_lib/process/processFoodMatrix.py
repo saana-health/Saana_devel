@@ -1,6 +1,8 @@
 import csv
+import pdb
 import os
 from .. import connectMongo
+from .. import utils
 
 PATH = os.path.join(os.getcwd(),'csv/')
 
@@ -30,9 +32,17 @@ def processFoodMatrixCSV(filename):
             if row[0]:
                 what_type = row[0].strip().lower()
             name = row[1].replace('\xc2',' ').replace('\xa0',' ').strip().lower()
+            if name == 'head &  neck':
+                name = 'head & neck'
             if name == '':
                 continue
-            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': {}, 'minimize':{}}
+
+            tags = list(connectMongo.db.mst_diseases.find())+list(connectMongo.db.mst_comorbidities.find())+list(connectMongo.db.mst_drugs.find())+list(connectMongo.db.mst_symptoms.find())
+            tag_id = None
+            for tag in tags:
+                if name in tag['name'].lower() or utils.similar(name, tag['name'],0.7):
+                    tag_id = tag['_id']
+            master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': {}, 'minimize':{}, 'tag_id': tag_id}
             #loop through each column
             for j in range(2,len(row)):
                 #avoid
@@ -53,6 +63,7 @@ def processFoodMatrixCSV(filename):
                 elif is_number(row[j]):
                     master_dict[name]['prior'][columns[j].strip().lower()] = float(row[j])
 
+
     return master_dict, [x for x in list(set(columns)) if x != '']
 
 def is_number(num):
@@ -63,9 +74,9 @@ def is_number(num):
         return False
 
 if __name__ == "__main__":
+
     master_dict, columns = processFoodMatrixCSV('foodtag0328.csv')
     # generate_keyword(columns)
-    connectMongo.db.tags.drop()
     connectMongo.db.tags.insert_many(list(master_dict.values()))
     # add_maggie()
     # pprint.pprint(processFoodMatrixCSV(''))

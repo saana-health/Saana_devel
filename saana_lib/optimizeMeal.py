@@ -1,6 +1,6 @@
 import pdb
 import itertools
-from . import model, connectMongo, utils
+from . import model, connectMongo, utils, feedback
 import csv
 import os
 from datetime import date, timedelta, datetime
@@ -75,7 +75,9 @@ class Optimizer:
         hash_tag = {}
         tags = list(connectMongo.db.tags.find())
         for tag in tags:
-            hash_tag[tag['_id']] = utils.tag_dict_to_class(tag)
+            new_tag = model.Tag()
+            new_tag.dict_to_class(tag)
+            hash_tag[tag['_id']] = new_tag
         return hash_tag
 
     def _get_patients(self):
@@ -88,9 +90,8 @@ class Optimizer:
         patients = connectMongo.db.patients.find()
         for patient in patients:
             # Skip if subscription is not active or not order cycle
-            # if not self._check_subscription(patient['_id']):
-            #     continue
-            #get tags
+            if not self._check_subscription(patient['_id']):
+                continue
             comorbidities = connectMongo.get_comorbidities(patient['_id'])
             disease = connectMongo.get_disease(patient['_id'])
             symptoms = connectMongo.get_symptoms(patient['_id'])
@@ -115,7 +116,6 @@ class Optimizer:
             return True
 
         patient_subscription = connectMongo.db.patient_subscriptions.find_one({'patient_id':patient_id})
-        pdb.set_trace()
         # No subscription
         if patient_subscription is None:
             return False
@@ -156,19 +156,25 @@ class Optimizer:
 
             # get all tags
             tag_ids = patient.symptoms+patient.disease+patient.treatment_drugs+patient.comorbidities
-            tags = list(connectMongo.db.tags.find({'_id':{'$in':tag_ids}}))
+            tags = list(connectMongo.db.tags.find({'tag_id':{'$in':tag_ids}}))
 
             # prepare tags
             minimizes = {}
             priors = {}
+            multiplier = []
+            symptoms_progress = feedback.get_lateset_symptoms(patient._id)
             for tag in tags:
                 minimizes.update(tag['minimize'])
-            for tag in tags:
                 priors.update(tag['prior'])
+                if tag['tag_id'] in symptoms_progress['worsen']:
+                    multiplier += list(tag['minimize'].keys())+list(tag['prior'].keys())
+                    print(1)
+
+
             avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
 
             ## Get scoreboard ##
-            score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors)
+            score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors, list(set(multiplier)))
             self.scoreboard_to_csv(score_board,patient._id)
 
             ## Start choosing meals ##
@@ -186,7 +192,7 @@ class Optimizer:
                 self.to_mongo(slots, patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
 
-    def get_score_board(self, patient, minimizes, avoids, priors):
+    def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
         create a scoring system based on minimize, avoid and prior tags
 
@@ -213,8 +219,6 @@ class Optimizer:
 
             ## AVOID ##
             # avoid_list is avoid tags that MATCHED
-            ## DELETE this line if I see again
-            # should_avoid = False
             for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
                 if each in avoids:
                     avoid_list.append(each)
@@ -226,10 +230,16 @@ class Optimizer:
             full_meal_info.update(meal.ingredients)
             full_meal_info.update(meal.nutrition)
 
+            # minimizes: list of all ingredients+nutrition to minimize from tags
+            # full_meal_info: from meal info
             for min_item in minimizes.keys():
                 for ing in full_meal_info.keys():
                     # if matched
                     if min_item in ing:
+                        multiplier_factor = 1
+
+                        if ing in multiplier:
+                            multiplier_factor = 1.5
 
                         # If a unit is included in the value, get rid of it
                         if not isinstance(full_meal_info[ing],(float,)) and not isinstance(full_meal_info[ing],int):
@@ -239,16 +249,16 @@ class Optimizer:
 
                         # if (val > min2)
                         if contain_val > float(minimizes[min_item]['min2']):
-                            score += DEDUCT_GR_MIN2
+                            score += DEDUCT_GR_MIN2*multiplier_factor
                         # if (min1 < val < min2)
                         elif contain_val > float(minimizes[min_item]['min1']):
-                            score += DEDUCT_LT_MIN2
+                            score += DEDUCT_LT_MIN2*multiplier_factor
                         #if (val < min1)
                         elif contain_val < float(minimizes[min_item]['min1']):
                             if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
-                                score += DEDUCT_LT_MIN1_VEESTRO
+                                score += DEDUCT_LT_MIN1_VEESTRO*multiplier_factor
                             else:
-                                score += DEDUCT_LT_MIN1
+                                score += DEDUCT_LT_MIN1*multiplier_factor
                         # This should never happen
                         else:
                             print('ERR')
@@ -391,7 +401,7 @@ class Optimizer:
                 repeat_same_week[each['meal'].name] += 1
             else:
                 repeat_same_week[each['meal'].name] = 1
-        print('{} repetitions from last week'.format(repeat_cnt))
+        # print('{} repetitions from last week'.format(repeat_cnt))
 
         return slots
 
