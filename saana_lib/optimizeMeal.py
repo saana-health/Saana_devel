@@ -455,7 +455,7 @@ class Optimizer:
         patient_meal_id = []
         for meal in mealinfo:
             patient_meal = model.Patient_meal(patient_id, meal['meal']._id, 'pending', datetime.today())
-            return_id = connectMongo.db.patient_meal.insert_one(patient_meal.class_to_dict()).inserted_id
+            return_id = connectMongo.db.patient_meals.insert_one(patient_meal.class_to_dict()).inserted_id
             patient_meal_id.append(return_id)
         new_order = model.Order(patient_id = patient_id,patient_meal_id = patient_meal_id,\
                           week_start_date=start_date, week_end_date=end_date)
