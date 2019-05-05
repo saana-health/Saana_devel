@@ -1,9 +1,10 @@
 import pdb
 import itertools
-from . import model, connectMongo, utils, feedback
 import csv
 import os
 from datetime import date, timedelta, datetime
+from . import model, connectMongo, utils, feedback
+from . import manual_input
 
 DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
@@ -208,6 +209,10 @@ class Optimizer:
         score_board = {}
 
         for meal in self.meals.values():
+            # skip meal if not from suppliers we want
+            if meal.supplier_id not in manual_input.manual_input('suppliers.csv'):
+                continue
+
             score = 100
             # TODO: quantity
             # if meal.quantity == 0:
@@ -494,6 +499,8 @@ class Optimizer:
             writer = csv.writer(csvfile)
             writer.writerows(csv_list)
         return True
+
+
 
 if __name__ == "__main__":
 

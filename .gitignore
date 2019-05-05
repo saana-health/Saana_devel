@@ -29,3 +29,6 @@ __pycache__/
 *.blg
 *.dvi
 
+
+# test files
+test.py
