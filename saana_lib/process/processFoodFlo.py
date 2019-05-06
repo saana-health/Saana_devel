@@ -32,7 +32,7 @@ def processNutrition(filename):
             first_word = reader_list[i][0].split(' ')[0]
             # Type
             if first_word  in ['Breakfast','Lunch','Dinner']:
-                type = first_word.lower()
+                type = [first_word.lower()]
                 name = reader_list[i][1].lower()
             elif first_word == '':
                 if 'TOTAL' in reader_list[i][1] :

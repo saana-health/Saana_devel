@@ -1,8 +1,9 @@
 import csv
 import os
+import pdb
+from .match_names import match_euphebe, change_names
 from ..model import Meal
 from .. import connectMongo
-from .match_names import match_euphebe, change_names
 
 PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')
 
@@ -29,12 +30,13 @@ def processNutrition(filename):
         units = reader_list[2]
 
         prev_type = ''
+        raw_list = is_raw()
         # loop through each row starting 3rd row
         for i in range(4,len(reader_list)):
             first_word = reader_list[i][0].split(' ')[0]
             # Type
             if first_word  in ['Breakfast','Lunch','Dinner']:
-                type = first_word.lower()
+                type = [first_word.lower()]
 
             # Meal name
             elif first_word != '':
@@ -49,6 +51,8 @@ def processNutrition(filename):
                     for j in range(4,len(reader_list[i])):
                         if reader_list[i][j].replace('.','').isdigit() and float(reader_list[i][j]) != 0:
                             nutritions[columns[j]] = str(float(reader_list[i][j])) + ' ' + units[j]
+                    if name in raw_list:
+                        type.append('raw')
                     new_meal = Meal(name = name,ingredients = ingredients, nutrition = nutritions, type = type, supplierID = \
                         connectMongo.db.users.find_one({'first_name':'FoodNerd'})['_id'], image = get_image_url(name))
                     meals.append(new_meal)
@@ -61,6 +65,24 @@ def processNutrition(filename):
                     if ingredient not in full_list:
                         full_list.append(ingredient)
     return meals, list(set(full_list + columns))
+
+def is_raw():
+    files = []
+    raw_list =[]
+    path = './csv/FoodNerd/'
+    for r,d,f in os.walk(path):
+        for file in f:
+            print(file)
+            if 'isRaw' in file:
+                with open(path+file) as csvfile:
+                    reader_list = list(csv.reader(csvfile))
+                    for row in reader_list:
+                        if '>' in row[0]:
+                            raw_list.append(row[1].lower())
+    return raw_list
+
+
+
 
 if __name__ == "__main__":
     print('Adding FoodNerd meals')

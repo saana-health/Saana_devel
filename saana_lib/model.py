@@ -25,14 +25,14 @@ class Meal(MongoObject):
     '''
     This class should follow the db schema designed for meal info
     '''
-    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = '', supplierID = '',quantity = 0, image = ''):
+    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = [], supplierID = '',quantity = 0, image = ''):
         '''
 
         :param _id: ObjectId()
         :param name: Str
         :param ingredients: {str: str}
         :param nutrition: {str: str}
-        :param type: str
+        :param type: []
         :param supplierID: ObjectId()
         :param quantity: int
         :param image: str
@@ -45,6 +45,10 @@ class Meal(MongoObject):
         self.supplier_id = supplierID
         self.quantity = quantity
         self.image = image
+
+    def change_type(self,new_type):
+        setattr(self, 'type', self.type + [new_type])
+
 
     def __str__(self):
         if self.name != '':

@@ -1,5 +1,6 @@
 from . import processFoodMatrix
 import os
+import pdb
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
@@ -76,6 +77,20 @@ def change_names(combined,convert_dic):
                     cnt += 1
                     combined.append(meal)
     # print('{} items changed'.format(cnt))
+    return combined
+
+def get_type(combined):
+    '''
+    Adds 'soup' and 'raw' tags based on keywords
+    :param combined: [Meal()]
+    :return: [Meal()]
+    '''
+    # for meal in combined:
+    for meal in combined:
+        if 'soup' in meal.name:
+            meal.change_type('soup')
+        if 'salad' in meal.name and 'raw' not in meal.type:
+            meal.change_type('raw')
     return combined
 
 if __name__ == "__main__":
