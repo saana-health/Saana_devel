@@ -192,7 +192,6 @@ class Optimizer:
                 end_date = utils.find_tuesday(start_date,3)
                 self.to_mongo(slots, patient._id,start_date,end_date)
                 self.write_csv(slots,patient._id,start_date,end_date)
-            break
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -210,7 +209,7 @@ class Optimizer:
 
         for meal in self.meals.values():
             # skip meal if not from suppliers we want
-            if meal.supplier_id not in manual_input.manual_input('suppliers.csv'):
+            if meal.supplier_id not in manual_input.manual_input('suppliers.csv')[0]:
                 continue
 
             score = 100
@@ -361,7 +360,7 @@ class Optimizer:
                 for meal in score_board[score]:
 
                     supplier = meal['meal'].supplier_id
-                    if meal['meal'].type.lower() == 'breakfast':
+                    if 'breakfast' in meal['meal'].type:
                         continue
                     try:
                         bucket[supplier].append(meal)
