@@ -32,3 +32,6 @@ __pycache__/
 
 # test files
 test.py
+
+# lock files
+*lock*

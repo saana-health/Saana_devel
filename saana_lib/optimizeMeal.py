@@ -148,13 +148,6 @@ class Optimizer:
         else:
             return False
 
-    # def _get_manual(self):
-    #     emails = []
-    #     suppliers = []
-    #     restrictions = []
-    #
-    #     mat
-
     def optimize(self, test = True):
         '''
         optimize -> get_sscre_board -> choose_meal -> to_mongo & write_csv
