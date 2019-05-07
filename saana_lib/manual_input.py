@@ -9,6 +9,8 @@ def manual_input(filename):
     :param filename:
     :return:
     '''
+    suppliers = []
+    restrictions = []
     with open(filename) as csvfile:
         reader = list(csv.reader(csvfile))
         list_supplier = reader[0]
@@ -18,7 +20,10 @@ def manual_input(filename):
             suppliers = [x['_id'] for x in list(connectMongo.db.users.find({'role':'supplier','first_name':{'$in': list_supplier}},{'_id':1}))]
         if len(reader) >= 2:
             restrictions = reader[1]
-        return suppliers, restrictions
+        if len(reader) >= 3:
+            patients = reader[2]
+
+        return suppliers, restrictions, patients
 
 
 

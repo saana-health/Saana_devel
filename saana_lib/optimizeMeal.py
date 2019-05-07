@@ -2,6 +2,7 @@ import pdb
 import itertools
 import csv
 import os
+import sys
 from datetime import date, timedelta, datetime
 from . import model, connectMongo, utils, feedback
 from . import manual_input
@@ -89,7 +90,18 @@ class Optimizer:
         '''
         patient_obj = []
         patients = connectMongo.db.patients.find()
+        emails = manual_input.manual_input('suppliers.csv')[2]
         for patient in patients:
+            # if no emails are specified -> run algo on ALL patients
+            if emails != []:
+                user = connectMongo.db.users.find_one({'_id':patient['user_id']})
+                # if emails specified but not matched
+                try:
+                    if connectMongo.db.users.find_one({'_id':patient['user_id']})['email'] not in emails:
+                        continue
+                except:
+                    continue
+                #     continue
             # Skip if subscription is not active or not order cycle
             if not self._check_subscription(patient['_id']):
                 continue
@@ -103,7 +115,6 @@ class Optimizer:
             new_patient = model.Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
                                   symptoms=symptoms, treatment_drugs=drugs)
             patient_obj.append(new_patient)
-
         return patient_obj
 
     def _check_subscription(self, patient_id):
@@ -136,6 +147,13 @@ class Optimizer:
            return True
         else:
             return False
+
+    # def _get_manual(self):
+    #     emails = []
+    #     suppliers = []
+    #     restrictions = []
+    #
+    #     mat
 
     def optimize(self, test = True):
         '''
