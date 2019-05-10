@@ -41,7 +41,9 @@ def processFoodMatrixCSV(filename):
             tag_id = None
             for tag in tags:
                 if name in tag['name'].lower() or utils.similar(name, tag['name'],0.7):
+                    print('{}   |   {}'.format(name, tag['name']))
                     tag_id = tag['_id']
+            pdb.set_trace()
             master_dict[name] = {'name': name, 'type': what_type, 'avoid': [], 'prior': {}, 'minimize':{}, 'tag_id': tag_id}
             #loop through each column
             for j in range(2,len(row)):
