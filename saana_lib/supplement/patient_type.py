@@ -66,21 +66,11 @@ def determine_body_type(patient_id):
     else:
         type = 'moist'
 
-    pdb.set_trace()
+    # pdb.set_trace()
+    print(temperature,type)
     return temperature, type
 
-def process_herb_matrix(filename):
-    herb_dict = {}
-    with open(filename) as csvfile:
-        reader_list = list(csv.reader(csvfile))
-        columns = [x.lower() for x in reader_list[0]]
-        for row_num in range(1,len(reader_list)):
-            herb_name = reader_list[row_num][0].lower()
-            herb_dict[herb_name] = []
-            for col_num in range(1,len(reader_list[row_num])):
-                if reader_list[row_num][col_num] != '':
-                    herb_dict[herb_name].append(columns[col_num])
-    return herb_dict
+
 
 
 
