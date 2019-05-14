@@ -3,6 +3,12 @@ import pdb
 import csv
 
 def determine_body_type(patient_id):
+    '''
+    Calculates a patient's body type by getting info from db
+    :param patient_id: ObjectId()
+    :return: Str,Str - ex) 'C','M'
+    '''
+    # dictionary to store type counts
     type_dict = {'warm':0, 'cold':0, 'dry':0, 'moist':0}
     type_info = connectMongo.db.patient_body_type_questions.find_one({'patient_id':patient_id})
 
@@ -56,6 +62,7 @@ def determine_body_type(patient_id):
         type_dict['moist'] += 1
 
     # decide
+    # TODO: right now, there is no tie-breaker, so the algorithm favors C > W, D > M if a tie
     if type_dict['cold'] >= type_dict['warm']:
         temperature = 'C'
     else:
@@ -67,10 +74,3 @@ def determine_body_type(patient_id):
         type = 'M'
 
     return temperature, type
-
-
-
-
-
-
-
