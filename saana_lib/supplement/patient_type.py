@@ -57,17 +57,15 @@ def determine_body_type(patient_id):
 
     # decide
     if type_dict['cold'] >= type_dict['warm']:
-        temperature = 'cold'
+        temperature = 'C'
     else:
-        temperature = 'warm'
+        temperature = 'W'
 
     if type_dict['dry'] >= type_dict['moist']:
-        type = 'dry'
+        type = 'D'
     else:
-        type = 'moist'
+        type = 'M'
 
-    # pdb.set_trace()
-    print(temperature,type)
     return temperature, type
 
 
