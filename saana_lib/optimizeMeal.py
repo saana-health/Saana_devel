@@ -4,8 +4,7 @@ import csv
 import os
 import sys
 from datetime import date, timedelta, datetime
-from . import model, connectMongo, utils, feedback
-from . import manual_input
+from . import model, connectMongo, utils, feedback, manual_input, chemo
 
 DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
@@ -21,6 +20,8 @@ REPEAT_CUM = - 5
 
 # PLUS
 ADD_PRIOR = 10
+
+LIKED_MEAL = 10
 
 try:
     os.remove('masterOrder/masterorder.csv')
@@ -101,7 +102,7 @@ class Optimizer:
                         continue
                 except:
                     continue
-                #     continue
+
             # Skip if subscription is not active or not order cycle
             if not self._check_subscription(patient['_id']):
                 continue
@@ -148,7 +149,7 @@ class Optimizer:
         else:
             return False
 
-    def optimize(self, test = True):
+    def optimize(self):
         '''
         optimize -> get_sscre_board -> choose_meal -> to_mongo & write_csv
         :return:
@@ -180,7 +181,6 @@ class Optimizer:
                 priors.update(tag['prior'])
                 if tag['tag_id'] in symptoms_progress['worsen']:
                     multiplier += list(tag['minimize'].keys())+list(tag['prior'].keys())
-                    print(1)
 
 
             avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
@@ -190,19 +190,19 @@ class Optimizer:
             self.scoreboard_to_csv(score_board,patient._id)
 
             ## Start choosing meals ##
-            slots = self.choose_meal(score_board, repeat_one_week)
+            slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
 
             # Save the result to csv and update on mongo
             if num_meal> 8:
                 end_date = utils.find_tuesday(start_date,2)
-                self.to_mongo(slots,patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,start_date,end_date)
             else:
                 end_date = utils.find_tuesday(start_date,3)
-                self.to_mongo(slots, patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,start_date,end_date)
+
+            slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date, score_board, supplierIds)
+            self.to_mongo(slots, patient._id,start_date,end_date)
+            self.write_csv(slots,patient._id,start_date,end_date)
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -220,7 +220,8 @@ class Optimizer:
 
         for meal in self.meals.values():
             # skip meal if not from suppliers we want
-            if meal.supplier_id not in manual_input.manual_input('suppliers.csv')[0]:
+            suppliers = manual_input.manual_input('suppliers.csv')[0]
+            if suppliers != [] and meal.supplier_id not in suppliers:
                 continue
 
             score = 100
@@ -345,6 +346,8 @@ class Optimizer:
 
             # Check if two suppliers can be chosen
             if len(bucket[Veestro]) == 15:
+                five_meal_supplier = Veestro
+                ten_meal_supplier = Veestro
                 slots = bucket[Veestro]
                 break
             if five_meal_supplier is None:
@@ -419,7 +422,8 @@ class Optimizer:
                 repeat_same_week[each['meal'].name] = 1
         # print('{} repetitions from last week'.format(repeat_cnt))
 
-        return slots
+
+        return slots, [five_meal_supplier, ten_meal_supplier]
 
     def _repeating_meals(self,patient_id,start_date):
         '''
@@ -474,18 +478,22 @@ class Optimizer:
             patient_meal_id.append(return_id)
         new_order = model.Order(patient_id = patient_id,patient_meal_id = patient_meal_id,\
                           week_start_date=start_date, week_end_date=end_date)
-        connectMongo.db.order.insert_one(new_order.class_to_dict())
+        connectMongo.db.orders.insert_one(new_order.class_to_dict())
         return True
 
     def write_csv(self,slots,patient_id,start_date,end_date):
         try:
             existing_order = list(csv.reader(open('masterOrder/masterorder.csv','r')))
         except:
-            existing_order = [['ID','date','meal_name','minimize','prior','avoid','supplier']]
+            existing_order = [['Patient_ID','Patient_name','date','meal_name','minimize','prior','avoid','supplier_id','supplier_name']]
         for index in range(len(slots)):
             meal = slots[index]
-            row = [str(patient_id)[-5:],str(start_date.date()+timedelta(days=index)),meal['meal'].name,\
-                   meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplier_id]
+            user = connectMongo.db.users.find_one({'_id':connectMongo.db.patients.find_one({'_id':patient_id})['user_id']})
+            patient_name = user['first_name'] + ' ' + user['last_name']
+            supplier_name = connectMongo.db.users.find_one({'_id': meal['meal'].supplier_id})['first_name']
+
+            row = [str(patient_id), patient_name, str(start_date.date()+timedelta(days=index)), meal['meal'].name,\
+                   meal['minimize'], meal['prior'], meal['avoid'], meal['meal'].supplier_id, supplier_name]
             existing_order.append(row)
         with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
