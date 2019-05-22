@@ -4,8 +4,7 @@ import csv
 import os
 import sys
 from datetime import date, timedelta, datetime
-from . import model, connectMongo, utils, feedback
-from . import manual_input
+from . import model, connectMongo, utils, feedback, manual_input, chemo
 
 DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
@@ -101,7 +100,7 @@ class Optimizer:
                         continue
                 except:
                     continue
-                #     continue
+
             # Skip if subscription is not active or not order cycle
             if not self._check_subscription(patient['_id']):
                 continue
@@ -197,12 +196,13 @@ class Optimizer:
             # Save the result to csv and update on mongo
             if num_meal> 8:
                 end_date = utils.find_tuesday(start_date,2)
-                self.to_mongo(slots,patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,start_date,end_date)
             else:
                 end_date = utils.find_tuesday(start_date,3)
-                self.to_mongo(slots, patient._id,start_date,end_date)
-                self.write_csv(slots,patient._id,start_date,end_date)
+
+            slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date)
+
+            self.to_mongo(slots, patient._id,start_date,end_date)
+            self.write_csv(slots,patient._id,start_date,end_date)
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -220,7 +220,8 @@ class Optimizer:
 
         for meal in self.meals.values():
             # skip meal if not from suppliers we want
-            if meal.supplier_id not in manual_input.manual_input('suppliers.csv')[0]:
+            suppliers = manual_input.manual_input('suppliers.csv')[0]
+            if suppliers != [] and meal.supplier_id not in suppliers:
                 continue
 
             score = 100
