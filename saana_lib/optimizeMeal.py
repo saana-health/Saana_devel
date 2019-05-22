@@ -149,7 +149,7 @@ class Optimizer:
         else:
             return False
 
-    def optimize(self, test = True):
+    def optimize(self):
         '''
         optimize -> get_sscre_board -> choose_meal -> to_mongo & write_csv
         :return:
