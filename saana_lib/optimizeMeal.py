@@ -475,7 +475,7 @@ class Optimizer:
             patient_meal_id.append(return_id)
         new_order = model.Order(patient_id = patient_id,patient_meal_id = patient_meal_id,\
                           week_start_date=start_date, week_end_date=end_date)
-        connectMongo.db.order.insert_one(new_order.class_to_dict())
+        connectMongo.db.orders.insert_one(new_order.class_to_dict())
         return True
 
     def write_csv(self,slots,patient_id,start_date,end_date):
