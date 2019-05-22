@@ -21,6 +21,8 @@ REPEAT_CUM = - 5
 # PLUS
 ADD_PRIOR = 10
 
+LIKED_MEAL = 10
+
 try:
     os.remove('masterOrder/masterorder.csv')
 except:
@@ -179,7 +181,6 @@ class Optimizer:
                 priors.update(tag['prior'])
                 if tag['tag_id'] in symptoms_progress['worsen']:
                     multiplier += list(tag['minimize'].keys())+list(tag['prior'].keys())
-                    print(1)
 
 
             avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
@@ -189,7 +190,7 @@ class Optimizer:
             self.scoreboard_to_csv(score_board,patient._id)
 
             ## Start choosing meals ##
-            slots = self.choose_meal(score_board, repeat_one_week)
+            slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
             assert len(slots) == 15
             slots = self.reorder_slots(slots)
 
@@ -199,8 +200,7 @@ class Optimizer:
             else:
                 end_date = utils.find_tuesday(start_date,3)
 
-            slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date)
-
+            slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date, score_board, supplierIds)
             self.to_mongo(slots, patient._id,start_date,end_date)
             self.write_csv(slots,patient._id,start_date,end_date)
 
@@ -346,6 +346,8 @@ class Optimizer:
 
             # Check if two suppliers can be chosen
             if len(bucket[Veestro]) == 15:
+                five_meal_supplier = Veestro
+                ten_meal_supplier = Veestro
                 slots = bucket[Veestro]
                 break
             if five_meal_supplier is None:
@@ -420,7 +422,8 @@ class Optimizer:
                 repeat_same_week[each['meal'].name] = 1
         # print('{} repetitions from last week'.format(repeat_cnt))
 
-        return slots
+
+        return slots, [five_meal_supplier, ten_meal_supplier]
 
     def _repeating_meals(self,patient_id,start_date):
         '''
