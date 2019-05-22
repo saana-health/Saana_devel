@@ -485,11 +485,15 @@ class Optimizer:
         try:
             existing_order = list(csv.reader(open('masterOrder/masterorder.csv','r')))
         except:
-            existing_order = [['ID','date','meal_name','minimize','prior','avoid','supplier']]
+            existing_order = [['Patient_ID','Patient_name','date','meal_name','minimize','prior','avoid','supplier_id','supplier_name']]
         for index in range(len(slots)):
             meal = slots[index]
-            row = [str(patient_id)[-5:],str(start_date.date()+timedelta(days=index)),meal['meal'].name,\
-                   meal['minimize'],meal['prior'],meal['avoid'],meal['meal'].supplier_id]
+            user = connectMongo.db.users.find_one({'_id':connectMongo.db.patients.find_one({'_id':patient_id})['user_id']})
+            patient_name = user['first_name'] + ' ' + user['last_name']
+            supplier_name = connectMongo.db.users.find_one({'_id': meal['meal'].supplier_id})['first_name']
+
+            row = [str(patient_id), patient_name, str(start_date.date()+timedelta(days=index)), meal['meal'].name,\
+                   meal['minimize'], meal['prior'], meal['avoid'], meal['meal'].supplier_id, supplier_name]
             existing_order.append(row)
         with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
