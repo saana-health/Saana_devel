@@ -36,7 +36,7 @@ def reorder_chemo(slots, patient_id, start_date, end_date, score_board, supplier
     if delta_dates == []:
         return slots
     else:
-        chemo_meals = choose_chemo_meals(score_board, slots, supplierIds)
         pdb.set_trace()
+        chemo_meals = choose_chemo_meals(score_board, slots, supplierIds)
         return slots
 

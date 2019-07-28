@@ -10,6 +10,10 @@ dump.zip
 venv/
 env/
 
+# score cards and orders
+scoreboard/*
+masterOrder/*
+
 # pycharm files
 .idea/
 

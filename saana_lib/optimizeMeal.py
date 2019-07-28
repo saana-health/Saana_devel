@@ -70,7 +70,7 @@ class Optimizer:
             new_meal = model.Meal()
             new_meal.dict_to_class(temp)
             map_meal[temp['_id']] = new_meal#utils.meal_dict_to_class(temp)
-        print("Finished getting meals from DB")
+        print("Started getting meals from DB")
         return map_meal
 
     def _get_tags(self):
@@ -163,56 +163,60 @@ class Optimizer:
         :return:
         '''
         for patient in self.patients:
-            # plan either 7 or 15
-            num_meal = connectMongo.get_subscription(patient._id)
+            try:
+                # plan either 7 or 15
+                num_meal = connectMongo.get_subscription(patient._id)
 
-            ## deprecated
-            # patient.next_order = connectMongo.get_next_order(patient._id)
+                ## deprecated
+                # patient.next_order = connectMongo.get_next_order(patient._id)
 
-            today = self.today
-            start_date = today
+                today = self.today
+                start_date = today
 
-            print('Processing   {}  on {}!'.format(patient.name,str(today)))
+                print('Processing   {}  on {}!'.format(patient.name,str(today)))
 
-            score_board = {}
+                score_board = {}
 
-            # get all tags
-            tag_ids = patient.symptoms + patient.disease + patient.treatment_drugs + patient.comorbidities
-            tags = list(connectMongo.db.tags.find({'tag_id':{'$in':tag_ids}}))
+                # get all tags
+                tag_ids = patient.symptoms + patient.disease + patient.treatment_drugs + patient.comorbidities
+                tags = list(connectMongo.db.tags.find({'tag_id':{'$in':tag_ids}}))
 
-            # prepare tags
-            minimizes = {}
-            priors = {}
-            multiplier = []
-            symptoms_progress = feedback.get_lateset_symptoms(patient._id)
-            for tag in tags:
-                minimizes.update(tag['minimize'])
-                priors.update(tag['prior'])
-                if tag['tag_id'] in symptoms_progress['worsen']:
-                    multiplier += list(tag['minimize'].keys())+list(tag['prior'].keys())
+                # prepare tags
+                minimizes = {}
+                priors = {}
+                multiplier = []
+                symptoms_progress = feedback.get_lateset_symptoms(patient._id)
+                for tag in tags:
+                    minimizes.update(tag['minimize'])
+                    priors.update(tag['prior'])
+                    if tag['tag_id'] in symptoms_progress['worsen']:
+                        multiplier += list(tag['minimize'].keys())+list(tag['prior'].keys())
 
 
-            avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
+                avoids = list(set(itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])))
 
-            ## Get scoreboard ##
-            score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors, list(set(multiplier)))
-            self.scoreboard_to_csv(score_board,patient._id)
+                ## Get scoreboard ##
+                score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors, list(set(multiplier)))
+                self.scoreboard_to_csv(score_board,patient._id)
 
-            ## Start choosing meals ##
-            slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
-            assert len(slots) == 15
-            slots = self.reorder_slots(slots)
+                ## Start choosing meals ##
+                slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
+                assert len(slots) == 15
+                slots = self.reorder_slots(slots)
 
-            # Save the result to csv and update on mongo
-            if num_meal> 8:
-                end_date = utils.find_tuesday(start_date,2)
-            else:
-                end_date = utils.find_tuesday(start_date,3)
+                # Save the result to csv and update on mongo
+                if num_meal> 8:
+                    end_date = utils.find_tuesday(start_date,2)
+                else:
+                    end_date = utils.find_tuesday(start_date,3)
 
-            slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date, score_board, supplierIds)
-            self.to_mongo(slots, patient._id,start_date,end_date)
-            self.write_csv(slots,patient._id,start_date,end_date)
-            print('Finished processing   {}'.format(patient.name,str(today)))
+                slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date, score_board, supplierIds)
+                self.to_mongo(slots, patient._id,start_date,end_date)
+                self.write_csv(slots,patient._id,start_date,end_date)
+                print('Finished processing   {}'.format(patient.name,str(today)))
+
+            except:
+                print('Error while generating meals for {}'.format(patient.name))
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -261,6 +265,7 @@ class Optimizer:
             # minimizes: list of all ingredients+nutrition to minimize from tags
             # full_meal_info: from meal info
             for min_item in minimizes.keys():
+
                 for ing in full_meal_info.keys():
                     # if matched
                     if min_item in ing:
@@ -278,20 +283,23 @@ class Optimizer:
                         # if (val > min2)
                         if contain_val > float(minimizes[min_item]['min2']):
                             score += DEDUCT_GR_MIN2*multiplier_factor
+                            minimize_list.append(min_item)
                         # if (min1 < val < min2)
                         elif contain_val > float(minimizes[min_item]['min1']):
                             score += DEDUCT_LT_MIN2*multiplier_factor
+                            minimize_list.append(min_item)
                         #if (val < min1)
-                        elif contain_val < float(minimizes[min_item]['min1']):
-                            if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
-                                score += DEDUCT_LT_MIN1_VEESTRO*multiplier_factor
-                            else:
-                                score += DEDUCT_LT_MIN1*multiplier_factor
+                        elif contain_val <= float(minimizes[min_item]['min1']):
+                            pass
+                            # Do we deduct points for {value} < min1 ? No
+                            # if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
+                            #     score += DEDUCT_LT_MIN1_VEESTRO*multiplier_factor
+                            # else:
+                            #     score += DEDUCT_LT_MIN1*multiplier_factor
                         # This should never happen
                         else:
                             print('ERR')
                             raise ValueError
-                        minimize_list.append(min_item)
 
             ## PRIORITIZE
             ## DELETE this line if I see again
