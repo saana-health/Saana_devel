@@ -49,6 +49,6 @@ def add_tags():
     connectMongo.db.tags.insert_many(list(master_dict.values()))
 
 if __name__=="__main__":
-    # add_tags()
-    add_meals()
+    add_tags()
+    # add_meals()
 

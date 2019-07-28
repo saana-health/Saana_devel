@@ -42,6 +42,7 @@ class Optimizer:
         patients: [Patient()]
         today: datetime.datetime()
         '''
+        print("Started initializing Optimizer Object")
         self.today = datetime.combine(TODAY,datetime.min.time())
         # check today is tuesday
         assert self.today.weekday() == 1
@@ -49,6 +50,7 @@ class Optimizer:
         self.meals = self._get_meals()
         self.tags = self._get_tags()
         self.patients = self._get_patients()
+        print("Finished initializing Optimizer Object")
 
     def _get_meals(self):
         '''
@@ -56,6 +58,7 @@ class Optimizer:
 
         :return: {_id: Meal()}
         '''
+        print("Started getting meals from DB")
         map_meal = {}
         meals_dict= list(connectMongo.db.meal_infos.find())
         for temp in meals_dict:
@@ -67,6 +70,7 @@ class Optimizer:
             new_meal = model.Meal()
             new_meal.dict_to_class(temp)
             map_meal[temp['_id']] = new_meal#utils.meal_dict_to_class(temp)
+        print("Finished getting meals from DB")
         return map_meal
 
     def _get_tags(self):
@@ -75,12 +79,14 @@ class Optimizer:
 
         :return: {_id: Tag()}
         '''
+        print("Started getting tags from DB")
         hash_tag = {}
         tags = list(connectMongo.db.tags.find())
         for tag in tags:
             new_tag = model.Tag()
             new_tag.dict_to_class(tag)
             hash_tag[tag['_id']] = new_tag
+        print("Finished getting tags from DB")
         return hash_tag
 
     def _get_patients(self):
@@ -89,6 +95,7 @@ class Optimizer:
 
         :return: [Patient()]
         '''
+        print("Started getting patients from DB")
         patient_obj = []
         patients = connectMongo.db.patients.find()
         emails = manual_input.manual_input('suppliers.csv')[2]
@@ -116,6 +123,7 @@ class Optimizer:
             new_patient = model.Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
                                   symptoms=symptoms, treatment_drugs=drugs)
             patient_obj.append(new_patient)
+        print("Finished getting patients")
         return patient_obj
 
     def _check_subscription(self, patient_id):
@@ -165,10 +173,11 @@ class Optimizer:
             start_date = today
 
             print('Processing   {}  on {}!'.format(patient.name,str(today)))
+
             score_board = {}
 
             # get all tags
-            tag_ids = patient.symptoms+patient.disease+patient.treatment_drugs+patient.comorbidities
+            tag_ids = patient.symptoms + patient.disease + patient.treatment_drugs + patient.comorbidities
             tags = list(connectMongo.db.tags.find({'tag_id':{'$in':tag_ids}}))
 
             # prepare tags
@@ -203,6 +212,7 @@ class Optimizer:
             slots = chemo.reorder_chemo(slots, patient._id, start_date, end_date, score_board, supplierIds)
             self.to_mongo(slots, patient._id,start_date,end_date)
             self.write_csv(slots,patient._id,start_date,end_date)
+            print('Finished processing   {}'.format(patient.name,str(today)))
 
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
@@ -214,6 +224,7 @@ class Optimizer:
         :param priors: { str: int}
         :return: {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]}, [Meal()]
         '''
+        print("Started generating score card")
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
         repeat_one_week, repeat_two_week= self._repeating_meals(patient._id,self.today)
         score_board = {}
@@ -314,6 +325,7 @@ class Optimizer:
             else:
                 score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list})
 
+        print("Finished generating score card")
         return score_board, repeat_one_week
 
     def choose_meal(self,score_board,repeat_one_week):
@@ -498,6 +510,7 @@ class Optimizer:
         with open('masterOrder/masterorder.csv','w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(existing_order)
+        print("Successfully generated orders to a csv file")
 
     def scoreboard_to_csv(self,score_board,patient_id):
         '''
@@ -516,6 +529,7 @@ class Optimizer:
         with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.today.date())+'.csv','w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csv_list)
+        print("Successfully wrote score card to a csv file")
         return True
 
 

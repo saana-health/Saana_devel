@@ -6,12 +6,9 @@ __pycache__/
 dump/
 dump.zip
 
-# MasterOrder folder
-masterOrder/
-scoreboard/
-
 # venv folder
 venv/
+env/
 
 # pycharm files
 .idea/
