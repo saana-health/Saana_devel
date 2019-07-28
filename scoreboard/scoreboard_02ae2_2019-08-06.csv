@@ -1,8 +1,8 @@
 5cb581403945895a51202ae2
 score,meal,minimize,prior,avoid,supplier_id
-150,b'beluga lentil braise',[],"['green beans', 'zucchini', 'ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-130,b'chocolate covered strawberry super-food oats',[],"['total fiber', 'nuts', 'flax']",[],5cb0fa253b7750fa415d3044
-120,b'wild blueberry super-food oats',[],"['nuts', 'flax']",[],5cb0fa253b7750fa415d3044
+150,b'beluga lentil braise',[],"['zucchini', 'carrot', 'ginger', 'green beans', 'potato']",[],5cb0fa253b7750fa415d3045
+130,b'chocolate covered strawberry super-food oats',[],"['total fiber', 'flax', 'nuts']",[],5cb0fa253b7750fa415d3044
+120,b'wild blueberry super-food oats',[],"['flax', 'nuts']",[],5cb0fa253b7750fa415d3044
 120,b'oatmeal breakfast pie',[],"['nuts', 'potato']",[],5cb0fa253b7750fa415d3045
 110,b'apple cinnamon mini muffins',[],['flax'],[],5cb0fa253b7750fa415d3044
 110,b'sweet beet slaw salad',[],['nuts'],[],5cb0fa253b7750fa415d3044
@@ -15,80 +15,80 @@ score,meal,minimize,prior,avoid,supplier_id
 100,b'berry choco-latte',[],[],[],5cb0fa253b7750fa415d3046
 100,b'napa-licious',[],[],[],5cb0fa253b7750fa415d3046
 100,"b""rollin' oats""",[],[],[],5cb0fa253b7750fa415d3046
-90.0,b'mushroom risotto',['garlic'],"['green beans', 'carrot']",[],5cb0fa253b7750fa415d3045
-90.0,b'pad thai',"['peppers, hot']","['ginger', 'carrot']",[],5cb0fa253b7750fa415d3045
-77.5,b'immunity',['spicy powders'],[],[],5cb0fa253b7750fa415d3046
-70.0,b'mediterranean falafel',['garlic'],[],[],5cb0fa253b7750fa415d3045
-70.0,b'moroccan melange',"['garlic', 'spicy powders']","['ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-70.0,b'spinach pie',['garlic'],[],[],5cb0fa253b7750fa415d3045
-70.0,b'black bean pasta alfredo',"['garlic', 'spicy powders']","['potato', 'asparagus', 'zucchini']",[],5cb0fa253b7750fa415d3045
-70.0,b'chinese eggplant stirfry',"['garlic', 'spicy powders']","['nut butter', 'ginger', 'carrot']",[],5cb0fa253b7750fa415d3045
-60.0,b'ultimate veggie wrap',"['garlic', 'onion']","['potato', 'zucchini']",[],5cb0fa253b7750fa415d3045
-52.5,b'perfect pot pie',"['insoluble fiber', 'onion']","['carrot', 'flax']",[],5cb0fa253b7750fa415d3043
-50.0,b'kale and quinoa salad',"['garlic', 'onion']",['carrot'],[],5cb0fa253b7750fa415d3045
-50.0,b'quinoa bake',"['garlic', 'onion']",['potato'],[],5cb0fa253b7750fa415d3045
-40.0,b'sweet potato & black bean burger with roasted veggies',"['insoluble fiber', 'onion', 'peppers, hot', 'spicy powders']","['carrot', 'total fiber', 'potato']",[],5cb0fa253b7750fa415d3043
-40.0,"b""creamy italian chick'n""","['garlic', 'onion', 'tomato']","['carrot', 'potato', 'asparagus']",[],5cb0fa253b7750fa415d3045
-40.0,b'soba noodles in peanut sauce',"['garlic', 'peppers, hot', 'spicy powders']","['ginger', 'carrot', 'nuts']",[],5cb0fa253b7750fa415d3045
-30.0,b'creamy celeriac soup with rosemary oat crumble',"['insoluble fiber', 'garlic', 'spicy powders']","['potato', 'flax']",[],5cb0fa253b7750fa415d3043
-30.0,b'cremini & shiitake mushroom soup with rosemary oat crumble',"['insoluble fiber', 'onion', 'spicy powders']","['total fiber', 'flax']",[],5cb0fa253b7750fa415d3043
-30.0,b'red curry with tofu',"['garlic', 'peppers, hot', 'spicy powders']","['ginger', 'carrot']",[],5cb0fa253b7750fa415d3045
-30.0,"b""country fried chick'n""","['garlic', 'onion', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-30.0,b'veggie empanadas',"['garlic', 'peppers, hot', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-30.0,b'veggie pesto pizza',"['garlic', 'onion', 'spicy powders']","['nuts', 'potato']",[],5cb0fa253b7750fa415d3045
-20.0,b'lunchtime rita with green salsa',"['insoluble fiber', 'garlic', 'peppers, hot']",['total fiber'],[],5cb0fa253b7750fa415d3043
-20.0,"b""thai chick'n stew""","['garlic', 'onion', 'peppers, hot', 'tomato']","['nut butter', 'ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-20.0,b'portobello steak dinner',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3045
-20.0,b'shepherdless pie',"['garlic', 'onion', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3045
-20.0,b'lentil meatloaf',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3045
-20.0,b'all-american breakfast',"['garlic', 'onion', 'spicy powders']",['ginger'],[],5cb0fa253b7750fa415d3045
-10.0,"b""southwest bbq chick'n""","['garlic', 'onion', 'spicy powders', 'tomato']","['potato', 'asparagus', 'zucchini']",[],5cb0fa253b7750fa415d3045
-10.0,b'latin stew',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-10.0,b'lentil and spinach tagine',"['garlic', 'onion', 'spicy powders', 'tomato']","['ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-7.5,b'puy lentil & cabbage burger with roasted veggies',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']","['carrot', 'total fiber']",[],5cb0fa253b7750fa415d3043
-7.5,b'zucchini farro soup with seed crumble',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']","['carrot', 'zucchini']",[],5cb0fa253b7750fa415d3043
-0.0,b'carrot osso bucco',"['garlic', 'onion', 'spicy powders', 'tomato']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
-0.0,b'golden chickpea stew',"['onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
-0.0,b'baked mac & cheez dinner',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'potato']",[],5cb0fa253b7750fa415d3045
-0.0,b'mushroom stroganoff',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'asparagus']",[],5cb0fa253b7750fa415d3045
-0.0,b'paella valenciana',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'potato']",[],5cb0fa253b7750fa415d3045
--2.5,b'veggie brunch muffin with roasted red pepper sauce',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
--10.0,"b""chick'n nuggets""","['garlic', 'onion', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
--10.0,b'pasta bolognese',"['garlic', 'onion', 'peppers, hot', 'tomato']",['carrot'],[],5cb0fa253b7750fa415d3045
--10.0,b'pizza napoletana',"['garlic', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
--20.0,b'spanish torta',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['carrot', 'potato', 'zucchini']",[],5cb0fa253b7750fa415d3045
--20.0,b'omelet primavera',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['carrot', 'potato', 'zucchini']",[],5cb0fa253b7750fa415d3045
--25.0,"b""chef's harvest lunch with tricolor quinoa""","['insoluble fiber', 'garlic', 'spicy powders']",['ginger'],[],5cb0fa253b7750fa415d3043
--25.0,b'magic mushroom ragout with herbed quinoa',"['insoluble fiber', 'garlic', 'spicy powders']",['total fiber'],[],5cb0fa253b7750fa415d3043
--25.0,b'roasted chickpea & tahini soup',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
--25.0,b'green machine bean burger',"['garlic', 'onion', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3044
--30.0,"b""chick'n quesadilla""","['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['potato', 'zucchini']",[],5cb0fa253b7750fa415d3045
--30.0,b'veggie lasagna',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['carrot', 'zucchini']",[],5cb0fa253b7750fa415d3045
--30.0,b'eggplant casserole',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['carrot', 'zucchini']",[],5cb0fa253b7750fa415d3045
--30.0,b'tuscan calzone',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['carrot', 'zucchini']",[],5cb0fa253b7750fa415d3045
--30.0,b'enfrijolada rustica',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['potato', 'zucchini']",[],5cb0fa253b7750fa415d3045
--30.0,b'breakfast burrito',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
--30.0,b'savory croquettes',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['nuts', 'potato']",[],5cb0fa253b7750fa415d3045
--30.0,b'three layer scramble',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
--35.0,b'lunch thyme grain bowl',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
--37.5,b'good for you aloo gobi with cardamom rice',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3043
--37.5,b'brussels sprouts gratin with toasted pecans',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']","['total fiber', 'potato']",[],5cb0fa253b7750fa415d3043
--40.0,"b""pepp'roni pizza""","['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
--50.0,b'enchilada casserole',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3045
--50.0,b'tortilla chili',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3045
--57.5,b'veggie heavy spanakopita with chickpea toast and olive and almond crumble',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
--70.0,b'herby farro salad',"['insoluble fiber', 'garlic', 'spicy powders']",['zucchini'],[],5cb0fa253b7750fa415d3043
--70.0,b'potato ranch slaw salad',"['garlic', 'spicy powders']",['total fiber'],[],5cb0fa253b7750fa415d3044
--80.0,b'tex mex bake',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",[],[],5cb0fa253b7750fa415d3043
--82.5,b'split pea soup',"['insoluble fiber', 'onion', 'spicy powders']","['carrot', 'total fiber']",[],5cb0fa253b7750fa415d3043
--82.5,b'tomato & cannellini bean soup',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']","['carrot', 'total fiber']",[],5cb0fa253b7750fa415d3043
--82.5,b'french style vegetable slaw salad',"['garlic', 'onion', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3044
--92.5,b'hippie brunch burrito with green salsa',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
--92.5,b'spaghetti and meatballs',"['garlic', 'onion', 'tomato']",['total fiber'],[],5cb0fa253b7750fa415d3044
--115.0,b'sausage biscuits and gravy',"['garlic', 'onion', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3044
--125.0,b'cuban black bean soup',"['insoluble fiber', 'garlic', 'onion']",[],[],5cb0fa253b7750fa415d3043
--137.5,b'breakfast bowl with smoky tomato sauce',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3043
--150.0,b'chana masala with indian spiced rice',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'tomato']","['ginger', 'total fiber']",[],5cb0fa253b7750fa415d3043
--150.0,b'eggplant caponata with herbed quinoa',"['insoluble fiber', 'garlic', 'onion', 'tomato']","['total fiber', 'nuts']",[],5cb0fa253b7750fa415d3043
--160.0,b'roasted chickpea & vegetable tacos',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3044
--170.0,"b'white lentil, tomato & fennel faux-sotto'","['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
+100,b'mushroom risotto',['garlic'],"['green beans', 'carrot']",[],5cb0fa253b7750fa415d3045
+100,b'pad thai',"['peppers, hot']","['ginger', 'carrot']",[],5cb0fa253b7750fa415d3045
+90,b'moroccan melange',"['garlic', 'spicy powders']","['ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+90,b'black bean pasta alfredo',"['garlic', 'spicy powders']","['asparagus', 'zucchini', 'potato']",[],5cb0fa253b7750fa415d3045
+90,b'chinese eggplant stirfry',"['garlic', 'spicy powders']","['ginger', 'nut butter', 'carrot']",[],5cb0fa253b7750fa415d3045
+85,b'immunity',['spicy powders'],[],[],5cb0fa253b7750fa415d3046
+80,b'mediterranean falafel',['garlic'],[],[],5cb0fa253b7750fa415d3045
+80,b'spinach pie',['garlic'],[],[],5cb0fa253b7750fa415d3045
+80,b'ultimate veggie wrap',"['garlic', 'onion']","['zucchini', 'potato']",[],5cb0fa253b7750fa415d3045
+75,b'perfect pot pie',"['insoluble fiber', 'onion']","['flax', 'carrot']",[],5cb0fa253b7750fa415d3043
+70,b'sweet potato & black bean burger with roasted veggies',"['insoluble fiber', 'onion', 'peppers, hot', 'spicy powders']","['total fiber', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3043
+70,"b""creamy italian chick'n""","['garlic', 'onion', 'tomato']","['asparagus', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+70,b'soba noodles in peanut sauce',"['garlic', 'peppers, hot', 'spicy powders']","['ginger', 'nuts', 'carrot']",[],5cb0fa253b7750fa415d3045
+70,b'kale and quinoa salad',"['garlic', 'onion']",['carrot'],[],5cb0fa253b7750fa415d3045
+70,b'quinoa bake',"['garlic', 'onion']",['potato'],[],5cb0fa253b7750fa415d3045
+60,b'creamy celeriac soup with rosemary oat crumble',"['insoluble fiber', 'garlic', 'spicy powders']","['flax', 'potato']",[],5cb0fa253b7750fa415d3043
+60,b'cremini & shiitake mushroom soup with rosemary oat crumble',"['insoluble fiber', 'onion', 'spicy powders']","['total fiber', 'flax']",[],5cb0fa253b7750fa415d3043
+60,b'red curry with tofu',"['garlic', 'peppers, hot', 'spicy powders']","['ginger', 'carrot']",[],5cb0fa253b7750fa415d3045
+60,"b""country fried chick'n""","['garlic', 'onion', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+60,b'veggie empanadas',"['garlic', 'peppers, hot', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+60,"b""thai chick'n stew""","['garlic', 'onion', 'peppers, hot', 'tomato']","['ginger', 'carrot', 'nut butter', 'potato']",[],5cb0fa253b7750fa415d3045
+60,b'veggie pesto pizza',"['garlic', 'onion', 'spicy powders']","['nuts', 'potato']",[],5cb0fa253b7750fa415d3045
+50,b'lunchtime rita with green salsa',"['insoluble fiber', 'garlic', 'peppers, hot']",['total fiber'],[],5cb0fa253b7750fa415d3043
+50,"b""southwest bbq chick'n""","['garlic', 'onion', 'spicy powders', 'tomato']","['asparagus', 'zucchini', 'potato']",[],5cb0fa253b7750fa415d3045
+50,b'portobello steak dinner',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3045
+50,b'shepherdless pie',"['garlic', 'onion', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3045
+50,b'latin stew',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+50,b'lentil and spinach tagine',"['garlic', 'onion', 'spicy powders', 'tomato']","['ginger', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+50,b'lentil meatloaf',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3045
+50,b'all-american breakfast',"['garlic', 'onion', 'spicy powders']",['ginger'],[],5cb0fa253b7750fa415d3045
+45,b'puy lentil & cabbage burger with roasted veggies',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']","['total fiber', 'carrot']",[],5cb0fa253b7750fa415d3043
+45,b'zucchini farro soup with seed crumble',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']","['zucchini', 'carrot']",[],5cb0fa253b7750fa415d3043
+40,b'carrot osso bucco',"['garlic', 'onion', 'spicy powders', 'tomato']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+40,b'golden chickpea stew',"['onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
+40,b'baked mac & cheez dinner',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'potato']",[],5cb0fa253b7750fa415d3045
+40,b'mushroom stroganoff',"['garlic', 'onion', 'spicy powders', 'tomato']","['asparagus', 'green beans']",[],5cb0fa253b7750fa415d3045
+40,b'paella valenciana',"['garlic', 'onion', 'spicy powders', 'tomato']","['green beans', 'potato']",[],5cb0fa253b7750fa415d3045
+35,b'veggie brunch muffin with roasted red pepper sauce',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
+30,"b""chick'n nuggets""","['garlic', 'onion', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
+30,b'pasta bolognese',"['garlic', 'onion', 'peppers, hot', 'tomato']",['carrot'],[],5cb0fa253b7750fa415d3045
+30,b'pizza napoletana',"['garlic', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
+30,b'spanish torta',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+30,b'omelet primavera',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'carrot', 'potato']",[],5cb0fa253b7750fa415d3045
+20,"b""chef's harvest lunch with tricolor quinoa""","['insoluble fiber', 'garlic', 'spicy powders']",['ginger'],[],5cb0fa253b7750fa415d3043
+20,b'magic mushroom ragout with herbed quinoa',"['insoluble fiber', 'garlic', 'spicy powders']",['total fiber'],[],5cb0fa253b7750fa415d3043
+20,b'roasted chickpea & tahini soup',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
+20,b'green machine bean burger',"['garlic', 'onion', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3044
+20,"b""chick'n quesadilla""","['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'potato']",[],5cb0fa253b7750fa415d3045
+20,b'veggie lasagna',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'carrot']",[],5cb0fa253b7750fa415d3045
+20,b'eggplant casserole',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'carrot']",[],5cb0fa253b7750fa415d3045
+20,b'tuscan calzone',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'carrot']",[],5cb0fa253b7750fa415d3045
+20,b'enfrijolada rustica',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['zucchini', 'potato']",[],5cb0fa253b7750fa415d3045
+20,b'breakfast burrito',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
+20,b'savory croquettes',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['nuts', 'potato']",[],5cb0fa253b7750fa415d3045
+20,b'three layer scramble',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3045
+15,b'good for you aloo gobi with cardamom rice',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']","['ginger', 'potato']",[],5cb0fa253b7750fa415d3043
+15,b'brussels sprouts gratin with toasted pecans',"['insoluble fiber', 'garlic', 'onion', 'spicy powders']","['total fiber', 'potato']",[],5cb0fa253b7750fa415d3043
+10,b'lunch thyme grain bowl',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
+10,"b""pepp'roni pizza""","['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3045
+0,b'enchilada casserole',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3045
+0,b'tortilla chili',"['garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3045
+-5,b'veggie heavy spanakopita with chickpea toast and olive and almond crumble',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
+-10,b'herby farro salad',"['insoluble fiber', 'garlic', 'spicy powders']",['zucchini'],[],5cb0fa253b7750fa415d3043
+-10,b'potato ranch slaw salad',"['garlic', 'spicy powders']",['total fiber'],[],5cb0fa253b7750fa415d3044
+-15,b'split pea soup',"['insoluble fiber', 'onion', 'spicy powders']","['total fiber', 'carrot']",[],5cb0fa253b7750fa415d3043
+-15,b'tomato & cannellini bean soup',"['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']","['total fiber', 'carrot']",[],5cb0fa253b7750fa415d3043
+-15,b'french style vegetable slaw salad',"['garlic', 'onion', 'spicy powders']","['carrot', 'potato']",[],5cb0fa253b7750fa415d3044
+-20,b'tex mex bake',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",[],[],5cb0fa253b7750fa415d3043
+-25,b'hippie brunch burrito with green salsa',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders']",['potato'],[],5cb0fa253b7750fa415d3043
+-25,b'spaghetti and meatballs',"['garlic', 'onion', 'tomato']",['total fiber'],[],5cb0fa253b7750fa415d3044
+-40,b'sausage biscuits and gravy',"['garlic', 'onion', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3044
+-50,b'cuban black bean soup',"['insoluble fiber', 'garlic', 'onion']",[],[],5cb0fa253b7750fa415d3043
+-55,b'breakfast bowl with smoky tomato sauce',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'spicy powders', 'tomato']",['potato'],[],5cb0fa253b7750fa415d3043
+-60,b'chana masala with indian spiced rice',"['insoluble fiber', 'garlic', 'onion', 'peppers, hot', 'tomato']","['total fiber', 'ginger']",[],5cb0fa253b7750fa415d3043
+-60,b'eggplant caponata with herbed quinoa',"['insoluble fiber', 'garlic', 'onion', 'tomato']","['total fiber', 'nuts']",[],5cb0fa253b7750fa415d3043
+-70,b'roasted chickpea & vegetable tacos',"['garlic', 'onion', 'spicy powders']",['carrot'],[],5cb0fa253b7750fa415d3044
+-80,"b'white lentil, tomato & fennel faux-sotto'","['insoluble fiber', 'garlic', 'onion', 'spicy powders', 'tomato']",[],[],5cb0fa253b7750fa415d3043
