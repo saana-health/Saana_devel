@@ -1,0 +1,69 @@
+VEESTRO Meal,Calories,Total Fat,Saturated Fat,Trans Fat,Cholesterol,Sodium,Total Carbohydrate,Dietary Fiber,Protein,Serving Size,Vegan,Gluten-Free?,Dairy Free?,Soy Free?,Sesame Free?,Nut Free?,Pepper Free?,Egg Free?,Mushroom Free?
+    BBQ Sauce (Chick'n Nuggets),60,0,0,0,0,240,14,1,1,2 oz,x,,x,,x,,x,x,x
+    BBQ Sauce (Southwest Chick'n),60,0,0,0,0,240,14,1,1,2 oz,x,,x,,x,,x,x,x
+    Black Bean Sauce (Enfrijolada) ,260,1,0,0,0,230,48,12,16,3 oz,x,x,x,,x,x,,x,x
+    Black Bean Sauce (quesadilla ) ,260,1,0,0,0,230,48,12,16,3 oz,x,x,x,,x,x,,x,x
+    Black Bean Sauce (Spanish Torta ) ,260,1,0,0,0,230,48,12,16,3 oz,x,x,x,,x,x,,x,x
+    Chimichurri Sauce (Veggie Empanadas),270,29,4,0,0,220,1,1,0,2 oz,x,,x,,x,x,x,x,x
+    Dressing (Roasted Beet & Kale Salad),110,10,1.5,0,0,190,5,0,0,2 oz,x,x,x,x,x,,x,x,x
+    Gravy (Country Fried Chick'n) ,80,6,1,0,0,220,5,1,2,3 oz,x,,x,,x,,x,x,x
+    Gravy (Lentil Meatloaf) ,80,6,1,0,0,220,5,1,2,3 oz,x,,x,,x,,,x,x
+    Marinara Sauce (Eggplant Casserole),20,1,0,0,0,35,3,1,1,3 oz,x,x,x,,x,x,,x,x
+    Marinara Sauce (Tuscan Calzone),20,1,0,0,0,35,3,1,1,3 oz,x,x,x,,x,x,,x,x
+    Marinara Sauce (Veggie Lasagna),20,1,0,0,0,35,3,1,1,3 oz,x,x,x,,x,x,,x,x
+    Peanut Sauce (Soba Noodles),180,13,2,0,0,290,11,1,5,2 oz,x,,x,,,,,x,x
+    Red Sauce (Enchilada Casserole),30,1,0,0,0,180,5,1,1,3 oz,x,x,x,,x,x,,x,x
+    Sauce (Portobello Steak),15,0,0,0,0,270,2,1,0,2 oz,x,x,x,x,x,x,x,x,
+    Tahini Dressing (Kale & Quinoa Salad),120,10,1.5,0,0,360,7,1,3,2 oz,x,x,x,x,,x,x,x,x
+Baked Mac & Cheez ,470,20,4.5,0,0,530,63,11,15,13  oz,x,,x,,x,x,,x,x
+Beluga Lentil Braise ,310,10,7,0,0,290,40,11,15,11 oz,x,x,x,x,x,x,x,x,x
+Black Bean Pasta Alfredo,410,19,6,0,0,100,34,15,29,9 oz,x,x,x,,x,x,,x,x
+Breakfast Burrito ,390,7,1.5,0,0,490,68,10,17,13 oz,x,,x,,,x,x,x,x
+Chick'n Nuggets ,300,9,1,0,0,560,30,5,29,6 oz,x,,x,,x,,x,x,x
+Chick'n Quesadilla,380,13,5,0,0,770,45,8,19,10 oz,x,,x,,x,x,,x,x
+Country Fried Chick'n,360,7,1,0,0,550,50,9,29,11 oz,x,,x,,x,,x,x,x
+Eggplant Casserole ,210,11,4.5,0,0,380,23,8,10,12 oz,x,x,x,,x,x,x,x,x
+Enchilada Casserole ,220,11,3.5,0,0,360,18,3,12,10 oz,x,x,x,,x,x,,x,x
+Enfrijolada Rustica ,490,9,4,0,0,380,88,17,21,13 oz,x,x,x,x,x,x,,x,x
+Golden Chickpea,370,5,0,0,0,66,66,14,16,12 oz,x,x,x,x,x,x,,x,x
+Kale & Quinoa Salad,260,3.5,0.5,0,0,330,44,10,15,6 oz,x,x,x,,,x,x,x,x
+Latin Stew ,420,6,0.5,0,0,350,71,11,24,13 oz,x,,x,,x,x,,x,x
+Lentil Meatloaf,570,6,0,0,0,580,105,25,30,15 oz,x,,x,,x,x,x,x,x
+Moroccan Melange ,430,5,1,0,0,310,79,21,19,12 oz,x,x,x,x,x,x,,x,x
+Mushroom Risotto,350,1,0,0,0,320,64,7,10,14 oz,x,x,x,x,x,x,x,x,
+Mushroom Stroganoff,400,12,5,0,0,350,61,6,10,11 oz,x,,x,x,x,x,,x,
+Oatmeal Breakfast Pie ,320,10,1.5,0,0,105,52,6,9,8 oz ,x,x,x,,x,,x,x,x
+Omelet Primavera ,160,5,0.5,0,0,320,25,8,6,8 oz,x,x,x,x,x,x,x,x,
+Pep'roni Pizza ,520,16,7,0,0,700,80,6,12,10 oz ,x,,x,,x,x,,x,x
+Pesto Pizza,670,23,6,0,0,430,107,9,12,8 oz,x,,x,x,x,,,x,x
+Pizza Napolitana ,580,19,6,0,0,440,92,6,7,8 oz,x,,x,x,x,x,x,x,x
+Portobello Steak Dinner ,270,12,1.5,0,0,490,35,7,10,9 oz,x,x,x,x,x,x,x,x,
+Quinoa Bake ,360,12,1,0,0,460,50,15,12,11 oz,x,x,x,x,x,,,x,x
+Red Curry ,410,17,9,0,0,670,54,6,11,14 oz,x,x,x,,,x,,x,x
+Rice & Quinoa Pudding ,340,9,4.5,0,0,95,64,9,6,14 oz,x,x,x,x,x,x,x,x,x
+Savory Croquettes ,410,13,2,0,0,420,57,6,15,11 oz ,x,,x,,x,,x,x,x
+Shepherdless Pie ,420,12,3.5,0,0,380,70,10,16,14 oz,x,,x,x,x,,,x,x
+Soba Noodles ,170,3,0,0,0,90,27,0,11,7 oz,x,,x,,,,x,x,x
+Southwest BBQ Chick'n,300,4,1.5,0,0,230,31,5,36,11 oz ,x,,x,,x,x,x,x,x
+Spanish Torta ,230,7,3.5,0,0,390,39,7,8,11 oz,x,x,x,,x,x,,x,x
+Spinach Pie ,440,22,6,0,0,310,46,8,13,10 oz,x,,x,,x,x,x,x,
+Thai Chick'n Stew ,460,8,0.5,0,0,580,83,11,22,13 oz,x,,x,,,,,x,X
+Three Layer Scramble ,470,8,1,0,0,550,73,15,27,12 oz,x,x,x,,,x,,x,x
+Tortilla Chili,250,3.5,0,0,0,100,43,12,13,9 oz,x,x,x,x,x,x,,x,x
+Tuscan Calzone ,310,16,5,0,0,510,33,4,7,7 oz,x,,x,,x,x,x,x,x
+Veggie Empanadas ,400,18,6,0,0,430,50,4,9,6 oz,x,,x,x,x,x,x,x,X
+Veggie Lasagna ,430,17,6,0,0,610,58,7,8,12 oz,x,x,x,x,x,x,,x,x
+Ultimate Veggie Wrap ,520,14,3.5,0,0,410,81,14,18,13 oz,x,,x,x,x,,,x,x
+Pad Thai,520,18,8,0,0,430,77,5,10,303 g,x,x,x,x,,,x,x,x
+Pasta Bolognese,460,10,1,0,0,470,76,9,14,376 g,x,,x,x,x,x,,x,
+Chinese Eggplant Stir Fry,630,25,4,0,0,470,84,8,20,340 g,x,x,x,,,,,x,x
+Lentil and Spinach Tagine,480,18,5,0,0,410,65,17,19,468 g,x,x,x,,,x,x,x,x
+Paella Valenciana,350,8,0,0,0,570,54,8,19,386 g,x,x,x,,x,x,,x,x
+Carrot Osso Bucco,210,11,2,0,0,550,22,6,6,430 g,x,x,x,,x,x,x,x, 
+Creamy Italian Chick'n,260,5,0.5,0,0,460,29,13,27,425 g,x,,x,, ,,,x,x
+Mediterranean Falafel,480,7,0.5,0,0,630,87,16,20,341 g,x,x,x,x,,x,,x,x
+All American Breakfast,410,17,1,0,0,690,33,5,33,294 g,x,,x,,x,,x,x,x
+New meal 1,210,11,11,11,11,11,11,11,11,430 g,x,x,x,,x,x,x,x, 
+New meal 2,260,5,0.5,0,0,460,29,13,27,425 g,x,,x,, ,,,x,x
+Mediterranean Falafel Another,480,7,0.5,0,0,630,87,16,20,341 g,x,x,x,x,,x,,x,x
+All American Breakfast Testing,410,17,1,0,0,690,33,5,33,294 g,x,,x,,x,,x,x,x
