@@ -30,7 +30,7 @@ def processIngredients(filename):
                     is_new_meal = False
                 else:
                     full_list.append(name)
-                    ingredients{name} = 0
+                    ingredients[name] = 0
             else:
                 is_new_meal = True
                 new_meal.ingredients = ingredients
@@ -76,9 +76,8 @@ def combine_mealinfo(ingredient_meals, nutrition_meals):
 
 if __name__ == '__main__':
     print('Adding Oisix meals')
-    ingredient_meals, ingredient_list = processIngredients('demo_ingredients.csv')
-    nutrition_meals, nutrition_list = processNutrition('demo_nutrition.csv')
-    #photo_meals = processPhoto('veestro-meals-photos.csv')
+    ingredient_meals, ingredient_list = processIngredients(PATH+'demo_ingredients.csv')
+    nutrition_meals, nutrition_list = processNutrition(PATH+'demo_nutrition.csv')
     combined = combine_mealinfo(ingredient_meals, nutrition_meals)
     full_list = ingredient_list + nutrition_list
     convert_dic = match_euphebe(full_list)
