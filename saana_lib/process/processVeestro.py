@@ -16,6 +16,7 @@ def processIngredients(filename):
         is_new_meal = True
         for row in reader_list:
             name = row[0].lower()
+            print(name, type(name))
             if name != '':
                 if is_new_meal:
                     new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Veestro'})['_id'])

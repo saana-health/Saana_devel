@@ -22,21 +22,21 @@ def processIngredients(filename):
         ingredients = {}
         is_new_meal = True
         for row in reader_list:
-            name = row
-            print(name)
+            name = ''.join(row).lower()
+            #print(name, type(name))
             if name != '':
                 if is_new_meal:
-                    # kept name as Veestro cause Oisix doesn't exist in the db right now
-                    new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Veestro'})['_id'])
+                    new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Oisix'})['_id'])
                     is_new_meal = False
                 else:
                     full_list.append(name)
-                    ingredients[name] = 0
+                    ingredients.update({name:0})
             else:
                 is_new_meal = True
                 new_meal.ingredients = ingredients
                 meals.append(new_meal)
                 ingredients = {}
+        print(meals)
     return meals, list(set(full_list))
 
 
@@ -77,8 +77,8 @@ def combine_mealinfo(ingredient_meals, nutrition_meals):
 
 if __name__ == '__main__':
     print('Adding Oisix meals')
-    ingredient_meals, ingredient_list = processIngredients(PATH+'demo_ingredients.csv')
-    nutrition_meals, nutrition_list = processNutrition(PATH+'demo_nutrition.csv')
+    ingredient_meals, ingredient_list = processIngredients(PATH+'demo_ingredients_full.csv')
+    nutrition_meals, nutrition_list = processNutrition(PATH+'demo_nutrition_full.csv')
     combined = combine_mealinfo(ingredient_meals, nutrition_meals)
     full_list = ingredient_list + nutrition_list
     convert_dic = match_euphebe(full_list)
