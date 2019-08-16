@@ -4,7 +4,7 @@ from saana_lib import connectMongo, model
 
 def add_meals():
 	print('Adding Oisix meals')
-    ingredient_meals, ingredient_list = processOisix.processIngredients(PATH+'/csv/Oisix/demo_ingredients.csv')
+   	ingredient_meals, ingredient_list = processOisix.processIngredients(PATH+'/csv/Oisix/demo_ingredients.csv')
     nutrition_meals, nutrition_list = processOisix.processNutrition(PATH+'/csv/Oisix/demo_nutrition.csv')
     # photo_meals = processVeestro.processPhoto('./csv/Veestro/veestro-meals-photos.csv')
     combined = processOisix.combine_mealinfo(ingredient_meals, nutrition_meals)
@@ -14,3 +14,6 @@ def add_meals():
     combined2 = match_names.get_type(combined2)
     connectMongo.insert_meal(combined2)
     print('Done')
+
+if __name__=="__main__":
+    add_meals()
