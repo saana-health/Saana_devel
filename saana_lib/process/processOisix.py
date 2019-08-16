@@ -12,7 +12,7 @@ from .match_names import match_euphebe, change_names
 
 
 # run from working directory of devel_folder
-PATH = os.path.join(os.getcwd(), 'csv/Oisix')
+PATH = os.path.join(os.getcwd(), 'csv/Oisix/')
 
 def processIngredients(filename):
     with open(filename) as csvfile:
@@ -22,14 +22,15 @@ def processIngredients(filename):
         ingredients = {}
         is_new_meal = True
         for row in reader_list:
-            name = row[0].lower()
+            name = row
+            print(name)
             if name != '':
                 if is_new_meal:
                     new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Oisix'})['_id'])
                     is_new_meal = False
                 else:
                     full_list.append(name)
-                    ingredients[name] = 0
+                    ingredients{name} = 0
             else:
                 is_new_meal = True
                 new_meal.ingredients = ingredients
@@ -45,7 +46,7 @@ def processNutrition(filename):
         reader_list = list(csv.reader(csvfile))
         nutrition = {}
         columns = [x.lower() for x in reader_list[0][:8]]
-        for row in reader_list[17:]:
+        for row in reader_list[1:]:
             name = row[0].lower()
             if '  ' in name:
                 continue
