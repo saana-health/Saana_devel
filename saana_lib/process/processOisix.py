@@ -26,7 +26,8 @@ def processIngredients(filename):
             print(name)
             if name != '':
                 if is_new_meal:
-                    new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Oisix'})['_id'])
+                    # kept name as Veestro cause Oisix doesn't exist in the db right now
+                    new_meal = Meal(name = name, supplierID = connectMongo.db.users.find_one({'first_name':'Veestro'})['_id'])
                     is_new_meal = False
                 else:
                     full_list.append(name)
