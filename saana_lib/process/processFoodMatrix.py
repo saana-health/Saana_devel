@@ -4,6 +4,9 @@ import os
 from .. import connectMongo
 from .. import utils
 
+#### NOTE: This function does NOT find and replace what is currently in the database it just appends it at the end. You have to clear out the database first before pushing in the new matrix ###
+
+
 PATH = os.path.join(os.getcwd(),'csv/')
 
 

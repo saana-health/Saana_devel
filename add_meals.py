@@ -45,10 +45,11 @@ def add_meals():
     print('Done')
 
 def add_tags():
-    master_dict, columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
+    print("Processing Food Tags Matrix")
+    master_dict, columns = processFoodMatrix.processFoodMatrixCSV('foodtag0817.csv')
     connectMongo.db.tags.insert_many(list(master_dict.values()))
 
 if __name__=="__main__":
-    # add_tags()
-    add_meals()
+    add_tags()
+    #add_meals()
 
