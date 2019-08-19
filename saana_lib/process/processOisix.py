@@ -46,7 +46,7 @@ def processNutrition(filename):
         meals = []
         reader_list = list(csv.reader(csvfile))
         nutrition = {}
-        columns = [x.lower() for x in reader_list[0][:8]]
+        columns = [x.lower() for x in reader_list[0][:37]]
         for row in reader_list[1:]:
             name = row[0].lower()
             if '  ' in name:

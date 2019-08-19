@@ -180,6 +180,7 @@ class Optimizer:
                 # get all tags
                 tag_ids = patient.symptoms + patient.disease + patient.treatment_drugs + patient.comorbidities
                 tags = list(connectMongo.db.tags.find({'tag_id':{'$in':tag_ids}}))
+                print('tags:', tag_ids)
 
                 # prepare tags
                 minimizes = {}
