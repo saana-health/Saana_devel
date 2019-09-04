@@ -1,0 +1,49 @@
+5d65961577f06d4208211e97
+score,meal,minimize,prior,avoid,supplier_id
+150,b'veggie lasagna',[],"['zucchini', 'parsley', 'peppers, bell', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+150,b'spanish torta',[],"['zucchini', 'parsley', 'peppers, bell', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+140,b'eggplant casserole',[],"['zucchini', 'parsley', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+140,b'tuscan calzone',[],"['zucchini', 'parsley', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+140,b'baked mac & cheez dinner',[],"['cauliflower', 'parsley', 'tomato', 'brussels sprouts']",[],5cb0fa253b7750fa415d3045
+140,b'ultimate veggie wrap',[],"['zucchini', 'peppers, bell', 'spinach', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+140,b'chinese eggplant stirfry',[],"['ginger', 'peppers, bell', 'kale', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+140,b'pad thai',[],"['ginger', 'kale', 'radish', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+140,b'omelet primavera',[],"['zucchini', 'peppers, bell', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'carrot osso bucco',[],"['broccoli', 'parsley', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,"b""creamy italian chick'n""",[],"['broccoli', 'parsley', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'red curry with tofu',[],"['ginger', 'broccoli', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+130,"b""chick'n quesadilla""",[],"['zucchini', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,"b""thai chick'n stew""",[],"['ginger', 'peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'golden chickpea stew',[],"['ginger', 'tomato', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+130,b'shepherdless pie',[],"['peppers, bell', 'kale', 'spinach']",[],5cb0fa253b7750fa415d3045
+130,b'enfrijolada rustica',[],"['zucchini', 'tomato', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+130,b'pasta bolognese',[],"['parsley', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'lentil and spinach tagine',[],"['ginger', 'spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'lentil meatloaf',[],"['broccoli', 'parsley', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+130,b'paella valenciana',[],"['peppers, bell', 'parsley', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'breakfast burrito',[],"['ginger', 'peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+130,b'three layer scramble',[],"['ginger', 'peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'mediterranean falafel',[],"['peppers, bell', 'parsley']",[],5cb0fa253b7750fa415d3045
+120,"b""country fried chick'n""",[],"['broccoli', 'cauliflower']",[],5cb0fa253b7750fa415d3045
+120,b'enchilada casserole',[],"['peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'soba noodles in peanut sauce',[],"['ginger', 'broccoli']",[],5cb0fa253b7750fa415d3045
+120,b'moroccan melange',[],"['ginger', 'peppers, bell']",[],5cb0fa253b7750fa415d3045
+120,"b""southwest bbq chick'n""",[],"['zucchini', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'spinach pie',[],"['parsley', 'spinach']",[],5cb0fa253b7750fa415d3045
+120,b'beluga lentil braise',[],"['zucchini', 'ginger']",[],5cb0fa253b7750fa415d3045
+120,b'kale and quinoa salad',[],"['broccoli', 'kale']",[],5cb0fa253b7750fa415d3045
+120,b'quinoa bake',[],"['peppers, bell', 'broccoli']",[],5cb0fa253b7750fa415d3045
+120,b'latin stew',[],"['peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'black bean pasta alfredo',[],"['zucchini', 'peppers, bell']",[],5cb0fa253b7750fa415d3045
+120,b'mushroom stroganoff',[],"['spinach', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'tortilla chili',[],"['peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,"b""pepp'roni pizza""",[],"['parsley', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'pizza napoletana',[],"['parsley', 'tomato']",[],5cb0fa253b7750fa415d3045
+120,b'savory croquettes',[],"['peppers, bell', 'tomato']",[],5cb0fa253b7750fa415d3045
+110,b'veggie empanadas',[],['parsley'],[],5cb0fa253b7750fa415d3045
+110,"b""chick'n nuggets""",[],['tomato'],[],5cb0fa253b7750fa415d3045
+110,b'mushroom risotto',[],['kale'],[],5cb0fa253b7750fa415d3045
+110,b'veggie pesto pizza',[],"['peppers, bell']",[],5cb0fa253b7750fa415d3045
+110,b'portobello steak dinner',[],['kale'],[],5cb0fa253b7750fa415d3045
+110,b'all-american breakfast',[],['ginger'],[],5cb0fa253b7750fa415d3045
+100,b'oatmeal breakfast pie',[],[],[],5cb0fa253b7750fa415d3045

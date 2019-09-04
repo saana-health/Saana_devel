@@ -1,0 +1,49 @@
+5d59bf2e77f06d4208211dc5
+score,meal,minimize,prior,avoid,supplier_id,supplier_name
+160,b'pad thai',[],"['carrot', 'ginger', 'seaweed', 'cauliflower', 'kale', 'radish']",[],5cb0fa253b7750fa415d3045,Veestro
+150,"b""creamy italian chick'n""",[],"['carrot', 'celery', 'parsley', 'broccoli', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+150,b'lentil meatloaf',[],"['carrot', 'celery', 'parsley', 'cauliflower', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
+150,b'spanish torta',[],"['carrot', 'celery', 'spinach', 'parsley', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'carrot osso bucco',[],"['carrot', 'celery', 'broccoli', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'red curry with tofu',[],"['cauliflower', 'ginger', 'broccoli', 'carrot']",[],5cb0fa253b7750fa415d3045,Veestro
+140,"b""country fried chick'n""",[],"['turmeric', 'cauliflower', 'broccoli', 'carrot']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'veggie lasagna',[],"['carrot', 'celery', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'eggplant casserole',[],"['carrot', 'celery', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'tuscan calzone',[],"['carrot', 'celery', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'pasta bolognese',[],"['carrot', 'celery', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+140,b'chinese eggplant stirfry',[],"['cauliflower', 'kale', 'ginger', 'carrot']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'soba noodles in peanut sauce',[],"['carrot', 'ginger', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
+130,"b""thai chick'n stew""",[],"['carrot', 'ginger', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'golden chickpea stew',[],"['cauliflower', 'ginger', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'baked mac & cheez dinner',[],"['brussels sprouts', 'cauliflower', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'beluga lentil braise',[],"['carrot', 'ginger', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'kale and quinoa salad',[],"['carrot', 'kale', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'lentil and spinach tagine',[],"['carrot', 'ginger', 'spinach']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'mediterranean falafel',[],"['turmeric', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'veggie empanadas',[],"['carrot', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+120,"b""chick'n quesadilla""",[],"['spinach', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'moroccan melange',[],"['carrot', 'ginger']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'mushroom risotto',[],"['carrot', 'kale']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'spinach pie',[],"['spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'portobello steak dinner',[],"['carrot', 'kale']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'shepherdless pie',[],"['kale', 'spinach']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'mushroom stroganoff',[],"['celery', 'spinach']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'ultimate veggie wrap',[],"['cauliflower', 'spinach']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'paella valenciana',[],"['turmeric', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'omelet primavera',[],"['carrot', 'spinach']",[],5cb0fa253b7750fa415d3045,Veestro
+120,b'all-american breakfast',[],"['ginger', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
+110,"b""chick'n nuggets""",[],['turmeric'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'quinoa bake',[],['broccoli'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'latin stew',[],['carrot'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'enfrijolada rustica',[],['cauliflower'],[],5cb0fa253b7750fa415d3045,Veestro
+110,"b""pepp'roni pizza""",[],['parsley'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'pizza napoletana',[],['parsley'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'breakfast burrito',[],['ginger'],[],5cb0fa253b7750fa415d3045,Veestro
+110,b'three layer scramble',[],['ginger'],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'enchilada casserole',[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'veggie pesto pizza',[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,"b""southwest bbq chick'n""",[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'black bean pasta alfredo',[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'tortilla chili',[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'savory croquettes',[],[],[],5cb0fa253b7750fa415d3045,Veestro
+100,b'oatmeal breakfast pie',[],[],[],5cb0fa253b7750fa415d3045,Veestro

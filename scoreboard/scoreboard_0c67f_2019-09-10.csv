@@ -1,0 +1,32 @@
+5d656b932fb97d420770c67f
+score,meal,minimize,prior,avoid,supplier_id
+140,b'tofu and veggie soup 2 - no.30',[],"['komatsuna', 'potato', 'carrot', 'ginger']",[],5d57124679136a3daf87f6f6
+130,b'chicken and eggplant with sweet potato and spinach - no.9',[],"['green beans', 'potato', 'spinach']",[],5d57124679136a3daf87f6f6
+120,b'chicken and tomato rice with radish salad - no.1',[],"['komatsuna', 'carrot']",[],5d57124679136a3daf87f6f6
+120,b'beef and veggies with potatoes - no.3',[],"['green beans', 'potato']",[],5d57124679136a3daf87f6f6
+110,b'pumpkin mushroom soup - no.28',[],['parsley'],[],5d57124679136a3daf87f6f6
+100,b'miso mackerel and pumpkin with shrimp tempura - no.21',['sodium'],"['potato', 'carrot', 'seaweed']",[],5d57124679136a3daf87f6f6
+95.0,b'pork loin and eggplant with spinach salad - no.12',['insoluble fiber'],"['green beans', 'potassium', 'potato', 'spinach']",[],5d57124679136a3daf87f6f6
+90,b'rockfish and lotus with cabbage soup - no.25',['sodium'],"['carrot', 'ginger', 'komatsuna', 'cabbage', 'potato']",[],5d57124679136a3daf87f6f6
+85.0,b'saury fish with spinach and radish salad - no.23',['insoluble fiber'],"['carrot', 'seaweed', 'spinach']",[],5d57124679136a3daf87f6f6
+80,b'chicken noodle soup with tofu - no.7 ',['sodium'],"['potassium', 'carrot', 'ginger', 'seaweed']",[],5d57124679136a3daf87f6f6
+80,b'chicken potatoes and pak choi - no.6',['sodium'],"['potato', 'ginger', 'pak choi', 'seaweed']",[],5d57124679136a3daf87f6f6
+80,b'salt mackerel with potato and cucumber salad - no.20',['sodium'],"['komatsuna', 'potato', 'carrot', 'ginger']",[],5d57124679136a3daf87f6f6
+75.0,b'shrimp and veggies with fried eggplant - no.27',['insoluble fiber'],"['potato', 'asparagus']",[],5d57124679136a3daf87f6f6
+70,b'tofu and veggie soup - no.29',['sodium'],"['komatsuna', 'carrot', 'shiitake mushroom']",[],5d57124679136a3daf87f6f6
+70,b'pork casserole with veggie soup - no.4',['sodium'],"['potassium', 'potato', 'spinach']",[],5d57124679136a3daf87f6f6
+60,b'pork loin with carrot and onion salad - no.5',['sodium'],"['parsley', 'carrot']",[],5d57124679136a3daf87f6f6
+60,b'mapo tofu with chicken and tomato soup - no.14',['sodium'],"['ginger', 'seaweed']",[],5d57124679136a3daf87f6f6
+60,b'stirfry chicken and veggies with fried eggplant - no.17',['sodium'],"['green beans', 'ginger']",[],5d57124679136a3daf87f6f6
+60,b'pork loin and fried eggplant with potatoes - no.10',['sodium'],"['potato', 'seaweed']",[],5d57124679136a3daf87f6f6
+50,b'horse mackerel with cucumber salad - no.22',['sodium'],['carrot'],[],5d57124679136a3daf87f6f6
+50,b'tatsutaage of yellowtail with broccoli and cauliflower - no.24',['sodium'],['green beans'],[],5d57124679136a3daf87f6f6
+45.0,b'chicken potatoes and beans with broccoli and cauliflower - no.11',"['sodium', 'insoluble fiber']","['green beans', 'ginger', 'potassium', 'seaweed', 'potato']",[],5d57124679136a3daf87f6f6
+45.0,b'chicken cucumber and mushroom with seaweed salad - no.13 ',"['sodium', 'insoluble fiber']","['carrot', 'komatsuna', 'potassium', 'seaweed', 'cabbage']",[],5d57124679136a3daf87f6f6
+35.0,b'grilled mackerel with pork and sweet potatoes - no.26',"['sodium', 'insoluble fiber']","['potassium', 'potato', 'carrot', 'ginger']",[],5d57124679136a3daf87f6f6
+25.0,b'stirfry and egg with tofu soup - no.16',"['sodium', 'insoluble fiber']","['komatsuna', 'carrot', 'seaweed']",[],5d57124679136a3daf87f6f6
+15.0,b'chicken and tomato with eggplant - no.2',"['sodium', 'insoluble fiber']","['potassium', 'potato']",[],5d57124679136a3daf87f6f6
+15.0,b'chicken eggplant and sweet potatoes - no.8',"['sodium', 'insoluble fiber']","['green beans', 'potato']",[],5d57124679136a3daf87f6f6
+15.0,b'mackerel and pumpkin with komatsuna salad - no.18',"['sodium', 'insoluble fiber']","['komatsuna', 'ginger']",[],5d57124679136a3daf87f6f6
+15.0,b'tatsutaage of horse mackerel with cauliflower and broccoli - no.19',"['sodium', 'insoluble fiber']","['green beans', 'spinach']",[],5d57124679136a3daf87f6f6
+-5.0,b'beef and broccoli with tofu and veggies - no.15',"['sodium', 'insoluble fiber']",[],[],5d57124679136a3daf87f6f6
