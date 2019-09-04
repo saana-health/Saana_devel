@@ -98,7 +98,7 @@ class Optimizer:
         print("Started getting patients from DB")
         patient_obj = []
         patients = connectMongo.db.patients.find()
-        emails = manual_input.manual_input('suppliers.csv')[2]
+        emails = manual_input.manual_input('suppliers.csv')[1]
         for patient in patients:
             # if no emails are specified -> run algo on ALL patients
             if emails != []:
