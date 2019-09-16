@@ -5,6 +5,7 @@ __pycache__/
 # dump folder
 dump/
 dump.zip
+dumps/
 
 # venv folder
 venv/

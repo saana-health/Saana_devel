@@ -1,21 +1,18 @@
 from pymongo import MongoClient
 import pdb
-import os
-import urllib.parse
+from urllib.parse import quote_plus
+import conf
 
-# DB Keys
-DATABASE_USER = os.environ.get("DATABASE_USER",'')
-DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD",'')
 
-# cast to the correct object
-username = urllib.parse.quote_plus(DATABASE_USER)
-password = urllib.parse.quote_plus(DATABASE_PASSWORD)
+client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+    quote_plus(conf.DATABASE_USER),
+    quote_plus(conf.DATABASE_PASSWORD),
+    quote_plus(conf.DATABASE_ADDRESS),
+    quote_plus(conf.DATABASE_PORT),
+))
 
-# Connect to DB
-client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password), authSource='saana_db')
 db = client.saana_db
 
-# ADD
 
 def insert_meal(meals):
     '''
@@ -29,10 +26,9 @@ def insert_meal(meals):
         if db.meal_infos.find({'name':meal.name}).count() > 0:
             continue
         meal_dictionaries.append(meal.class_to_dict())
-    if meal_dictionaries != []:
+    if meal_dictionaries:
         db.meal_infos.insert_many(meal_dictionaries)
-        # except:
-        #     pdb.set_trace()
+
 
 def add_patients(patients):
     '''
@@ -48,22 +44,26 @@ def add_patients(patients):
         patients = [patients]
 
     for patient in patients:
-        user_id = db.users.insert_one({'first_name':patient.name, 'role':'patient'}).inserted_id
-        patient_id = db.patients.insert_one({'user_id':user_id}).inserted_id
-        subscription_id = db.mst_subscriptions.find_one({'interval_count':2})['_id']
-        patient_subscription_id = db.patient_subscription.insert_one({'patient_id':patient_id, 'subscription_id':subscription_id,\
-                                                                      'status':'active'})
+        user_id = db.users.insert_one({'first_name':patient.name, 'role':'patient'}
+        ).inserted_id
+        patient_id = db.patients.insert_one({'user_id': user_id}).inserted_id
+        subscription_id = db.mst_subscriptions.find_one({'interval_count': 2})['_id']
+        patient_subscription_id = db.patient_subscription.insert_one({
+            'patient_id':patient_id,
+            'subscription_id':subscription_id,
+            'status':'active'}
+        )
         comos = []
         drugs = []
         symps = []
         for como in patient.comorbidities:
-            doc = {'patient_id':patient_id, 'comorbidity_id':como}
+            doc = {'patient_id': patient_id, 'comorbidity_id': como}
             comos.append(doc)
         for drug in patient.treatment_drugs:
-            doc = {'patient_id':patient_id, 'drug_id':drug}
+            doc = {'patient_id': patient_id, 'drug_id': drug}
             drugs.append(doc)
         for symp in patient.symptoms:
-            doc= {'patient_id': patient_id, 'symptom_id':symp}
+            doc= {'patient_id': patient_id, 'symptom_id': symp}
             symps.append(doc)
         db.patient_diseases.insert_one({'patient_id':patient_id, 'disease_id':patient.disease})
         if drugs != []:

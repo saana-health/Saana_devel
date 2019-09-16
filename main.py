@@ -1,15 +1,34 @@
-from saana_lib import optimizeMeal
-import sys
+import argparse
+from logging import getLogger
 
-if len(sys.argv) > 1 and sys.argv[1] == 'test':
-    print('Running TEST mode')
-    op = optimizeMeal.Optimizer(True)
-    op.optimize()
-elif len(sys.argv) > 1 and sys.argv[1] == 'prod':
-    print('Running PRODUCTION mode')
-    op = optimizeMeal.Optimizer(False)
-    op.optimize()
-elif len(sys.argv) == 1:
-    print('Needs an argument: ["test"/"prod"]')
-else:
-    print('Invalid argument {}: choose between "test" and "prod"'.format(sys.argv[1]))
+import conf
+from saana_lib.optimizeMealSimple import Optimizer
+
+
+logger = getLogger(__name__)
+
+
+class ConfException(Exception):
+    """"""
+
+
+def bootstrap_check():
+    if conf.DATABASE_USER is None:
+        raise ConfException("Please set the env DATABASE_USER as variable")
+    if conf.DATABASE_PASSWORD is None:
+        raise ConfException("Please set the env DATABASE_PASSWORD as variable")
+
+
+def run():
+    try:
+        bootstrap_check()
+        parser = argparse.ArgumentParser()
+        parser.add_argument('mode', choices=['test', 'prod'], help='running mode')
+        args = parser.parse_args()
+        Optimizer(test=args.mode == 'test').optimize()
+    except ConfException as e:
+        logger.critical(e)
+
+
+if __name__ == "__main__":
+    run()

@@ -1,7 +1,6 @@
 from . import connectMongo
-import pprint
-import pdb
 from bson import ObjectId
+
 
 def get_lateset_symptoms(patient_id):
     '''
@@ -20,6 +19,7 @@ def get_lateset_symptoms(patient_id):
         else:
             dict['better'].append(symptom_id)
     return dict
+
 
 if __name__ == "__main__":
     get_lateset_symptoms(ObjectId('5cabf2ad37c87f3ac00e8701'))

@@ -2,15 +2,16 @@ import csv
 import pdb
 from . import connectMongo
 
+
 def manual_input(filename):
-    '''
+    """
     first line of file -> suppliers
     second line of file -> emails of patients to run algorithm on
     :param filename:
-    :return:
-    '''
+    :return: suppliers IDs and patients email addresses
+    """
     suppliers = []
-    #restrictions = [] # feature needs to be added in later
+    # restrictions = [] # feature needs to be added in later
     patients = []
     with open(filename) as csvfile:
         reader = list(csv.reader(csvfile))

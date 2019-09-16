@@ -1,12 +1,14 @@
 from . import connectMongo
 import pdb
 
+
 # Parent object class for easily converting between dict and class
 class MongoObject:
-    def dict_to_class(self,dict):
-        for attr in [attr for attr in dir(self) if not attr.startswith('__') and not callable(getattr(self,attr))]:
+
+    def dict_to_class(self, dict):
+        for attr in [attr for attr in dir(self) if not attr.startswith('__') and not callable(getattr(self, attr))]:
             if attr in dict.keys():
-                setattr(self,attr,dict[attr])
+                setattr(self, attr, dict[attr])
 
     def class_to_dict(self):
         dic = {}
@@ -20,6 +22,7 @@ class MongoObject:
         return dic
 
 # inheriting classes from MongoObject
+
 
 class Meal(MongoObject):
     '''
@@ -59,11 +62,14 @@ class Meal(MongoObject):
     def __eq__(self,other):
         return self.name == other.name
 
-    __repr__ = __str__
+
 
 class Patient(MongoObject):
-    def __init__(self, _id = '',name = '', comorbidities = [], disease = '', symptoms = [],weight = 0, treatment_drugs = [], disease_stage = '', feet = 0, surgery = '', plan = 7):
-        '''
+
+    def __init__(self, _id='', name='', comorbidities=list(), disease='', symptoms=list(),
+                 weight=0, treatment_drugs=list(), disease_stage='', feet=0, surgery='',
+                 plan = 7):
+        """
 
         :param _id:  ObjectId()
         :param name: str
@@ -76,7 +82,7 @@ class Patient(MongoObject):
         :param feet:
         :param surgery:
         :param plan:
-        '''
+        """
         self.name = name
         self.weight = weight
         self.treatment_drugs = treatment_drugs
@@ -91,6 +97,7 @@ class Patient(MongoObject):
         return str(self._id)
 
     __repr__ = __str__
+
 
 class Tag(MongoObject):
     '''
