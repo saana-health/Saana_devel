@@ -21,14 +21,10 @@ class MongoObject:
             dic[attr] = getattr(self,attr)
         return dic
 
-# inheriting classes from MongoObject
-
 
 class Meal(MongoObject):
-    '''
-    This class should follow the db schema designed for meal info
-    '''
-    def __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = [], supplierID = '',quantity = 0, image = ''):
+
+    def  __init__(self,_id = '', name = '', ingredients = {}, nutrition = {}, type = [], supplierID = '',quantity = 0, image = ''):
         '''
 
         :param _id: ObjectId()
@@ -52,14 +48,13 @@ class Meal(MongoObject):
     def change_type(self,new_type):
         setattr(self, 'type', self.type + [new_type])
 
-
     def __str__(self):
         if self.name != '':
             return str(self.name.encode('ascii','ignore'))
         else:
             return 'Meal Object (no name)'
 
-    def __eq__(self,other):
+    def __eq__(self, other):
         return self.name == other.name
 
 
@@ -96,15 +91,11 @@ class Patient(MongoObject):
     def __str__(self):
         return str(self._id)
 
-    __repr__ = __str__
-
 
 class Tag(MongoObject):
-    '''
-    This class should follow the db schema designed for tag info
-    '''
-    def __init__(self, _id = '',name = '', minimize= {}, prior = [], type = '',avoid=[]):
-        '''
+
+    def __init__(self, _id='', name=None, minimize=None, prior=None, _type=None, avoid=None):
+        """
 
         :param _id: ObjectId()
         :param name: str
@@ -112,13 +103,13 @@ class Tag(MongoObject):
         :param prior: {ObjectId(): float}
         :param type: str
         :param avoid: {ObjectId(): float}
-        '''
+        """
         self._id = _id
         self.name = name
-        self.avoid = avoid
-        self.prior = prior
-        self.type = type
-        self.minimize = minimize
+        self.avoid = avoid or list()
+        self.prior = prior or list()
+        self.type = _type or ''
+        self.minimize = minimize or dict()
 
     def __str__(self):
         return str(self.name)
@@ -126,7 +117,6 @@ class Tag(MongoObject):
     def __eq__(self,other):
         return self.name == other.name
 
-    __repr__ = __str__
 
 class Order(MongoObject):
     def __init__(self,patient_id = '', patient_meal_id = [], herb_id=[], week_start_date= '', week_end_date= ''):
@@ -147,7 +137,6 @@ class Order(MongoObject):
     def __str__(self):
         return str(self.patient_id) + ' |  '+ str(self.week_start_date)
 
-    __repr__ = __str__
 
 class Patient_meal(MongoObject):
     def __init__(self, patient_id = '', meal_id = '', status= '', shippping_date= ''):

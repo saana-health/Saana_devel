@@ -5,6 +5,7 @@ from pymongo.database import Collection
 from bson.objectid import ObjectId
 import pytest
 
+from saana_lib import connectMongo, optimizeMealSimple
 
 PATIENT_DATA = {
     'feet': 5,
@@ -188,8 +189,22 @@ def manual_input_patch(monkeypatch):
 
 
 @pytest.fixture
+def scoreboard_base_patch(manual_input_patch):
+
+    class datetime_mock(MagicMock):
+        @classmethod
+        def now(cls):
+            return '2019-09-18T11:10:00'
+
+    manual_input_patch.setattr(
+        optimizeMealSimple,
+        'datetime',
+        datetime_mock
+    )
+
+
+@pytest.fixture
 def patients(monkeypatch):
-    from saana_lib import connectMongo, manual_input, optimizeMealSimple
 
     def get_patient_related_data_stub(a, b):
         return list(), list(), list(), list()
@@ -218,8 +233,6 @@ def empty_patients(patients):
 
 @pytest.fixture
 def empty_meals(monkeypatch):
-    from saana_lib import connectMongo
-
     monkeypatch.setattr(connectMongo, 'db', get_mongo_stub(
         meal_infos=BaseCollectionMock
     ))
@@ -227,13 +240,56 @@ def empty_meals(monkeypatch):
 
 @pytest.fixture
 def meals_patch(monkeypatch):
-    from saana_lib import connectMongo
-
     monkeypatch.setattr(connectMongo, 'db', get_mongo_stub(
         meal_infos=MealsCollectionMock
     ))
     return monkeypatch
 
 
+def assert_equal_objects(o1, o2):
+    """
+    o1 and o2 are two objects. might be of almost any type (i'm
+    sure that there are some Python types that will break this out)
+    but basically this utility comes in hand for those cases where
+    I have to compare sequences (as tuple, lists) that are generated
+    in a way that the original order is not preserved (ex. a list
+    generated during the execution of for loop over a dictionary)
+    """
+    def _dict_equal(d1, d2):
+        for k, v in d1.items():
+            assert k in d2
+            assert_equal_objects(v, d2[k])
 
+    assert type(o1) is type(o2)
+    if not hasattr(o1, '__iter__') or isinstance(o1, str):
+        assert o1 == o2
+    elif isinstance(o1, dict):
+        _dict_equal(o1, o2)
+    else:
+        o1 = list(o1)
+        o2 = list(o2)
+        assert len(o1) == len(o2)
+        for pos, el in enumerate(o1):
+            if isinstance(el, dict):
+                _dict_equal(el, o2[pos])
+            else:
+                assert el in o2
+
+
+def assert_not_equal_objects(o1, o2):
+    """
+    If two objects are not the same, then an AssertionError is
+    expected. If no exception is caught, then the two objects
+    are the same and False is returned
+    """
+    def _assert_not_equal_objects(o1, o2):
+        try:
+            assert_equal_objects(o1, o2)
+        except AssertionError as e:
+            print(e)
+            return True
+        else:
+            return False
+
+    assert _assert_not_equal_objects(o1, o2)
 

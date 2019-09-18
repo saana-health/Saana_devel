@@ -1,5 +1,8 @@
-from saana_lib import optimizeMealSimple, manual_input
 import pytest
+
+from saana_lib import optimizeMealSimple, model
+from tests.conftest import assert_equal_objects
+from constants import constants_wrapper as constants
 
 
 @pytest.mark.usefixtures("manual_input_patch")
@@ -97,6 +100,10 @@ class TestCaseOptimezer(object):
         assert len(meals_list) == 1
         assert len(meals_list[0].ingredients) == 0
 
+
+@pytest.mark.usefixtures("manual_input_patch")
+class TestCaseGetScoreboard(object):
+
     def test_get_scoreboard_method_1(self, manual_input_patch):
         """Base case: no meals"""
         manual_input_patch.setattr(
@@ -111,8 +118,6 @@ class TestCaseOptimezer(object):
         """Base case: Meal's supplier != to the one manually provided
         with the supplier's file
         """
-        from saana_lib.model import Meal
-
         def manual_input_stub(a):
             return ['s-2', ], list()
 
@@ -121,7 +126,7 @@ class TestCaseOptimezer(object):
             manual_input_stub
         )
 
-        meal_obj = Meal(_id='meal-id', supplierID='s-1')
+        meal_obj = model.Meal(_id='meal-id', supplierID='s-1')
         monkeypatch.setattr(
             optimizeMealSimple.Optimizer,
             'meals',
@@ -131,9 +136,8 @@ class TestCaseOptimezer(object):
         assert optimizer.get_score_board(None, {}, [], {}) == dict()
 
     def test_get_scoreboard_method_3(self, monkeypatch):
-        from saana_lib.model import Meal
 
-        meal_obj = Meal(_id='meal-id', ingredients={'basil': '20'})
+        meal_obj = model.Meal(_id='meal-id', ingredients={'basil': '20'})
         monkeypatch.setattr(
             optimizeMealSimple.Optimizer,
             'meals',
@@ -147,6 +151,212 @@ class TestCaseOptimezer(object):
             'avoid': ['basil',]
         }]} == optimizer.get_score_board(None, {}, ['basil',], {})
 
+    def test_get_scoreboard_method_4(self, monkeypatch):
+        """
+        quantity is in between min1 and min2
+        """
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "sodium": "864.24 mg",
+                "vitamin k": "76.45 mcg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert {70: [{
+            'meal': meal_obj,
+            'prior': [],
+            'minimize': ['sodium', ],
+            'avoid': []
+        }]} == optimizer.get_score_board(None, {
+            "sodium": {
+                "min1": "800",
+                "min2": "1000"
+            }}, [], {})
+
+    def test_get_scoreboard_method_5(self, monkeypatch):
+        """
+        quantity is greater than minimum2
+        """
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "sodium": "1164.24 mg",
+                "vitamin k": "76.45 mcg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert {40: [{
+            'meal': meal_obj,
+            'prior': [],
+            'minimize': ['sodium', ],
+            'avoid': []
+        }]} == optimizer.get_score_board(None, {
+            "sodium": {
+                "min1": "800",
+                "min2": "1000"
+            }}, [], {})
+
+    def test_get_scoreboard_method_6(self, monkeypatch):
+        """
+        quantity is less than minimum1
+        """
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "sodium": "564.24 mg",
+                "vitamin k": "76.45 mcg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert {100: [{
+            'meal': meal_obj,
+            'prior': [],
+            'minimize': [],
+            'avoid': []
+        }]} == optimizer.get_score_board(None, {
+            "sodium": {
+                "min1": "800",
+                "min2": "1000"
+            }}, [], {})
+
+    def test_get_scoreboard_method_7(self, monkeypatch):
+        """quantity is less than minimum1"""
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "sodium": "564.24 mg",
+                "vitamin k": "76.45 mcg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert {100: [{
+            'meal': meal_obj,
+            'prior': [],
+            'minimize': [],
+            'avoid': []
+        }]} == optimizer.get_score_board(None, {
+            "sodium": {
+                "min1": "800",
+                "min2": "1000"
+            }}, [], {})
+
+    def test_get_scoreboard_method_8(self, monkeypatch):
+        """prioritize ingredients"""
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "garlic": 3,
+                "mushroom": 2,
+                "mackerel": 0,
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert_equal_objects({120: [{
+            'meal': meal_obj,
+            'prior': ['garlic', 'mushroom'],
+            'minimize': [],
+            'avoid': []
+        }]}, optimizer.get_score_board(None, {}, [], {
+                "garlic": 2,
+                "mushroom": 1,
+            })
+        )
+
+    def test_get_scoreboard_method_9(self, monkeypatch):
+        """prioritize nutrients"""
+        meal_obj = model.Meal(
+            _id='meal-id',
+            name='creamy celeriac soup',
+            ingredients={
+                "soy": 3,
+            },
+            nutrition={
+                "potassium": "1020.13 mg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        expected = {120: [{
+            'meal': meal_obj,
+            'prior': ['potassium', 'soy'],
+            'minimize': [],
+            'avoid': []
+        }]}
+        assert_equal_objects(
+            expected,
+            optimizer.get_score_board(None, {}, [], {
+                "soy": 0,
+                "turmeric": 0,
+                "potassium": 10,
+            },)
+        )
+
+
+@pytest.mark.usefixtures("scoreboard_base_patch")
+class TestCaseScoreboardToCsv(object):
+    base_headers = ['abf3ed', 'score', 'meal', 'minimize', 'prior', 'avoid', 'supplier_id', 'supplier_name']
+
+    @property
+    def meal_obj(self):
+        return model.Meal(
+            _id='meal-id',
+            name='creamy celeriac soup',
+            ingredients={
+                "soy": 3,
+            },
+            nutrition={
+                "potassium": "1020.13 mg"
+            },
+            supplierID='3b7750fa415d304'
+        )
+
+    def test_scoreboard_to_csv_rows_1(self, patients):
+        """empty scoreboard, """
+        optimizer = optimizeMealSimple.Optimizer()
+        assert ('Admin.TestUser', [self.base_headers, ]) == optimizer.scoreboard_to_csv_rows({}, 'abf3ed')
+
+    def test_scoreboard_to_csv_rows_2(self, patients):
+        """scoreboard with one meal"""
+        optimizer = optimizeMealSimple.Optimizer()
+        row = [120, 'creamy celeriac soup', '', 'potassium:soy', '', '3b7750fa415d304', 'Admin']
+        assert ('Admin.TestUser', [self.base_headers, row]) == optimizer.scoreboard_to_csv_rows({
+            120: [{
+                'meal': self.meal_obj,
+                'prior': ['potassium', 'soy'],
+                'minimize': [],
+                'avoid': []
+            }]
+        }, 'abf3ed')
 
 
 
