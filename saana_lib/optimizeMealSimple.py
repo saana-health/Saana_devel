@@ -228,7 +228,7 @@ class Optimizer:
                     # or B in A. Usually one of the two information comes from the
                     # database, so it can be considered safe
 
-                    # TODO #2: since we are using MongoDB, we can around with dictionaries
+                    # TODO #2: since we are using MongoDB, we can play around with dictionaries
                     # as long as we want, so instead of saving nutrition fact quantities
                     # as strings, they might be saved in this form:
                     # {'quantity': float, 'unit': [mcg, gr, ...whatever]}, so that we don't
@@ -237,7 +237,7 @@ class Optimizer:
                             elem_quantity <= float(meal.nutrition[nutrition].split(' ')[0]):
                                 prior_list.append(elem_name)
 
-            # TODO: why this line ? to avoid duplicates ?
+            # TODO: why this line? to avoid duplicates?
             prior_list = list(set(prior_list))
             score += len(prior_list) * ADD_PRIOR
 

@@ -156,14 +156,13 @@ def find_tuesday(curr, wk = 1):
     return curr
 
 
-def similar(a,b,r):
-    '''
-    A util function to check if two strings are 'similar', defined by the value below. This is used for mapping items to meals
-    :param a: (str) string 1 to compare
-    :param b: (str) string 2 to compare
-    :return: True if similar, False otherwise
-    '''
-    return SequenceMatcher(None,a,b).ratio() > r
+def similar(s1, s2, _ratio):
+    """
+    A util function to check if two strings are 'similar',
+    defined by the value below. This is used for mapping
+    items to meals
+    """
+    return SequenceMatcher(None, s1, s2).ratio() > _ratio
 
 
 def add_suppliers():

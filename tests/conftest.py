@@ -83,6 +83,23 @@ MEAL_DATA = {
 }
 
 
+TAGS_DATA = [
+    {'_id': '5d8346929303fc6a4a302fe5', 'type': 'symptoms', 'minimize': {},
+     'tag_id': '5cab584074e88f0cb0977a10', 'name': 'inflammation',
+     'avoid': [], 'prior': {
+        'black rockfish': 0, 'mackerel': 0, 'burdock': 0,
+        'saury fish': 0, 'fish': 0, 'cabbage': 0, 'pak choi': 0, 'komatsuna': 0}
+     },
+    {'_id': '5d8346929303fc6a4a302fe6', 'type': 'symptoms', 'minimize': {
+        'insoluble fiber': {'min2': '15', 'min1': '10'}
+    }, 'tag_id': '5cab584074e88f0cb0977a0a', 'name': 'diarrhea', 'avoid': [],
+     'prior': {
+         'asparagus': 0, 'sweet potato': 0, 'green beans': 0,
+         'zucchini': 0, 'seaweed': 0, 'ginger': 0, 'carrot': 0, 'potato': 0}
+     }
+]
+
+
 @pytest.fixture
 def argparse_patch(monkeypatch):
     import argparse
@@ -126,6 +143,12 @@ class PatientsCollectionMock(BaseCollectionMock):
         return [PATIENT_DATA,]
 
 
+class TagsCollectionMock(BaseCollectionMock):
+
+    def find(self):
+        return TAGS_DATA
+
+
 class UsersCollectionMock(BaseCollectionMock):
 
     def find(self):
@@ -164,12 +187,6 @@ class FakeDb:
         super().__init__()
         for k, v in kwargs.items():
             setattr(self, k, v())
-
-
-class MongoStub:
-
-    def __init__(self, **kwargs):
-        self.db = FakeDb(**kwargs)
 
 
 def get_mongo_stub(**kwargs):
@@ -246,6 +263,15 @@ def meals_patch(monkeypatch):
     return monkeypatch
 
 
+@pytest.fixture
+def tags_patch(monkeypatch):
+
+    monkeypatch.setattr(connectMongo, 'db', get_mongo_stub(
+        tags=TagsCollectionMock,
+    ))
+    return monkeypatch
+
+
 def assert_equal_objects(o1, o2):
     """
     o1 and o2 are two objects. might be of almost any type (i'm
@@ -293,3 +319,8 @@ def assert_not_equal_objects(o1, o2):
 
     assert _assert_not_equal_objects(o1, o2)
 
+
+def assert_equal_tuples(t1, t2):
+    assert len(t1) == len(t2)
+    for pos, element in enumerate(t1):
+        assert_equal_objects(element, t2[pos])
