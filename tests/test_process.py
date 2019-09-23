@@ -47,63 +47,60 @@ class TestCaseProcessMatrix(object):
         ]
         assert self.matrix_obj.column_headers() == headers
 
-    def test_load_tags(self, mocker):
+    def test_tags_property(self, mocker):
         from tests.conftest import TagsCollectionMock, connectMongo, assert_equal_objects
         mocker.patch.object(connectMongo.db, 'tags', TagsCollectionMock())
-        tags = self.matrix_obj.load_tags()
-        assert_equal_objects(tags.keys(), {'inflammation': None, 'diarrhea': None}.keys())
+        assert_equal_objects(
+            self.matrix_obj.tags.keys(), {
+                ('inflammation', 'symptoms'): None,
+                ('diarrhea', 'symptoms'): None}.keys()
+        )
 
-    def test_tags_are_loaded_from_db(self, mocker):
+    def test_str_to_list_1(self):
+        with pytest.raises(FoodMatrixException):
+            self.matrix_obj.str_to_list(['a', '', ''])
+
+    def test_str_to_list_2(self):
+        with pytest.raises(FoodMatrixException):
+            self.matrix_obj.str_to_list(['', ''])
+
+    def test_str_to_list_3(self):
+        with pytest.raises(FoodMatrixException):
+            self.matrix_obj.str_to_list([None, ''])
+
+    def mock_tags(self, mocker):
         load_tags_mock = mocker.patch(
-            'saana_lib.process.processFoodMatrix.FoodMatrix.load_tags',
+            'saana_lib.process.processFoodMatrix.FoodMatrix.tags',
+            new_callable=mocker.PropertyMock
         )
-        mocker.patch(
-            'saana_lib.process.processFoodMatrix.FoodMatrix.column_headers',
-        )
-        self.matrix_obj.read_rows()
-        assert load_tags_mock.call_count == 1
-
-    def test_parse_elements_row_1(self):
-        with pytest.raises(FoodMatrixException):
-            self.matrix_obj.parse_elements_row(['a', '', ''])
-
-    def test_parse_elements_row_2(self):
-        with pytest.raises(FoodMatrixException):
-            self.matrix_obj.parse_elements_row(['', ''])
-
-    def test_parse_elements_row_3(self):
-        with pytest.raises(FoodMatrixException):
-            self.matrix_obj.parse_elements_row([None, ''])
-
-    def test_str_to_list(self):
-        assert self.matrix_obj.str_to_list(None) == []
-
-    def test_row_processed_1(self):
-        row = ['cancer', 'breast', 'P', '', 'A', 'M']
-        assert_equal_tuples(
-            self.matrix_obj.row_processed(row),
-            ([(0, 'P'), (2, 'A'), (3, 'M')], {})
-        )
-
-    def test_row_processed_2(self):
-        row = ['cancer', 'breast', 'T', '', 'A', 'M']
-        assert_equal_tuples(
-            self.matrix_obj.row_processed(row),
-            ([(2, 'A'), (3, 'M')], {0: 'invalid option T'})
-        )
-
-
-
-"""
-        current_element = {
+        load_tags_mock.return_value = {('breast', 'cancer'): {
             'name': 'breast',
             'type': 'cancer',
-            'avoid': ['mackerel', 'saury fish', 'seaweed'],
-            'prior': ['green beans'],
-            'minimize': ['"Peppers, Hot"', 'Potato', 'Sweet Potato'],
-            'tag_id': None
+            'avoid': ['mackerel', 'seaweed'],
+            'minimize': ['potato'],
+            'prior': [''],
+            }
         }
+        return load_tags_mock
 
-"""
+    def test_updated_content_row(self, mocker):
+        load_tags_mock = self.mock_tags(mocker)
+        headers_mock = mocker.patch(
+            'saana_lib.process.processFoodMatrix.FoodMatrix.column_headers',
+            return_value=[
+                'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'
+                ]
+        )
 
+        assert_equal_objects({
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['seaweed'],
+            'minimize': ['potato'],
+            'prior': ['spinach'],
+            },
+            self.matrix_obj.updated_content_row(
+                ['breast', 'cancer', '', 'A', 'M', 'P']
+            )
+        )
 

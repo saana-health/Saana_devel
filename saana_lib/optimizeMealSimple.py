@@ -3,7 +3,7 @@ import itertools
 from datetime import datetime
 from pymongo.errors import PyMongoError
 
-from . import model, connectMongo, utils
+from saana_lib import model, connectMongo, utils
 from saana_lib.manual_input import manual_input
 from constants import constants_wrapper as constants
 from saana_lib.utils import csv_writer
@@ -102,7 +102,7 @@ class Optimizer:
                 name=name,
                 comorbidities=comorbidities,
                 disease=disease,
-                _id = patient['_id'],
+                _id=patient['_id'],
                 symptoms=symptoms,
                 treatment_drugs=drugs
             )
@@ -149,26 +149,33 @@ class Optimizer:
             except PyMongoError:
                 logger.error('Error while generating meals for {}'.format(patient.name))
 
-    def compute_minimize_score(self, current, minimize_elements, meal_info):
+    def minimize_score(self, current, minimize_elements, meal_info):
         minimize_list = list()
         for item_name, min_item in minimize_elements.items():
             item_name = item_name.lower()
+            if not isinstance(min_item, dict):
+                logger.warning(
+                    "Minimize element {} is not of type dict".format(item_name)
+                )
+                continue
+
             if item_name in meal_info:
                 multiplier_factor = 1
 
                 # If a unit is included in the value, get rid of it
-                if not isinstance(meal_info[item_name], (float,)) and not isinstance(meal_info[item_name], int):
+                if not isinstance(meal_info[item_name], (float,)) and \
+                        not isinstance(meal_info[item_name], int):
                     contain_val = float(meal_info[item_name].split(' ')[0])
                 else:
                     contain_val = float(meal_info[item_name])
 
-                if contain_val > float(min_item['min2']):
+                if contain_val > float(min_item.get('min2', 0)):
                     current += DEDUCT_GR_MIN2 * multiplier_factor
                     minimize_list.append(item_name)
-                elif contain_val > float(min_item['min1']):
+                elif contain_val > float(min_item.get('min1', 0)):
                     current += DEDUCT_LT_MIN2 * multiplier_factor
                     minimize_list.append(item_name)
-                elif contain_val <= float(min_item['min1']):
+                elif contain_val <= float(min_item.get('min1', 0)):
                     pass
                     # Do we deduct points for {value} < min1 ? No
                     # if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
@@ -180,6 +187,72 @@ class Optimizer:
                     raise ValueError("")
 
         return current, minimize_list
+
+    def value_to_float(self, v):
+        try:
+            return float(v)
+        except ValueError:
+            return 0
+
+    def adjust_score_according_to_calories(self, cals_quantity, ref):
+        score = 0
+        cals_quantity = self.value_to_float(cals_quantity)
+
+        if isinstance(ref, str) and "|" in ref:
+            low, up = ref.split("|")
+            if cals_quantity > self.value_to_float(up):
+                score += ADD_PRIOR * 2
+            elif cals_quantity <= self.value_to_float(low):
+                score -= ADD_PRIOR
+            else:
+                score += ADD_PRIOR
+
+        else:
+            ref = self.value_to_float(ref)
+            if not (cals_quantity or ref):
+                return score
+
+            if cals_quantity < ref:
+                score -= ADD_PRIOR
+            elif cals_quantity >= ref:
+                score += ADD_PRIOR
+        return score
+
+    def prioritize_score(self, priors, minimize_list, avoid_list, meal, score):
+        prior_list = list()
+        for elem_name in priors:
+            if elem_name in minimize_list + avoid_list:
+                continue
+
+            tag_elem_quantity = priors[elem_name]
+            if elem_name in meal.ingredients and \
+                    tag_elem_quantity <= float(meal.ingredients[elem_name]):
+                prior_list.append(elem_name)
+
+            for nutrition, nutrition_quantity in meal.nutrition.items():
+                # TODO #1: this behavior should be fixed. either is A IN B
+                # or B in A. Usually one of the two information comes from the
+                # database, so it can be considered safe
+
+                # TODO #2: since we are using MongoDB, we can play around with dictionaries
+                # as long as we want, so instead of saving nutrition fact quantities
+                # as strings, they might be saved in this form:
+                # {'quantity': float, 'unit': [mcg, gr, ...whatever]}, so that we don't
+                # have to retrieve data using awkward method (like split + indexing)
+                if (nutrition in elem_name or elem_name in nutrition) and \
+                        tag_elem_quantity <= float(nutrition_quantity.split(' ')[0]):
+                    prior_list.append(elem_name)
+                elif 'calorie' in elem_name and nutrition == 'cals':
+                    score += self.adjust_score_according_to_calories(
+                        nutrition_quantity,
+                        tag_elem_quantity,
+                    )
+
+        # TODO: why this line? to avoid duplicates?
+        prior_list = list(set(prior_list))
+        score += len(prior_list) * ADD_PRIOR
+
+        return score, prior_list
 
     def get_score_board(self, patient, minimizes: dict, avoids: list, priors: dict):
         """
@@ -200,7 +273,6 @@ class Optimizer:
 
             score = 100
             avoid_list = list()
-            prior_list = list()
 
             # TODO: is it correct that this loop exits after the first match ?
             for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
@@ -213,33 +285,12 @@ class Optimizer:
             full_meal_info.update(meal.ingredients)
             full_meal_info.update(meal.nutrition)
 
-            score, minimize_list = self.compute_minimize_score(score, minimizes, full_meal_info)
-            for elem_name in priors:
-                if elem_name in minimize_list + avoid_list:
-                    continue
-
-                elem_quantity = priors[elem_name]
-                if elem_name in meal.ingredients and \
-                        elem_quantity <= float(meal.ingredients[elem_name]):
-                    prior_list.append(elem_name)
-
-                for nutrition in meal.nutrition.keys():
-                    # TODO #1: this behavior should be fixed. either is A IN B
-                    # or B in A. Usually one of the two information comes from the
-                    # database, so it can be considered safe
-
-                    # TODO #2: since we are using MongoDB, we can play around with dictionaries
-                    # as long as we want, so instead of saving nutrition fact quantities
-                    # as strings, they might be saved in this form:
-                    # {'quantity': float, 'unit': [mcg, gr, ...whatever]}, so that we don't
-                    # have to retrieve data using awkward method (like split + indexing)
-                    if (nutrition in elem_name or elem_name in nutrition) and \
-                            elem_quantity <= float(meal.nutrition[nutrition].split(' ')[0]):
-                                prior_list.append(elem_name)
-
-            # TODO: why this line? to avoid duplicates?
-            prior_list = list(set(prior_list))
-            score += len(prior_list) * ADD_PRIOR
+            score, minimize_list = self.minimize_score(
+                score, minimizes, full_meal_info
+            )
+            score, prior_list = self.prioritize_score(
+                priors, minimize_list, avoid_list, meal, score
+            )
 
             if score not in score_board.keys():
                 score_board[score] = list()

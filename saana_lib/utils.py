@@ -1,10 +1,11 @@
 # from mixpanel_api import Mixpanel
 import logging
 import csv
-from saana_lib import connectMongo
-from .model import Meal, Tag, Patient
 from datetime import date, timedelta
 from difflib import SequenceMatcher
+
+from saana_lib import connectMongo
+from saana_lib.model import Meal, Tag, Patient
 
 
 logger = logging.getLogger(__name__)

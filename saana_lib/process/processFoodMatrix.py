@@ -25,6 +25,7 @@ class FoodMatrix(object):
         self._content_iterator = None
         self.client_db = connectMongo.db
         self.cols_to_skip = 2
+        self._tags = None
 
     def load_file(self):
         try:
@@ -45,51 +46,72 @@ class FoodMatrix(object):
         if not self.content_iterator():
             raise FoodMatrixException("Empty file")
         headers = self.content_iterator()[0]
-        return self.str_to_list(headers)
+        return headers.split(',')
 
-    def load_tags(self):
-        return dict((tag['name'], tag) for tag in self.client_db.tags.find())
+    @property
+    def tags(self):
+        if not self._tags:
+            self._tags = dict(
+                ((tag['name'], tag['type']), tag) for tag in self.client_db.tags.find()
+            )
+        return self._tags
 
-    @staticmethod
-    def str_to_list(str_row, sep=','):
-        return str_row.split(sep) if isinstance(str_row, str) else list()
-
-    def parse_elements_row(self, row):
-        row = self.str_to_list(row)
+    def str_to_list(self, str_row, sep=','):
+        row = str_row.split(sep) if isinstance(str_row, str) else list()
         if len(row) < 3 or row[0] not in ['', None] or row[1] not in ['', None]:
             raise FoodMatrixException()
         return row
 
-    def elements_selection(self, row: list):
-        options = list()
+    def add_or_remove_element(self, el, _list: list, action_key):
+        import pdb;pdb.set_trace()
+        if action_key == constants.ELEMENT_REMOVE_ACTION_KEY:
+            if el in _list:
+                _list.remove(_list.index(el))
+        elif action_key == constants.ELEMENT_AVOID_ACTION_KEY and el not in _list:
+            _list.append(el)
+        elif action_key == constants.ELEMENT_MINIMIZE_ACTION_KEY and el not in _list:
+            _list.append(el)
+        elif action_key == constants.ELEMENT_PRIORITIZE_ACTION_KEY and el not in _list:
+            _list.append(el)
+
+        return _list
+
+    def updated_content_row(self, row):
+
+        def list_name(key):
+            dict(constants.ELEMENT_ACTION_KEYS).get(key)
+
+        name, tag_type = row[0], row[1]
+        current_record = self.tags.get((name, tag_type))
+
         errs = dict()
-        for i, v in enumerate(row[self.cols_to_skip:]):
-            if v not in constants.ELEMENT_OPT_KEYS:
-                if v:
-                    errs[i] = "invalid option {}".format(v)
+        for i, action_key in enumerate(row[self.cols_to_skip:]):
+            if action_key not in constants.ELEMENT_ACTION_KEYS:
+                if action_key:
+                    errs[i] = "invalid option {}".format(action_key)
                 continue
-            options.append((i, v))
-        return options, errs
+
+            elem_name = self.column_headers()[i]
+            current_record[list_name(action_key)] = self.add_or_remove_element(
+                elem_name,
+                current_record.get(list_name(action_key)),
+                action_key
+            )
+
+        return current_record
 
     def read_rows(self):
         """
         Temporarily we keep the CSV file as the input. Soon we'll
         switch to XLS files.
         """
-        # row[name] = {
-        #     'name': name,
-        #     'type': what_type,
-        #     'avoid': [],
-        #     'prior': {},
-        #     'minimize':{},
-        #     'tag_id': tag_id
-        # }
-
-        column_headers = self.column_headers()
-        tags = self.load_tags()
-        for row in self.content_iterator()[1:]:
+        for p, row in self.content_iterator()[1:]:
             row = self.str_to_list(row)
+            data = {
+                'type': row[0],
+                'name': row[1]
 
+            }
         return
 
 

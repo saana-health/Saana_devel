@@ -1,6 +1,5 @@
 import csv
-import pdb
-from . import connectMongo
+from saana_lib import connectMongo
 
 
 def manual_input(filename):

@@ -262,6 +262,29 @@ class TestCaseGetScoreboard(object):
             }}, [], {})
 
     def test_get_scoreboard_method_8(self, monkeypatch):
+        """minimize element is not of type dict"""
+        meal_obj = model.Meal(
+            _id='meal-id',
+            ingredients={
+                "sodium": "564.24 mg",
+                "vitamin k": "76.45 mcg"
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        assert {100: [{
+            'meal': meal_obj,
+            'prior': [],
+            'minimize': [],
+            'avoid': []
+        }]} == optimizer.get_score_board(None, {
+            "sodium": 0}, [], {})
+
+    def test_get_scoreboard_method_9(self, monkeypatch):
         """prioritize ingredients"""
         meal_obj = model.Meal(
             _id='meal-id',
@@ -288,7 +311,7 @@ class TestCaseGetScoreboard(object):
             })
         )
 
-    def test_get_scoreboard_method_9(self, monkeypatch):
+    def test_get_scoreboard_method_10(self, monkeypatch):
         """prioritize nutrients"""
         meal_obj = model.Meal(
             _id='meal-id',
@@ -320,6 +343,48 @@ class TestCaseGetScoreboard(object):
                 "potassium": 10,
             },)
         )
+
+    def test_get_scoreboard_method_11(self, monkeypatch):
+        """prioritize nutrients"""
+        meal_obj = model.Meal(
+            _id='meal-id',
+            name='creamy celeriac soup',
+            ingredients={"soy": 3},
+            nutrition={
+                'cals': 500,
+            }
+        )
+        monkeypatch.setattr(
+            optimizeMealSimple.Optimizer,
+            'meals',
+            [meal_obj,]
+        )
+        optimizer = optimizeMealSimple.Optimizer()
+        expected = {120: [{
+            'meal': meal_obj,
+            'prior': ['soy'],
+            'minimize': [],
+            'avoid': []
+        }]}
+        assert_equal_objects(
+            expected,
+            optimizer.get_score_board(None, {}, [], {
+                'high calorie content': 500.0,
+                'soy': 0
+            },)
+        )
+
+    def test_adjust_score_according_to_calories_1(self):
+        optimizer = optimizeMealSimple.Optimizer()
+        assert optimizer.adjust_score_according_to_calories(670, 500.0) == 10
+
+    def test_adjust_score_according_to_calories_2(self):
+        optimizer = optimizeMealSimple.Optimizer()
+        assert optimizer.adjust_score_according_to_calories(100, 500.0) == -10
+
+    def test_adjust_score_according_to_calories_3(self):
+        optimizer = optimizeMealSimple.Optimizer()
+        assert optimizer.adjust_score_according_to_calories(450, '400|700') == 10
 
 
 @pytest.mark.usefixtures("scoreboard_base_patch")

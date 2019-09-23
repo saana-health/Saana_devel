@@ -18,6 +18,8 @@ masterOrder/*
 # pycharm files
 .idea/
 
+node_modules/
+
 # py cache
 __pycache__/
 
