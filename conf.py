@@ -48,3 +48,5 @@ DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", '')
 DATABASE_ADDRESS = os.environ.get('DATABASE_ADDRESS', '0.0.0.0')
 DATABASE_PORT = os.environ.get('DATABASE_ADDRESS', '27017')
 
+
+CSV_FOLDER = os.path.join(os.getcwd(),'csv/')

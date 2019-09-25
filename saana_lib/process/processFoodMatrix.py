@@ -1,5 +1,5 @@
 import csv
-import os
+from re import match
 from saana_lib import connectMongo, utils
 from constants import constants_wrapper as constants
 
@@ -9,7 +9,6 @@ in the database it just appends it at the end. You have to clear
 out the database first before pushing in the new matrix
 """
 
-PATH = os.path.join(os.getcwd(),'csv/')
 
 
 class FoodMatrixException(Exception):
@@ -62,56 +61,93 @@ class FoodMatrix(object):
             raise FoodMatrixException()
         return row
 
-    def add_or_remove_element(self, el, _list: list, action_key):
-        import pdb;pdb.set_trace()
-        if action_key == constants.ELEMENT_REMOVE_ACTION_KEY:
-            if el in _list:
-                _list.remove(_list.index(el))
-        elif action_key == constants.ELEMENT_AVOID_ACTION_KEY and el not in _list:
-            _list.append(el)
-        elif action_key == constants.ELEMENT_MINIMIZE_ACTION_KEY and el not in _list:
-            _list.append(el)
-        elif action_key == constants.ELEMENT_PRIORITIZE_ACTION_KEY and el not in _list:
-            _list.append(el)
+    def whereis_elem(self, elem_name, current_record):
+        list_name = ''
+        pos = 0
+        if elem_name in current_record['avoid']:
+            list_name = 'avoid'
+            pos = current_record['avoid'].index(elem_name)
+        if elem_name in current_record['prior']:
+            list_name = 'prior'
+            pos = current_record['prior'].index(elem_name)
+        if elem_name in current_record['minimize']:
+            list_name = 'minimize'
+            pos = current_record['minimize'].index(elem_name)
+        return list_name, pos
 
-        return _list
+    def remove_element(self, elem_name, current_record):
+        list_name, pos = self.whereis_elem(elem_name, current_record)
+        if not list_name:
+            return current_record
 
-    def updated_content_row(self, row):
-
-        def list_name(key):
-            dict(constants.ELEMENT_ACTION_KEYS).get(key)
-
-        name, tag_type = row[0], row[1]
-        current_record = self.tags.get((name, tag_type))
-
-        errs = dict()
-        for i, action_key in enumerate(row[self.cols_to_skip:]):
-            if action_key not in constants.ELEMENT_ACTION_KEYS:
-                if action_key:
-                    errs[i] = "invalid option {}".format(action_key)
-                continue
-
-            elem_name = self.column_headers()[i]
-            current_record[list_name(action_key)] = self.add_or_remove_element(
-                elem_name,
-                current_record.get(list_name(action_key)),
-                action_key
-            )
-
+        current_record.get(list_name).pop(pos)
         return current_record
+
+    def changed_status(self, current_record, elem, action):
+        changed = False
+        if action == constants.ELEMENT_AVOID_ACTION_KEY:
+            changed = elem not in current_record['avoid']
+        elif action == constants.ELEMENT_MINIMIZE_ACTION_KEY:
+            changed = elem not in current_record['minimize']
+        elif action == constants.ELEMENT_PRIORITIZE_ACTION_KEY:
+            changed = elem not in current_record['prior']
+        return changed
+
+    def updated_content_row(self, row, current_record, row_n):
+        errs = dict()
+        for i, row_value in enumerate(row[self.cols_to_skip:], start=self.cols_to_skip):
+            elem_name = self.column_headers()[i]
+            if row_value in constants.ELEMENT_ACTION_KEYS:
+                changed_status = self.changed_status(
+                    current_record, elem_name, row_value
+                )
+                if row_value == constants.ELEMENT_REMOVE_ACTION_KEY or changed_status:
+                    current_record = self.remove_element(elem_name, current_record)
+
+                if row_value == constants.ELEMENT_AVOID_ACTION_KEY:
+                    if elem_name not in current_record['avoid']:
+                        current_record['avoid'].append(elem_name)
+                elif row_value == constants.ELEMENT_PRIORITIZE_ACTION_KEY:
+                    if elem_name not in current_record['prior']:
+                        current_record['prior'].append(elem_name)
+                elif row_value == constants.ELEMENT_MINIMIZE_ACTION_KEY:
+                    if elem_name not in current_record['minimize']:
+                        current_record['minimize'].append(elem_name)
+
+            elif match(r'^\d+$', row_value):
+                new_val = (elem_name, float(row_value))
+                list_name, pos = self.whereis_elem(elem_name, current_record)
+                if not list_name:
+                    continue
+                current_record[list_name][pos] = new_val
+            elif match(r'^(\d+)\|(\d+)$', row_value):
+                low, up = row_value.split("|")
+                list_name, pos = self.whereis_elem(elem_name, current_record)
+                if not list_name:
+                    continue
+                current_record[list_name][pos] = (
+                    elem_name, {'min1': float(low), 'min2': float(up)}
+                )
+            else:
+                errs[elem_name] = "Invalid value for cell: {}:{}".format(row_n, i)
+
+        return current_record, errs
 
     def read_rows(self):
         """
         Temporarily we keep the CSV file as the input. Soon we'll
         switch to XLS files.
         """
-        for p, row in self.content_iterator()[1:]:
+        for row_n, row in self.content_iterator()[1:]:
             row = self.str_to_list(row)
+            name, tag_type = row[0], row[1]
             data = {
-                'type': row[0],
-                'name': row[1]
-
+                'type': tag_type,
+                'name': name,
             }
+            current_record = self.tags.get((name, tag_type))
+            updated_record, errs = self.updated_content_row(row, current_record, row_n)
+
         return
 
 

@@ -9,6 +9,8 @@ def file_opening(mocker):
     return mocker.patch('builtins.open')
 
 
+
+
 @pytest.mark.usefixtures("file_mocker")
 class TestCaseProcessMatrix(object):
     matrix_obj = FoodMatrix('fname')
@@ -17,6 +19,16 @@ class TestCaseProcessMatrix(object):
     def content_iterator(self, mocker):
         m = mocker.patch(
             'saana_lib.process.processFoodMatrix.FoodMatrix.content_iterator',
+        )
+        return m
+
+    @pytest.fixture
+    def headers_mock(self, mocker):
+        m = mocker.patch(
+            'saana_lib.process.processFoodMatrix.FoodMatrix.column_headers',
+            return_value=[
+                'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'
+                ]
         )
         return m
 
@@ -68,39 +80,122 @@ class TestCaseProcessMatrix(object):
         with pytest.raises(FoodMatrixException):
             self.matrix_obj.str_to_list([None, ''])
 
-    def mock_tags(self, mocker):
-        load_tags_mock = mocker.patch(
-            'saana_lib.process.processFoodMatrix.FoodMatrix.tags',
-            new_callable=mocker.PropertyMock
-        )
-        load_tags_mock.return_value = {('breast', 'cancer'): {
-            'name': 'breast',
-            'type': 'cancer',
-            'avoid': ['mackerel', 'seaweed'],
-            'minimize': ['potato'],
-            'prior': [''],
-            }
-        }
-        return load_tags_mock
-
-    def test_updated_content_row(self, mocker):
-        load_tags_mock = self.mock_tags(mocker)
-        headers_mock = mocker.patch(
-            'saana_lib.process.processFoodMatrix.FoodMatrix.column_headers',
-            return_value=[
-                'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'
-                ]
-        )
-
-        assert_equal_objects({
+    def test_updated_content_row_1(self, headers_mock):
+        assert_equal_tuples(({
             'name': 'breast',
             'type': 'cancer',
             'avoid': ['seaweed'],
             'minimize': ['potato'],
             'prior': ['spinach'],
-            },
+            }, {}),
             self.matrix_obj.updated_content_row(
-                ['breast', 'cancer', '', 'A', 'M', 'P']
+                ['breast', 'cancer', 'R', 'A', 'M', 'P'], {
+                    'name': 'breast',
+                    'type': 'cancer',
+                    'avoid': ['mackerel', 'seaweed'],
+                    'minimize': ['potato'],
+                    'prior': [],
+                }
             )
         )
+        assert headers_mock.call_count == 4
+
+    def test_updated_content_row_2(self, headers_mock):
+        assert_equal_tuples(({
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel'],
+            'minimize': ['potato'],
+            'prior': ['seaweed'],
+            }, {}),
+            self.matrix_obj.updated_content_row(
+                ['breast', 'cancer', '', 'P', '', ''], {
+                    'name': 'breast',
+                    'type': 'cancer',
+                    'avoid': ['mackerel', 'seaweed'],
+                    'minimize': ['potato'],
+                    'prior': [],
+                }
+            )
+        )
+        assert headers_mock.call_count == 4
+
+    def test_updated_content_row_3(self, headers_mock):
+        assert_equal_tuples(({
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel'],
+            'minimize': ['potato'],
+            'prior': [('spinach', 300), 'seaweed'],  # ,
+            }, {}),
+            self.matrix_obj.updated_content_row(
+                ['breast', 'cancer', '', 'P', '', '300'], {
+                    'name': 'breast',
+                    'type': 'cancer',
+                    'avoid': ['mackerel', 'seaweed'],
+                    'minimize': ['potato'],
+                    'prior': ['spinach'],
+                }
+            )
+        )
+        assert headers_mock.call_count == 4
+
+    def test_updated_content_row_4(self, headers_mock):
+        assert_equal_tuples(({
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel'],
+            'minimize': ['potato'],
+            'prior': [('spinach', {'min1': 300, 'min2': 400}), 'seaweed'],
+            }, {}),
+            self.matrix_obj.updated_content_row(
+                ['breast', 'cancer', '', 'P', '', '300|400'], {
+                    'name': 'breast',
+                    'type': 'cancer',
+                    'avoid': ['mackerel', 'seaweed'],
+                    'minimize': ['potato'],
+                    'prior': ['spinach'],
+                }
+            )
+        )
+        assert headers_mock.call_count == 4
+
+    def test_updated_content_row_5(self, headers_mock):
+        assert_equal_tuples(({
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel'],
+            'minimize': ['potato'],
+            'prior': ['spinach', 'seaweed'],
+            }, {"spinach": "Invalid value: {}".format("300|")}),
+            self.matrix_obj.updated_content_row(
+                ['breast', 'cancer', '', 'P', '', '300|'], {
+                    'name': 'breast',
+                    'type': 'cancer',
+                    'avoid': ['mackerel', 'seaweed'],
+                    'minimize': ['potato'],
+                    'prior': ['spinach'],
+                }
+            )
+        )
+
+    def test_change_status_method_1(self):
+        record = {
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel', 'seaweed'],
+            'minimize': ['potato'],
+            'prior': [],
+        }
+        assert self.matrix_obj.changed_status(record, 'mackerel', 'P')
+
+    def test_change_status_method_2(self):
+        record = {
+            'name': 'breast',
+            'type': 'cancer',
+            'avoid': ['mackerel', 'seaweed'],
+            'minimize': ['potato'],
+            'prior': [],
+        }
+        assert self.matrix_obj.changed_status(record, 'mackerel', 'A') == False
 

@@ -1,14 +1,10 @@
+import pdb
 import itertools
 import csv
 import os
 import sys
 from datetime import date, timedelta, datetime
-
-from . import model, connectMongo, utils, chemo, feedback
-from saana_lib.manual_input import manual_input
-from constants import constants_wrapper as constants
-from saana_lib.utils import csv_writer
-
+from . import model, connectMongo, utils, feedback, manual_input, chemo
 
 DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
@@ -39,83 +35,96 @@ TODAY = utils.find_tuesday(date.today(),2)
 class Optimizer:
 
     def __init__(self, test = True):
+        '''
+        meals: {_id: Meal()}
+        tags: {_id: Tag()}
+        # inventory:  ?
+        patients: [Patient()]
+        today: datetime.datetime()
+        '''
+        print("Started initializing Optimizer Object")
         self.today = datetime.combine(TODAY,datetime.min.time())
         # check today is tuesday
         assert self.today.weekday() == 1
         self.test = test
-        self.suppliers, self.patients_emails = manual_input('suppliers.csv')
+        self.meals = self._get_meals()
+        self.tags = self._get_tags()
+        self.patients = self._get_patients()
+        print("Finished initializing Optimizer Object")
 
-    def get_ingredient_name(self, ingredient_id):
-        ing = connectMongo.db.mst_food_ingredients.find_one({'_id': ingredient_id})
-        return ing['name'] if ing else ''
+    def _get_meals(self):
+        '''
+        gets all meals in db in {_id:Meal(object)} structure
 
-    @property
-    def meals(self):
-        """
-        TODO: fix inner loop (has no sense). Making N queries to retrieve
-        only one information (the name) that might be already stored
-        inside the meal dict
-
-        NOTE:
-        If an ingredient is not found then it should not be added to
-        :return: a list of Meal object
-        """
-        meals_list = list()
-        for meal in connectMongo.db.meal_infos.find():
+        :return: {_id: Meal()}
+        '''
+        print("Started getting meals from DB")
+        map_meal = {}
+        meals_dict= list(connectMongo.db.meal_infos.find())
+        for temp in meals_dict:
             ingredients = {}
-            for ingredient in meal['ingredients']:
-                name = self.get_ingredient_name(ingredient['food_ingredient_id'])
-                if name:
-                    ingredients[name] = ingredient['quantity']
-
-            meal['ingredients'] = ingredients
+            for ingredient in temp['ingredients']:
+                name = connectMongo.db.mst_food_ingredients.find_one({'_id':ingredient['food_ingredient_id']})['name']
+                ingredients[name] = ingredient['quantity']
+            temp['ingredients'] = ingredients
             new_meal = model.Meal()
-            new_meal.dict_to_class(meal)
-            meals_list.append(new_meal)
-        return meals_list
+            new_meal.dict_to_class(temp)
+            map_meal[temp['_id']] = new_meal#utils.meal_dict_to_class(temp)
+        print("Started getting meals from DB")
+        return map_meal
 
-    @property
-    def tags(self):
+    def _get_tags(self):
+        '''
+        Gets all tags
+
+        :return: {_id: Tag()}
+        '''
+        print("Started getting tags from DB")
         hash_tag = {}
-        for tag in connectMongo.db.tags.find():
+        tags = list(connectMongo.db.tags.find())
+        for tag in tags:
             new_tag = model.Tag()
             new_tag.dict_to_class(tag)
             hash_tag[tag['_id']] = new_tag
+        print("Finished getting tags from DB")
         return hash_tag
 
-    @property
-    def patients(self):
-        """
-        TODO: optimize the for loop. Remove `if emails ...` and let patients
-        property to return only patients filtered by emails.
+    def _get_patients(self):
+        '''
+        Get all patients
 
-        if selecting patients based on emails read in from manual file
-        if no emails are specified -> run on all patients
-        :return:
-        """
-        patients_list = []
+        :return: [Patient()]
+        '''
+        print("Started getting patients from DB")
+        patient_obj = []
         patients = connectMongo.db.patients.find()
-        users = connectMongo.db.users
+        emails = manual_input.manual_input('suppliers.csv')[1]
         for patient in patients:
-            if self.patients_emails and \
-                    users.find_one({'_id': patient['user_id']})['email'] not in self.patients_emails:
-                continue
+            # if no emails are specified -> run algo on ALL patients
+            if emails != []:
+                user = connectMongo.db.users.find_one({'_id':patient['user_id']})
+                # if emails specified but not matched
+                try:
+                    if connectMongo.db.users.find_one({'_id':patient['user_id']})['email'] not in emails:
+                        continue
+                except:
+                    continue
 
-            comorbidities, disease, symptoms, drugs = self.get_patient_related_data(patient['_id'])
+            # Skip if subscription is not active or not order cycle
+            if not self._check_subscription(patient['_id']):
+                continue
+            comorbidities = connectMongo.get_comorbidities(patient['_id'])
+            disease = connectMongo.get_disease(patient['_id'])
+            symptoms = connectMongo.get_symptoms(patient['_id'])
+            drugs = connectMongo.get_drugs(patient['_id'])
             user_id = connectMongo.db.patients.find_one({'_id':patient['_id']})['user_id']
             name = connectMongo.db.users.find_one({'_id':user_id})['first_name']
 
-            new_patient = model.Patient(
-                name=name,
-                comorbidities=comorbidities,
-                disease=disease,
-                _id = patient['_id'],
-                symptoms=symptoms,
-                treatment_drugs=drugs
-            )
-            patients_list.append(new_patient)
-
-        return patients_list
+            new_patient = model.Patient(name=name,comorbidities=comorbidities, disease=disease, _id = patient['_id'],\
+                                  symptoms=symptoms, treatment_drugs=drugs)
+            patient_obj.append(new_patient)
+        print("Finished getting patients")
+        return patient_obj
 
     def _check_subscription(self, patient_id):
         '''
@@ -189,7 +198,7 @@ class Optimizer:
 
                 ## Get scoreboard ##
                 score_board, repeat_one_week = self.get_score_board(patient, minimizes, avoids, priors, list(set(multiplier)))
-                self.scoreboard_to_csv_rows(score_board, patient._id)
+                self.scoreboard_to_csv(score_board,patient._id)
 
                 ## Start choosing meals ##
                 slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
@@ -210,39 +219,6 @@ class Optimizer:
             except:
                 print('Error while generating meals for {}'.format(patient.name))
 
-    def compute_minimize_score(self, current, minimize_elements, meal_info):
-        minimize_list = list()
-        for item_name, min_item in minimize_elements.items():
-            item_name = item_name.lower()
-            if item_name in meal_info:
-                multiplier_factor = 1
-
-                # If a unit is included in the value, get rid of it
-                if not isinstance(meal_info[item_name], (float,)) and \
-                        not isinstance(meal_info[item_name], int):
-                    contain_val = float(meal_info[item_name].split(' ')[0])
-                else:
-                    contain_val = float(meal_info[item_name])
-
-                if contain_val > float(min_item['min2']):
-                    current += DEDUCT_GR_MIN2 * multiplier_factor
-                    minimize_list.append(item_name)
-                elif contain_val > float(min_item['min1']):
-                    current += DEDUCT_LT_MIN2 * multiplier_factor
-                    minimize_list.append(item_name)
-                elif contain_val <= float(min_item['min1']):
-                    pass
-                    # Do we deduct points for {value} < min1 ? No
-                    # if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
-                    #     score += DEDUCT_LT_MIN1_VEESTRO*multiplier_factor
-                    # else:
-                    #     score += DEDUCT_LT_MIN1*multiplier_factor
-                # This should never happen
-                else:
-                    raise ValueError("")
-
-        return current, minimize_list
-
     def get_score_board(self, patient, minimizes, avoids, priors, multiplier):
         '''
         create a scoring system based on minimize, avoid and prior tags
@@ -256,51 +232,88 @@ class Optimizer:
         print("Started generating score card")
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
         repeat_one_week, repeat_two_week= self._repeating_meals(patient._id,self.today)
-        score_board = dict()
+        score_board = {}
 
-        for meal in self.meals:
-            if self.suppliers and meal.supplier_id not in self.suppliers:
+        for meal in self.meals.values():
+            # skip meal if not from suppliers we want
+            suppliers = manual_input.manual_input('suppliers.csv')[0]
+            if suppliers != [] and meal.supplier_id not in suppliers:
                 continue
 
             score = 100
-            avoid_list = list()
-            prior_list = list()
+            # TODO: quantity
+            # if meal.quantity == 0:
+            #     continue
 
-            # TODO: is it correct that this loop exits after the first match ?
+            # arrays for storing matched contents
+            avoid_list = []
+            minimize_list = []
+            prior_list = []
+
+            ## AVOID ##
+            # avoid_list is avoid tags that MATCHED
             for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
                 if each in avoids:
                     avoid_list.append(each)
                     score += DEDUCT_AVOID
                     break
 
+            ## MINIMIZE ##
             full_meal_info = {}
             full_meal_info.update(meal.ingredients)
             full_meal_info.update(meal.nutrition)
 
-            score, minimize_list = self.compute_minimize_score(score, minimizes, full_meal_info)
-            for elem_name in priors:
-                if elem_name in minimize_list + avoid_list:
-                    continue
+            # minimizes: list of all ingredients+nutrition to minimize from tags
+            # full_meal_info: from meal info
+            for min_item in minimizes.keys():
 
-                elem_quantity = priors[elem_name]
-                if elem_name in meal.ingredients and \
-                        elem_quantity <= float(meal.ingredients[elem_name]):
-                    prior_list.append(elem_name)
+                for ing in full_meal_info.keys():
+                    # if matched
+                    if min_item in ing:
+                        multiplier_factor = 1
 
+                        if ing in multiplier:
+                            multiplier_factor = 1.5
+
+                        # If a unit is included in the value, get rid of it
+                        if not isinstance(full_meal_info[ing],(float,)) and not isinstance(full_meal_info[ing],int):
+                            contain_val = float(full_meal_info[ing].split(' ')[0])
+                        else:
+                            contain_val = float(full_meal_info[ing])
+
+                        # if (val > min2)
+                        if contain_val > float(minimizes[min_item]['min2']):
+                            score += DEDUCT_GR_MIN2*multiplier_factor
+                            minimize_list.append(min_item)
+                        # if (min1 < val < min2)
+                        elif contain_val > float(minimizes[min_item]['min1']):
+                            score += DEDUCT_LT_MIN2*multiplier_factor
+                            minimize_list.append(min_item)
+                        #if (val < min1)
+                        elif contain_val <= float(minimizes[min_item]['min1']):
+                            pass
+                            # Do we deduct points for {value} < min1 ? No
+                            # if meal.supplier_id == connectMongo.db.users.find_one({'first_name':'Veestro'})['_id']:
+                            #     score += DEDUCT_LT_MIN1_VEESTRO*multiplier_factor
+                            # else:
+                            #     score += DEDUCT_LT_MIN1*multiplier_factor
+                        # This should never happen
+                        else:
+                            print('ERR')
+                            raise ValueError
+
+            ## PRIORITIZE
+            ## DELETE this line if I see again
+            # prior_list = [{nutrition: meal.nutrition[nutrition]} for nutrition in meal.nutrition if nutrition in priors]
+            for prior in priors.keys():
+                # if 1) string matched 2) not in min or avoid list and 3) content value above threshold
+                for ingredient in meal.ingredients.keys():
+                    if prior in ingredient and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.ingredients[ingredient]):
+                        prior_list.append(prior)
                 for nutrition in meal.nutrition.keys():
-
-                    # TODO #1: this behavior should be fixed. either is A IN B
-                    # or B in A. Usually one of the two information comes from the
-                    # database, so it can be considered safe
-
-                    # TODO #2: since we are using MongoDB, we can play around with dictionaries
-                    # as long as we want, so instead of saving nutrition fact quantities
-                    # as strings, they might be saved in this form:
-                    # {'quantity': float, 'unit': [mcg, gr, ...whatever]}, so that we don't
-                    # have to retrieve data using awkward method (like split + indexing)
-                    if (nutrition in elem_name or elem_name in nutrition) and \
-                            elem_quantity <= float(meal.nutrition[nutrition].split(' ')[0]):
-                                prior_list.append(elem_name)
+                    if (nutrition in prior or prior in nutrition) and prior not in minimize_list + avoid_list and priors[prior] <= float(meal.nutrition[nutrition].split(' ')[0]):
+                        prior_list.append(prior)
+            prior_list = list(set(prior_list))
 
             # ADD points for priors
             pos = len(prior_list)
@@ -317,10 +330,11 @@ class Optimizer:
 
             # update the score_board
             if score not in score_board.keys():
-                score_board[score] = [{'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list}]
+                score_board[score] = [{'meal': meal, 'prior': prior_list,'minimize':minimize_list, 'avoid':avoid_list}]
             else:
                 score_board[score].append({'meal': meal,'prior':prior_list,'minimize':minimize_list, 'avoid':avoid_list})
 
+        print("Finished generating score card")
         return score_board, repeat_one_week
 
     def choose_meal(self,score_board,repeat_one_week):
@@ -440,11 +454,16 @@ class Optimizer:
         :param start_date: datetime.datetime()
         :return: [Meal()] or None, [Meal()] or None
         '''
-        # prev_order = connectMongo.get_order(patient_id,start_date + timedelta(weeks=-1))
-        prev_order = connectMongo.db.orders.find_one({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-1)})
-        prev_two_order = connectMongo.db.orders.find_one({'patient_id':patient_id, 'week_start_date': start_date + timedelta(weeks=-2)})
+        prev_order = connectMongo.db.orders.find_one({
+            'patient_id':patient_id,
+            'week_start_date': start_date - timedelta(weeks=1)
+        })
+        prev_two_order = connectMongo.db.orders.find_one({
+            'patient_id': patient_id,
+            'week_start_date': start_date - timedelta(weeks=2)
+        })
 
-        if prev_order is not None:
+        if prev_order:
             # for catching errors
             try:
                 prev_order = [self.meals[x] for x in prev_order['patient_meal_id']]
@@ -507,30 +526,25 @@ class Optimizer:
             writer.writerows(existing_order)
         print("Successfully generated orders to a csv file")
 
-    def scoreboard_to_csv_rows(self, score_board, patient_id):
-        """
-        TODO: move CSV headers to a constants
-        """
-        sorted_score = sorted(score_board.keys(), reverse=True)
-        csv_list = [[patient_id, 'score', 'meal', 'minimize', 'prior', 'avoid', 'supplier_id','supplier_name'], ]
-        user = connectMongo.db.users.find_one({
-            '_id':connectMongo.db.patients.find_one({'_id':patient_id})['user_id']
-        })
-        patient_name = "{}.{}".format(user['first_name'], user['last_name'])
+    def scoreboard_to_csv(self,score_board,patient_id):
+        '''
+        Save score_board to csv
+        :param score_board: {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]},
+        :param patient_id: ObjectId()
+        :return: True
+        '''
+        sorted_score = sorted(score_board.keys(),reverse = True)
+        csv_list = [[patient_id],['score','meal','minimize','prior','avoid','supplier_id']]
         for score in sorted_score:
             for meal in score_board[score]:
-                supplier_name = connectMongo.db.users.find_one({'_id': meal['meal'].supplier_id})['first_name']
-                csv_list.append([
-                    score,
-                    meal['meal'].name,
-                    ":".join(meal['minimize']),
-                    ":".join(meal['prior']),
-                    ":".join(meal['avoid']),
-                    meal['meal'].supplier_id,
-                    supplier_name
-                ])
-
-        return patient_name, csv_list
+                temp_list = [score]
+                temp_list += [meal['meal'],meal['minimize'],meal['prior'], meal['avoid'],meal['meal'].supplier_id]
+                csv_list.append(temp_list)
+        with open('scoreboard/scoreboard_'+str(patient_id)[-5:]+'_'+str(self.today.date())+'.csv','w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(csv_list)
+        print("Successfully wrote score card to a csv file")
+        return True
 
 
 

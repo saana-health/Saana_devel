@@ -8,10 +8,33 @@ class ConstantsWrapper:
     ELEMENT_MINIMIZE_ACTION_KEY = 'M'
     ELEMENT_REMOVE_ACTION_KEY = 'R'
     ELEMENT_ACTION_KEYS = (
-        (ELEMENT_AVOID_ACTION_KEY, 'avoid'),
-        (ELEMENT_PRIORITIZE_ACTION_KEY, 'prior'),
-        (ELEMENT_MINIMIZE_ACTION_KEY, 'minimize'),
+        ELEMENT_AVOID_ACTION_KEY,
+        ELEMENT_PRIORITIZE_ACTION_KEY,
+        ELEMENT_MINIMIZE_ACTION_KEY,
+        ELEMENT_REMOVE_ACTION_KEY,
     )
+
+    # Deductions
+    DEDUCT_AVOID = -60
+    DEDUCT_GR_MIN2 = -60
+    DEDUCT_LT_MIN2 = -30
+    DEDUCT_LT_MIN1 = -15
+    DEDUCT_LT_MIN1_VEESTRO = - 20
+
+    # Additions
+    ADD_PRIOR = 10
+    LIKED_MEAL = 10
+
+    ADD_CALORIES = 10
+    DEDUCT_CALORIES = 10
+
+    # REPEAT
+    REPEAT_ZERO = -50
+    REPEAT_ONE = -30
+    REPEAT_TWO = -15
+    REPEAT_CUM = - 5
+
+    SUBSCRIPTION_WEEKLY_INTERVAL = 1
 
 
 constants_wrapper = ConstantsWrapper()

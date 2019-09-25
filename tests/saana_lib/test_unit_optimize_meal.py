@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 import pytest
 
 from saana_lib import optimizeMealSimple, model
@@ -53,66 +54,70 @@ class TestCaseOptimezer(object):
 
     def test_meals_property_1(self, empty_meals):
         optimizer = optimizeMealSimple.Optimizer()
-        assert optimizer.meals == list()
+        assert optimizer.meals == dict()
 
-    def test_meals_property_2(self, meals_patch):
+    def test_meals_property_2(self, mocker):
         from tests.conftest import MEAL_DATA
 
-        meals_patch.setitem(MEAL_DATA, 'ingredients', [])
-        optimizer = optimizeMealSimple.Optimizer()
-        assert len(optimizer.meals) == 1
+        meal_infos = mocker.patch('saana_lib.connectMongo.db.meal_infos')
+        meal_infos.find.return_value = [MEAL_DATA, ]
+        assert len(optimizeMealSimple.Optimizer().meals) == 1
+        assert meal_infos.find.called
 
-    def test_meals_property_3(self, meals_patch):
+    def test_meals_property_3(self, mocker):
         from tests.conftest import MEAL_DATA
 
-        def method_mock(a, b):
-            return b.binary
+        meal_infos = mocker.patch('saana_lib.connectMongo.db.meal_infos')
+        meal_infos.find.return_value = [MEAL_DATA, ]
 
-        meals_patch.setattr(
-            optimizeMealSimple.Optimizer,
-            'get_ingredient_name',
-            method_mock
+        get_ingredient_method = mocker.patch(
+            'saana_lib.optimizeMealSimple.Optimizer.get_ingredient_name',
         )
 
-        optimizer = optimizeMealSimple.Optimizer()
-        meals_list = optimizer.meals
-        assert len(meals_list) == 1
-        assert len(meals_list[0].ingredients) == len(MEAL_DATA['ingredients'])
+        meals_dict = optimizeMealSimple.Optimizer().meals
+        assert len(meals_dict) == 1
+        assert get_ingredient_method.call_count == len(MEAL_DATA['ingredients'])
 
-    def test_meals_property_4(self, manual_input_patch):
+    def test_meals_property_4(self, mocker):
         """The ingredient is not found `return None`. Test that is not added
         to the meal list of ingredients
         """
-        from saana_lib import connectMongo
-        from tests import conftest
+        from tests.conftest import MEAL_DATA
 
-        class StubClass:
-            def find_one(self, *args, **kwargs):
-                return None
+        meal_infos = mocker.patch('saana_lib.connectMongo.db.meal_infos')
+        meal_infos.find.return_value = [MEAL_DATA, ]
 
-        manual_input_patch.setattr(connectMongo, 'db', conftest.get_mongo_stub(
-            meal_infos=conftest.MealsCollectionMock,
-            mst_food_ingredients=StubClass
-        ))
-
-        optimizer = optimizeMealSimple.Optimizer()
-        meals_list = optimizer.meals
-        assert len(meals_list) == 1
-        assert len(meals_list[0].ingredients) == 0
+        get_ingredient_method = mocker.patch(
+            'saana_lib.optimizeMealSimple.Optimizer.get_ingredient_name',
+            return_value=None
+        )
+        meals_dict = optimizeMealSimple.Optimizer().meals
+        assert len(meals_dict) == 1
+        assert get_ingredient_method.call_count == len(MEAL_DATA['ingredients'])
+        assert len(meals_dict[MEAL_DATA['_id']].ingredients) == 0
 
 
-@pytest.mark.usefixtures("manual_input_patch")
+@pytest.fixture
+def repeating_meals(mocker):
+    m = mocker.patch(
+        'saana_lib.optimizeMealSimple.Optimizer.repeating_meals',
+        return_value=(list(), list())
+    )
+    return m
+
+
+@pytest.mark.usefixtures("manual_input_patch", "repeating_meals")
 class TestCaseGetScoreboard(object):
 
-    def test_get_scoreboard_method_1(self, manual_input_patch):
+    def test_get_scoreboard_method_1(self, mocker, repeating_meals):
         """Base case: no meals"""
-        manual_input_patch.setattr(
-            optimizeMealSimple.Optimizer,
-            'meals',
-            list()
+        mocker.patch(
+            'saana_lib.optimizeMealSimple.Optimizer.meals',
+            return_value=dict
         )
         optimizer = optimizeMealSimple.Optimizer()
-        assert optimizer.get_score_board(None, {}, [], {}) == dict()
+        assert optimizer.get_score_board(MagicMock(_id=1), {}, [], {}) == dict()
+        assert repeating_meals.call_count == 1
 
     def test_get_scoreboard_method_2(self, monkeypatch):
         """Base case: Meal's supplier != to the one manually provided
@@ -133,7 +138,7 @@ class TestCaseGetScoreboard(object):
             [meal_obj,]
         )
         optimizer = optimizeMealSimple.Optimizer()
-        assert optimizer.get_score_board(None, {}, [], {}) == dict()
+        assert optimizer.get_score_board(MagicMock(_id=1), {}, [], {}) == dict()
 
     def test_get_scoreboard_method_3(self, monkeypatch):
 
@@ -149,7 +154,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': [],
             'avoid': ['basil',]
-        }]} == optimizer.get_score_board(None, {}, ['basil',], {})
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {}, ['basil',], {})
 
     def test_get_scoreboard_method_4(self, monkeypatch):
         """
@@ -173,7 +178,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': ['sodium', ],
             'avoid': []
-        }]} == optimizer.get_score_board(None, {
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {
             "sodium": {
                 "min1": "800",
                 "min2": "1000"
@@ -201,7 +206,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': ['sodium', ],
             'avoid': []
-        }]} == optimizer.get_score_board(None, {
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {
             "sodium": {
                 "min1": "800",
                 "min2": "1000"
@@ -229,7 +234,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': [],
             'avoid': []
-        }]} == optimizer.get_score_board(None, {
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {
             "sodium": {
                 "min1": "800",
                 "min2": "1000"
@@ -255,7 +260,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': [],
             'avoid': []
-        }]} == optimizer.get_score_board(None, {
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {
             "sodium": {
                 "min1": "800",
                 "min2": "1000"
@@ -281,7 +286,7 @@ class TestCaseGetScoreboard(object):
             'prior': [],
             'minimize': [],
             'avoid': []
-        }]} == optimizer.get_score_board(None, {
+        }]} == optimizer.get_score_board(MagicMock(_id=1), {
             "sodium": 0}, [], {})
 
     def test_get_scoreboard_method_9(self, monkeypatch):
@@ -305,7 +310,8 @@ class TestCaseGetScoreboard(object):
             'prior': ['garlic', 'mushroom'],
             'minimize': [],
             'avoid': []
-        }]}, optimizer.get_score_board(None, {}, [], {
+        }]}, optimizer.get_score_board(
+            MagicMock(_id=1), {}, [], {
                 "garlic": 2,
                 "mushroom": 1,
             })
@@ -316,12 +322,8 @@ class TestCaseGetScoreboard(object):
         meal_obj = model.Meal(
             _id='meal-id',
             name='creamy celeriac soup',
-            ingredients={
-                "soy": 3,
-            },
-            nutrition={
-                "potassium": "1020.13 mg"
-            }
+            ingredients={"soy": 3},
+            nutrition={"potassium": "1020.13 mg"}
         )
         monkeypatch.setattr(
             optimizeMealSimple.Optimizer,
@@ -337,7 +339,7 @@ class TestCaseGetScoreboard(object):
         }]}
         assert_equal_objects(
             expected,
-            optimizer.get_score_board(None, {}, [], {
+            optimizer.get_score_board(MagicMock(_id=1), {}, [], {
                 "soy": 0,
                 "turmeric": 0,
                 "potassium": 10,
@@ -350,9 +352,7 @@ class TestCaseGetScoreboard(object):
             _id='meal-id',
             name='creamy celeriac soup',
             ingredients={"soy": 3},
-            nutrition={
-                'cals': 500,
-            }
+            nutrition={'cals': 500}
         )
         monkeypatch.setattr(
             optimizeMealSimple.Optimizer,
@@ -368,7 +368,66 @@ class TestCaseGetScoreboard(object):
         }]}
         assert_equal_objects(
             expected,
-            optimizer.get_score_board(None, {}, [], {
+            optimizer.get_score_board(MagicMock(_id=1), {}, [], {
+                'high calorie content': 500.0,
+                'soy': 0
+            },)
+        )
+
+    def test_get_scoreboard_method_12(self, mocker, repeating_meals):
+        """meal is in repeat_one_week meals"""
+        meal = MagicMock()
+        meal.name = 'creamy celeriac soup'
+        meal._id = 'id'
+        meal.ingredients = {"soy": 3}
+        meal.nutrition = {'cals': 500}
+        repeating_meals.return_value = [meal], list()
+
+        meals_mock = mocker.patch(
+            'saana_lib.optimizeMealSimple.Optimizer.meals',
+            new_callable=mocker.PropertyMock
+        )
+        meals_mock.return_value = [meal]
+
+        optimizer = optimizeMealSimple.Optimizer()
+        expected = {90: [{
+            'meal': meal,
+            'prior': ['soy'],
+            'minimize': [],
+            'avoid': []
+        }]}
+        assert_equal_objects(
+            expected,
+            optimizer.get_score_board(MagicMock(_id=1), {}, [], {
+                'high calorie content': 500.0,
+                'soy': 0
+            },)
+        )
+
+    def test_get_scoreboard_method_13(self, mocker, repeating_meals):
+        """meal is in repeat_two_week meals"""
+        meal = MagicMock()
+        meal.name = 'creamy celeriac soup'
+        meal._id = 'id'
+        meal.ingredients = {"soy": 3}
+        meal.nutrition = {'cals': 500}
+        repeating_meals.return_value = list(), [meal,]
+
+        meals_mock = mocker.patch(
+            'saana_lib.optimizeMealSimple.Optimizer.meals',
+            new_callable=mocker.PropertyMock
+        )
+        meals_mock.return_value = [meal]
+        optimizer = optimizeMealSimple.Optimizer()
+        expected = {105: [{
+            'meal': meal,
+            'prior': ['soy'],
+            'minimize': [],
+            'avoid': []
+        }]}
+        assert_equal_objects(
+            expected,
+            optimizer.get_score_board(MagicMock(_id=1), {}, [], {
                 'high calorie content': 500.0,
                 'soy': 0
             },)
@@ -385,6 +444,56 @@ class TestCaseGetScoreboard(object):
     def test_adjust_score_according_to_calories_3(self):
         optimizer = optimizeMealSimple.Optimizer()
         assert optimizer.adjust_score_according_to_calories(450, '400|700') == 10
+
+    def test_patient_has_active_subscription_1(self, mocker):
+        m1 = mocker.patch(
+            'saana_lib.connectMongo.db.patient_subscriptions',
+        )
+        m1.find_one.return_value = None
+        assert not optimizeMealSimple.Optimizer(test=False).patient_has_active_subscription('id')
+
+    def test_patient_has_active_subscription_2(self, mocker):
+        m1 = mocker.patch(
+            'saana_lib.connectMongo.db.patient_subscriptions',
+        )
+        m1.find_one.return_value = {'status': 'inactive'}
+        assert not optimizeMealSimple.Optimizer(test=False).patient_has_active_subscription('id')
+
+    def test_patient_has_active_subscription_3(self, mocker):
+        m1 = mocker.patch(
+            'saana_lib.connectMongo.db.patient_subscriptions',
+        )
+        m1.find_one.return_value = {'status': 'active', 'subscription_id': 1}
+
+        m2 = mocker.patch(
+            'saana_lib.connectMongo.db.mst_subscriptions',
+        )
+        m2.find_one.return_value = {'interval_count': 1}
+        m3 = mocker.patch(
+            'saana_lib.connectMongo.db.orders',
+        )
+        m3.find_one.return_value = 1
+        assert optimizeMealSimple.Optimizer(test=False).patient_has_active_subscription('id')
+        assert m1.find_one.called
+        assert m2.find_one.called
+        assert not m3.called
+
+    def test_patient_has_active_subscription_4(self, mocker):
+        m1 = mocker.patch(
+            'saana_lib.connectMongo.db.patient_subscriptions',
+        )
+        m1.find_one.return_value = {'status': 'active', 'subscription_id': 1}
+        m2 = mocker.patch(
+            'saana_lib.connectMongo.db.mst_subscriptions',
+        )
+        m2.find_one.return_value = {'interval_count': 2}
+        m3 = mocker.patch(
+            'saana_lib.connectMongo.db.orders',
+        )
+        m3.find_one.return_value = 1
+        assert not optimizeMealSimple.Optimizer(test=False).patient_has_active_subscription('id')
+        assert m2.find_one.called
+        assert m3.find_one.called
 
 
 @pytest.mark.usefixtures("scoreboard_base_patch")

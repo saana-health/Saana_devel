@@ -61,20 +61,20 @@ NUTRITION_DATA = {
 
 
 INGREDIENTS_DATA = [
-    {'quantity': 131.09, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da0')},
-    {'quantity': 14.97, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da1')},
-    {'quantity': 0.68, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da2')},
-    {'quantity': 12.26, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da3')},
-    {'quantity': 27.730000000000004, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da4')},
-    {'quantity': 320.0, 'food_ingredient_id': ObjectId('5cafc1e73b7750e4f9533da5')}
+    {'quantity': 131.09, 'food_ingredient_id': '5cafc1e73b7750e4f9533da0'},
+    {'quantity': 14.97, 'food_ingredient_id': '5cafc1e73b7750e4f9533da1'},
+    {'quantity': 0.68, 'food_ingredient_id': '5cafc1e73b7750e4f9533da2'},
+    {'quantity': 12.26, 'food_ingredient_id': '5cafc1e73b7750e4f9533da3'},
+    {'quantity': 27.730000000000004, 'food_ingredient_id': '5cafc1e73b7750e4f9533da4'},
+    {'quantity': 320.0, 'food_ingredient_id': '5cafc1e73b7750e4f9533da5'}
 ]
 
 
 MEAL_DATA = {
-    '_id': ObjectId('5cb0fa2f3b7750fa4c2d5a42'),
+    '_id': '5cb0fa2f3b7750fa4c2d5a42',
     'nutrition': NUTRITION_DATA,
     'image': 'https://recipe.url',
-    'supplier_id': ObjectId('5cb0fa253b7750fa415d3043'),
+    'supplier_id': '5cb0fa253b7750fa415d3043',
     'updated_at': datetime(2019, 4, 8, 14, 20, 44, 390000),
     'type': 'dinner',
     'name': 'creamy celeriac soup with rosemary oat crumble',
@@ -166,7 +166,7 @@ class MealsCollectionMock(BaseCollectionMock):
 
     def find(self, *args, **kwargs):
         from copy import deepcopy
-        return [deepcopy(MEAL_DATA), ]
+        return {ObjectId('5cb0fa2f3b7750fa4c2d5a42'): deepcopy(MEAL_DATA)}
 
 
 class IngredientsCollectionMock(BaseCollectionMock):
@@ -240,7 +240,6 @@ def patients(monkeypatch):
 
 @pytest.fixture
 def empty_patients(patients):
-    from saana_lib import connectMongo
 
     patients.setattr(connectMongo, 'db', get_mongo_stub(
         patients=BaseCollectionMock,
