@@ -10,9 +10,19 @@ out the database first before pushing in the new matrix
 """
 
 
-
 class FoodMatrixException(Exception):
     """"""
+
+
+class TagsRecord(object):
+
+    def __init__(self):
+        self.name = ''
+        self.tag_type = ''
+        self.avoid = list()
+        self.minimize = dict()
+        self.prioritize = dict()
+
 
 
 class FoodMatrix(object):
@@ -25,6 +35,8 @@ class FoodMatrix(object):
         self.client_db = connectMongo.db
         self.cols_to_skip = 2
         self._tags = None
+        self.new = False
+        self.current_record = {}
 
     def load_file(self):
         try:
@@ -36,15 +48,17 @@ class FoodMatrix(object):
                 )
             )
 
+    @property
     def content_iterator(self):
         if not self._content_iterator:
             self._content_iterator = csv.reader(self.load_file())
         return list(self._content_iterator)
 
+    @property
     def column_headers(self):
-        if not self.content_iterator():
+        if not self.content_iterator:
             raise FoodMatrixException("Empty file")
-        headers = self.content_iterator()[0]
+        headers = self.content_iterator[0]
         return headers.split(',')
 
     @property
@@ -56,36 +70,57 @@ class FoodMatrix(object):
         return self._tags
 
     def str_to_list(self, str_row, sep=','):
+        """"""
         row = str_row.split(sep) if isinstance(str_row, str) else list()
-        if len(row) < 3 or row[0] not in ['', None] or row[1] not in ['', None]:
+        if len(row) < 3 or row[0] in ['', None] or row[1] in ['', None]:
             raise FoodMatrixException()
         return row
 
     def whereis_elem(self, elem_name, current_record):
+        """
+        Brutally iterates over the three list/dict of the record
+        and search where the element is located
+        :return: if the element is in `avoid`, returns `avoid`
+        and the position within the list, otherwise the name of
+        the dictionary and -1, that will be correclty interpreted
+        at the caller
+        """
         list_name = ''
-        pos = 0
+        pos = -1
         if elem_name in current_record['avoid']:
             list_name = 'avoid'
             pos = current_record['avoid'].index(elem_name)
         if elem_name in current_record['prior']:
             list_name = 'prior'
-            pos = current_record['prior'].index(elem_name)
         if elem_name in current_record['minimize']:
             list_name = 'minimize'
-            pos = current_record['minimize'].index(elem_name)
         return list_name, pos
 
     def remove_element(self, elem_name, current_record):
         list_name, pos = self.whereis_elem(elem_name, current_record)
         if not list_name:
             return current_record
-
-        current_record.get(list_name).pop(pos)
+        elif pos < 0:
+            current_record.get(list_name).pop(elem_name)
+        else:
+            current_record.get(list_name).pop(pos)
         return current_record
 
     def changed_status(self, current_record, elem, action):
+        """
+        :param current_record: the current DB record as dict
+        :param elem: the elem under analysis
+        :param action: basically it is one of the three letters
+        A|M|P. The reason why this parameter was given such name
+        is because it indicates which action the patient should
+        attain (avoid|minimize|prioritize a certain element)
+        :return: True if the element was moved to a list different
+        than the one it pertains now
+        """
         changed = False
-        if action == constants.ELEMENT_AVOID_ACTION_KEY:
+        if not current_record:
+            return changed
+        elif action == constants.ELEMENT_AVOID_ACTION_KEY:
             changed = elem not in current_record['avoid']
         elif action == constants.ELEMENT_MINIMIZE_ACTION_KEY:
             changed = elem not in current_record['minimize']
@@ -94,10 +129,32 @@ class FoodMatrix(object):
         return changed
 
     def updated_content_row(self, row, current_record, row_n):
+        """
+        Scan the current xls row, and updates the current record
+        accordingly. For each value in row, remove/update/leave
+        as it is, the corresponding value in the record.
+        It might also mean moving one element from one list to
+        another.
+        Ex: if element X belongs to the `avoid` list (which means
+        it's in current_record['avoid']) and its value in ROW is
+        M (minimize) that implies it'll be moved to this list and
+        removed from `avoid`.
+        allowed values are any of the following patterns: '', 'M',
+        'A', 'P', 'R', number or number|number. Numbers might be
+        integer or internally
+        are cast to float.
+        :param row: a list of values
+        :param current_record: dictionary
+        :param row_n: this index is passed only for logging purpose
+        """
         errs = dict()
         for i, row_value in enumerate(row[self.cols_to_skip:], start=self.cols_to_skip):
-            elem_name = self.column_headers()[i]
-            if row_value in constants.ELEMENT_ACTION_KEYS:
+
+            elem_name = self.column_headers[i]
+            if row_value == '':
+                continue
+
+            elif row_value in constants.ELEMENT_ACTION_KEYS:
                 changed_status = self.changed_status(
                     current_record, elem_name, row_value
                 )
@@ -109,47 +166,66 @@ class FoodMatrix(object):
                         current_record['avoid'].append(elem_name)
                 elif row_value == constants.ELEMENT_PRIORITIZE_ACTION_KEY:
                     if elem_name not in current_record['prior']:
-                        current_record['prior'].append(elem_name)
+                        current_record['prior'][elem_name] = 0
                 elif row_value == constants.ELEMENT_MINIMIZE_ACTION_KEY:
                     if elem_name not in current_record['minimize']:
-                        current_record['minimize'].append(elem_name)
+                        current_record['minimize'][elem_name] = 0
 
-            elif match(r'^\d+$', row_value):
-                new_val = (elem_name, float(row_value))
-                list_name, pos = self.whereis_elem(elem_name, current_record)
-                if not list_name:
-                    continue
-                current_record[list_name][pos] = new_val
-            elif match(r'^(\d+)\|(\d+)$', row_value):
-                low, up = row_value.split("|")
-                list_name, pos = self.whereis_elem(elem_name, current_record)
-                if not list_name:
-                    continue
-                current_record[list_name][pos] = (
-                    elem_name, {'min1': float(low), 'min2': float(up)}
-                )
             else:
-                errs[elem_name] = "Invalid value for cell: {}:{}".format(row_n, i)
+                list_name, pos = self.whereis_elem(elem_name, current_record)
+                m = match(r'(?P<quantity>^\d+(\.\d+)?$)', row_value) or \
+                    match(r'^(?P<range>(\d+)\|(\d+)$)', row_value)
+
+                if not m:
+                    errs[elem_name] = "Invalid value {} for cell: {}:{}".format(
+                        row_value, row_n, i
+                    )
+
+                elif list_name == 'avoid':
+                    errs[elem_name] = "Cannot assign a quantity value to {} " \
+                              "because is in the avoid list: {}:{}".format(
+                        elem_name, row_n, i
+                    )
+
+                elif m.groupdict().get('quantity'):
+                    new_val = float(row_value)
+                    if pos == -1:
+                        current_record[list_name][elem_name] = new_val
+                    else:
+                        current_record[list_name][pos] = new_val
+                elif m.groupdict().get('range'):
+                    low, up = row_value.split("|")
+                    current_record[list_name][elem_name] = {
+                        'min1': float(low), 'min2': float(up)
+                    }
 
         return current_record, errs
 
-    def read_rows(self):
+    def updated_content(self):
         """
         Temporarily we keep the CSV file as the input. Soon we'll
         switch to XLS files.
         """
-        for row_n, row in self.content_iterator()[1:]:
+        updated_content = list()
+        errs = dict()
+        for row_n, row in enumerate(self.content_iterator[1:], start=1):
+            if not row:
+                continue
             row = self.str_to_list(row)
             name, tag_type = row[0], row[1]
-            data = {
+            current_record = self.tags.get((name, tag_type))
+            updated_record, errs = self.updated_content_row(
+                row, current_record, row_n
+            )
+            updated_content.append({
                 'type': tag_type,
                 'name': name,
-            }
-            current_record = self.tags.get((name, tag_type))
-            updated_record, errs = self.updated_content_row(row, current_record, row_n)
+                'avoid': updated_record['avoid'],
+                'prior': updated_record['prior'],
+                'minimize': updated_record['minimize'],
+            })
 
-        return
-
+        return updated_content, errs
 
 
 def processFoodMatrixCSV(filename):

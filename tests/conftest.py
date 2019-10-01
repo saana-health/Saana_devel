@@ -11,8 +11,8 @@ PATIENT_DATA = {
     'feet': 5,
     'exercise': '1-2_per_month',
     'inches': 4,
-    'questionnaire_session_id': ObjectId('5cabf1511887db3ac1a89e46'),
-    '_id': ObjectId('5cabf2ad37c87f3ac00e8701'),
+    'questionnaire_session_id': '5cabf1511887db3ac1a89e46',
+    '_id': '5cabf2ad37c87f3ac00e8701',
     'weight': 182,
     'preferred_coaching_channel': 'text',
     'updated_at': datetime(2019, 4, 9, 1, 17, 33, 866000),
@@ -25,7 +25,7 @@ PATIENT_DATA = {
     'surgery_what': 'none',
     'surgery': 'NA',
     'age': 52,
-    'user_id': ObjectId('5cabf2ad37c87f3ac00e86ff'),
+    'user_id': '5cabf2ad37c87f3ac00e86ff',
     '__v': 0
 }
 
@@ -33,7 +33,7 @@ PATIENT_DATA = {
 USER_DATA = {
     'is_email_verified': True,
     'is_account_locked': False,
-    '_id': ObjectId('5cabf2ad37c87f3ac00e86ff'),
+    '_id': '5cabf2ad37c87f3ac00e86ff',
     'is_deleted': False,
     'salt': '7f039ee0-5a09-11e9-bab7-f3ab285a283c',
     'updated_at': datetime(2019, 4, 8, 14, 20, 44, 390000),
@@ -84,13 +84,13 @@ MEAL_DATA = {
 
 
 TAGS_DATA = [
-    {'_id': '5d8346929303fc6a4a302fe5', 'type': 'symptoms', 'minimize': {},
+    {'type': 'symptoms', 'minimize': {},
      'tag_id': '5cab584074e88f0cb0977a10', 'name': 'inflammation',
      'avoid': [], 'prior': {
         'black rockfish': 0, 'mackerel': 0, 'burdock': 0,
         'saury fish': 0, 'fish': 0, 'cabbage': 0, 'pak choi': 0, 'komatsuna': 0}
      },
-    {'_id': '5d8346929303fc6a4a302fe6', 'type': 'symptoms', 'minimize': {
+    {'type': 'symptoms', 'minimize': {
         'insoluble fiber': {'min2': '15', 'min1': '10'}
     }, 'tag_id': '5cab584074e88f0cb0977a0a', 'name': 'diarrhea', 'avoid': [],
      'prior': {
@@ -323,3 +323,24 @@ def assert_equal_tuples(t1, t2):
     assert len(t1) == len(t2)
     for pos, element in enumerate(t1):
         assert_equal_objects(element, t2[pos])
+
+
+@pytest.fixture(name='integration_setup')
+def integration_tests_setup():
+    test_db = connectMongo.client.test_db
+
+    PATIENT_DATA.pop('_id')
+    test_db.patients.insert_one(PATIENT_DATA)
+
+    USER_DATA.pop('_id')
+    test_db.users.insert_one(USER_DATA)
+
+    test_db.nutrition_facts.insert_one(NUTRITION_DATA)
+    test_db.ingredients.insert_many(INGREDIENTS_DATA)
+
+    MEAL_DATA.pop('_id')
+    test_db.meals.insert_one(MEAL_DATA)
+
+    test_db.tags.insert_many(TAGS_DATA)
+    yield test_db
+    connectMongo.client.drop_database('test_db')

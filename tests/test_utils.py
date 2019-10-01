@@ -1,4 +1,32 @@
+import pytest
 from tests.conftest import assert_equal_objects, assert_not_equal_objects
+from saana_lib.connectMongo import client
+
+
+"""
+Tests in this file are meant to test utilities used in other tests
+"""
+
+
+@pytest.mark.usefixtures('integration_setup')
+class TestCaseIntegrationSetup(object):
+
+    def test_database_for_test_is_created(self):
+        assert any([d for d in client.list_databases() if d['name'] == 'test_db'])
+
+    def test_default_collections_are_created(self, integration_setup):
+        expected_collections = [
+            'patients',
+            'users',
+            'nutrition_facts',
+            'ingredients',
+            'meals',
+            'tags',
+        ]
+        assert all([
+            name in [coll['name'] for coll in integration_setup.list_collections()]
+            for name in expected_collections
+        ])
 
 
 class TestAssertEqualObjects(object):
