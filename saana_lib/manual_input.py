@@ -18,10 +18,15 @@ def manual_input(filename):
 
         if len(reader) >= 1:
             list_supplier = reader[0]
-            suppliers = [x['_id'] for x in list(connectMongo.db.users.find({'role':'supplier','first_name':{'$in': list_supplier}},{'_id':1}))]
+            suppliers = [
+                x['_id'] for x in connectMongo.db.users.find(
+                    {'role':'supplier','first_name': {'$in': list_supplier}},
+                    {'_id':1})
+            ]
         if len(reader) >= 2:
             patients = reader[1]
-        return suppliers, patients
+
+    return suppliers, patients
 
 
 

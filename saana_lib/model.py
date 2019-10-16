@@ -18,7 +18,7 @@ class MongoObject:
             if attr == 'ingredients':
                 dic[attr] = connectMongo.get_ingredient(self.ingredients)
                 continue
-            dic[attr] = getattr(self,attr)
+            dic[attr] = getattr(self, attr)
         return dic
 
 
@@ -58,14 +58,12 @@ class Meal(MongoObject):
         return self.name == other.name
 
 
-
 class Patient(MongoObject):
 
     def __init__(self, _id='', name='', comorbidities=list(), disease='', symptoms=list(),
                  weight=0, treatment_drugs=list(), disease_stage='', feet=0, surgery='',
-                 plan = 7):
+                 plan=7):
         """
-
         :param _id:  ObjectId()
         :param name: str
         :param comorbidities: [ObjectId()]
@@ -78,6 +76,7 @@ class Patient(MongoObject):
         :param surgery:
         :param plan:
         """
+        self._id = _id
         self.name = name
         self.weight = weight
         self.treatment_drugs = treatment_drugs
@@ -85,7 +84,6 @@ class Patient(MongoObject):
         self.comorbidities = comorbidities
         self.disease = disease
         self.symptoms = symptoms
-        self._id = _id
         self.plan = plan
 
     def __str__(self):

@@ -14,7 +14,7 @@ class FoodMatrixException(Exception):
     """"""
 
 
-class TagsRecord(object):
+class TagRecord(object):
 
     def __init__(self):
         self.name = ''
@@ -23,6 +23,14 @@ class TagsRecord(object):
         self.minimize = dict()
         self.prioritize = dict()
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'type': self.tag_type,
+            'prior': self.prioritize,
+            'minimize': self.minimize,
+            'avoid': self.avoid
+        }
 
 
 class FoodMatrix(object):
@@ -37,6 +45,16 @@ class FoodMatrix(object):
         self._tags = None
         self.new = False
         self.current_record = {}
+
+    @property
+    def new_row(self):
+        return {
+            'type': 'cancer',
+            'name': 'breast',
+            'avoid': list(),
+            'prior': dict(),
+            'minimize': dict()
+        }
 
     def load_file(self):
         try:
@@ -128,7 +146,7 @@ class FoodMatrix(object):
             changed = elem not in current_record['prior']
         return changed
 
-    def updated_content_row(self, row, current_record, row_n):
+    def updated_row(self, row, current_record, row_n):
         """
         Scan the current xls row, and updates the current record
         accordingly. For each value in row, remove/update/leave
@@ -148,7 +166,7 @@ class FoodMatrix(object):
         :param row_n: this index is passed only for logging purpose
         """
         errs = dict()
-        for i, row_value in enumerate(row[self.cols_to_skip:], start=self.cols_to_skip):
+        for i, row_value in enumerate(row[self.cols_to_skip:len(self.column_headers)], start=self.cols_to_skip):
 
             elem_name = self.column_headers[i]
             if row_value == '':
@@ -177,7 +195,7 @@ class FoodMatrix(object):
                     match(r'^(?P<range>(\d+)\|(\d+)$)', row_value)
 
                 if not m:
-                    errs[elem_name] = "Invalid value {} for cell: {}:{}".format(
+                    errs[elem_name] = "Invalid value {} @cell: {}:{}".format(
                         row_value, row_n, i
                     )
 
@@ -201,12 +219,59 @@ class FoodMatrix(object):
 
         return current_record, errs
 
+    def quantity_value(self, v):
+        m = match(r'^(?P<list>[MP])-(?P<quantity>\d+(\.\d+)?)$', v) or \
+            match(r'^(?P<list>[MP])-(?P<min1>\d+)\|(?P<min2>\d+)$', v)
+        return m
+
+    @property
+    def key_mappings(self):
+        return {
+            constants.ELEMENT_AVOID_ACTION_KEY: 'avoid',
+            constants.ELEMENT_PRIORITIZE_ACTION_KEY: 'prior',
+            constants.ELEMENT_MINIMIZE_ACTION_KEY: 'minimize'
+        }
+
+    def new_record(self, row, row_n):
+        record = self.new_row
+        errs = dict()
+        for i, row_value in enumerate(
+                row[self.cols_to_skip:len(self.column_headers)],
+                start=self.cols_to_skip):
+            elem_name = self.column_headers[i]
+            if row_value == '':
+                continue
+
+            m = self.quantity_value(row_value)
+            if m:
+                list_name = self.key_mappings.get(
+                    m.groupdict().get('list')
+                )
+                if m.groupdict().get('min1'):
+                    val = {
+                        'min1': float(m.groupdict().get('min1')),
+                        'min2': float(m.groupdict().get('min2'))
+                    }
+                else:
+                    val = float(m.groupdict().get('quantity'))
+                record[list_name][elem_name] = val
+
+            elif row_value in self.key_mappings:
+                if row_value == constants.ELEMENT_AVOID_ACTION_KEY:
+                    record[self.key_mappings.get(row_value)].append(elem_name)
+                else:
+                    record[self.key_mappings.get(row_value)][elem_name] = 0
+            else:
+                errs[elem_name] = "Invalid value @cell {}:{}".format(row_n, i)
+
+        return record, errs
+
     def updated_content(self):
         """
         Temporarily we keep the CSV file as the input. Soon we'll
         switch to XLS files.
         """
-        updated_content = list()
+        content_list = list()
         errs = dict()
         for row_n, row in enumerate(self.content_iterator[1:], start=1):
             if not row:
@@ -214,20 +279,38 @@ class FoodMatrix(object):
             row = self.str_to_list(row)
             name, tag_type = row[0], row[1]
             current_record = self.tags.get((name, tag_type))
-            updated_record, errs = self.updated_content_row(
-                row, current_record, row_n
-            )
-            updated_content.append({
+            if current_record:
+                record, errs = self.updated_row(
+                    row, current_record, row_n
+                )
+            else:
+                record, errs = self.new_record(row, row_n)
+            content_list.append({
                 'type': tag_type,
                 'name': name,
-                'avoid': updated_record['avoid'],
-                'prior': updated_record['prior'],
-                'minimize': updated_record['minimize'],
+                'avoid': record['avoid'],
+                'prior': record['prior'],
+                'minimize': record['minimize'],
             })
 
-        return updated_content, errs
+        return content_list, errs
+
+    def update(self):
+        counter = 0
+        content, errs = self.updated_content()
+        for tag_record in content:
+            result = self.client_db.tags.replace_one(
+                {'name': tag_record['name']},
+                tag_record,
+                upsert=True
+            )
+            if result.modified_count or result.upserted_id:
+                counter += 1
+
+        return counter, errs
 
 
+# TODO to remove
 def processFoodMatrixCSV(filename):
     """
     from now the type is expected to be at pos[0] for each line

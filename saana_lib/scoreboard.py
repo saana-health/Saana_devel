@@ -3,6 +3,7 @@ import itertools
 from datetime import datetime, timedelta
 from pymongo.errors import PyMongoError
 
+import conf
 from saana_lib import model, connectMongo, utils, chemo
 from saana_lib.manual_input import manual_input
 from constants import constants_wrapper as constants
@@ -12,18 +13,178 @@ from saana_lib.utils import csv_writer
 logger = getLogger(__name__)
 
 
-class Optimizer:
+class ScoreboardException(Exception):
+    """"""
 
-    def __init__(self, test=True):
-        self.testing_mode = test
-        self.today = datetime.now()
+
+class ScoreboardPatientException(Exception):
+    """"""
+
+
+class ScoreboardPatient:
+    """
+    This is an
+    """
+
+    def __init__(self, patient, testing_mode=conf.DEV_ENV):
+        """
+        By default manual_input returns two lists
+        :param test:
+        """
+        self.testing_mode = testing_mode
         self.db_client = connectMongo.db
+        self.today = datetime.now()
+        self._meals = None
+
+        self._id = patient['_id']
+        self.user_id = patient['user_id']
+
+        # NOT USED
+        self._comorbidities = None
+        self._diseases = None
+        self._treatment_drugs = None
+        self._symptoms = None
+
+    @property
+    def user_of_patient(self):
+        u = self.db_client.users.find_one({'_id': self.user_id})
+        if not u:
+            raise ScoreboardPatientException(
+                "There is not user object for patient: {}".format(self._id)
+            )
+        return u
+
+    @property
+    def email(self):
+        return self.user_of_patient['email']
+
+    @property
+    def name(self):
+        return self.user_of_patient['email']
+
+    @property
+    def comorbidities(self):
+        return list(
+            o['_id'] for o in self.db_client.patient_comorbidities.find(
+                {'patient_id': self._id}
+            )
+        )
+
+    @property
+    def diseases(self):
+        return list(
+            o['_id'] for o in self.db_client.patient_diseases.find(
+                {'patient_id': self._id}
+            )
+        )
+
+    @property
+    def symptoms(self):
+        return list(
+            o['_id'] for o in self.db_client.patient_symptoms.find(
+                {'patient_id': self._id}
+            )
+        )
+
+    @property
+    def treatment_drugs(self):
+        return list(
+            o['_id'] for o in self.db_client.patient_drugs.find(
+                {'patient_id': self._id}
+            )
+        )
+
+    @property
+    def has_active_subscription(self):
+        """Checks subscription status"""
+        if self.testing_mode:
+            return True
+
+        patient_subscription = self.db_client.patient_subscriptions.find_one(
+            {'patient_id': self._id}
+        )
+        if not patient_subscription or \
+            (patient_subscription and patient_subscription['status'] != 'active'):
+                return False
+
+        # Weekly order
+        if self.db_client.mst_subscriptions.find_one(
+                {'_id': patient_subscription['subscription_id']}
+        )['interval_count'] == constants.SUBSCRIPTION_WEEKLY_INTERVAL:
+            return True
+
+        # order if not ordered last week
+        return self.db_client.orders.find_one({
+            'patient_id': self._id,
+            'week_start_date': self.today + timedelta(weeks=-1)}
+        ) is None
+
+    @property
+    def tags(self):
+        return self.db_client.tags.find(
+            {'tag_id': {
+                '$in': self.symptoms + self.diseases +
+                       self.treatment_drugs + self.comorbidities
+                }
+            }
+        )
+
+    @property
+    def avoid(self):
+        return list(set(
+            itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in self.tags])
+        ))
+
+    @property
+    def minimize(self):
+        d = dict()
+        for t in self.tags:
+            d.update(t['minimize'])
+        return d
+
+    @property
+    def prioritize(self):
+        d = dict()
+        for t in self.tags:
+            d.update(t['prior'])
+        return d
+
+
+class Scoreboard:
+
+    def __init__(self):
+        self.db_client = connectMongo.db
+        self.today = datetime.now()
         self._meals = None
         self.suppliers, self.patients_emails = manual_input('suppliers.csv')
+        self.single_patient_email = ''
 
     def get_ingredient_name(self, ingredient_id):
         ing = self.db_client.mst_food_ingredients.find_one({'_id': ingredient_id})
         return ing['name'] if ing else ''
+
+    @property
+    def all_patients(self):
+        """
+        TODO: instead of querying for the patients, filter out
+        those users whose email is not in self.patients email.
+
+        this is a generator. at each iteration return one
+        ScoreboardPatient object
+        """
+        for patient in self.db_client.patients.find():
+            patient = ScoreboardPatient(patient, testing_mode=False)
+            if self.is_patient_to_skip(patient):
+                continue
+
+            import pdb;pdb.set_trace()
+            yield patient
+
+    def is_patient_to_skip(self, patient):
+        if self.patients_emails and patient.email not in self.patients_emails:
+            return True
+        # if not patient.has_active_subscription:
+        #     return True
 
     @property
     def meals(self):
@@ -61,127 +222,43 @@ class Optimizer:
             hash_tag[tag['_id']] = new_tag
         return hash_tag
 
-    def get_patient_related_data(self, patient_id):
-        comorbidities = self.db_client.get_comorbidities(patient_id)
-        disease = self.db_client.get_disease(patient_id)
-        symptoms = self.db_client.get_symptoms(patient_id)
-        drugs = self.db_client.get_drugs(patient_id)
-        return comorbidities, disease, symptoms, drugs
+    def patients(self, patient_email=''):
+        if patient_email:
+            user = self.db_client.users.find_one({"email": patient_email})
+            patient = self.db_client.patients.find_one({'user_id': user['_id']})
+            if not (user and patient):
+                return list()
+            return [ScoreboardPatient(patient)]
 
-    @property
-    def patients(self):
-        """
-        TODO: optimize the for loop. Remove `if emails ...` and let patients
-        property to return only patients filtered by emails.
+        return self.all_patients
 
-        if selecting patients based on emails read in from manual file
-        if no emails are specified -> run on all patients
-        :return:
-        """
-        patients_list = []
-        patients = connectMongo.db.patients.find()
-        for patient in patients:
-            if self.patients_emails and \
-                    self.db_client.users.find_one(
-                        {'_id': patient['user_id']}
-                    )['email'] not in self.patients_emails:
-                continue
-
-            # Skip if subscription is not active or not order cycle
-            if not self.patient_has_active_subscription(patient['_id']):
-                continue
-
-            comorbidities, disease, symptoms, drugs = self.get_patient_related_data(patient['_id'])
-            user_id = self.db_client.patients.find_one({'_id':patient['_id']})['user_id']
-            name = self.db_client.users.find_one({'_id':user_id})['first_name']
-
-            new_patient = model.Patient(
-                name=name,
-                comorbidities=comorbidities,
-                disease=disease,
-                _id=patient['_id'],
-                symptoms=symptoms,
-                treatment_drugs=drugs
+    def as_file(self, patient_email=''):
+        for patient in self.patients(patient_email):
+            filename = constants.SCOREBOARD_CSV_FILE_NAME_PATTERN.format(
+                constants.SCOREBOARD_FOLDER,
+                patient.name,
+                self.today
             )
-            patients_list.append(new_patient)
 
-        return patients_list
+            patient_name, csv_list = self.scoreboard_to_csv_rows(
+                self.get_score_board(patient), patient._id
+            )
+            csv_writer(filename, csv_list)
 
-    def patient_has_active_subscription(self, patient_id):
-        '''
-        Checks subscription status
-
-        :param patient_id: ObjectId()
-        :return: True / False
-        '''
-        if self.testing_mode:
-            return True
-
-        patient_subscription = self.db_client.patient_subscriptions.find_one({'patient_id':patient_id})
-        if patient_subscription is None or \
-                (patient_subscription and patient_subscription['status'] != 'active'):
-            return False
-
-        # Weekly order
-        if self.db_client.mst_subscriptions.find_one(
-                {'_id': patient_subscription['subscription_id']}
-        )['interval_count'] == constants.SUBSCRIPTION_WEEKLY_INTERVAL:
-            return True
-
-        # order if not ordered last week
-        return self.db_client.orders.find_one({
-            'patient_id': patient_id,
-            'week_start_date': self.today + timedelta(weeks=-1)}
-        ) is None
-
-    def optimize(self):
+    def as_dict(self, patient_email=''):
         """
-        optimize -> get_score_board -> choose_meal -> to_mongo & write_csv
-        :return:
         """
-        logger.info("Starting optimization")
-        for patient in self.patients:
-            # plan either 7 or 15
-            num_meal = connectMongo.get_subscription(patient._id)
-
+        # TODO to uncomment
+        #subscription_meals = connectMongo.get_subscription(patient._id)
+        subscription_meals = 0
+        board = dict()
+        for patient in self.patients(patient_email):
             try:
-                tag_ids = patient.symptoms + \
-                          patient.disease + \
-                          patient.treatment_drugs + \
-                          patient.comorbidities
-
-                tags = list(self.db_client.tags.find({'tag_id': {'$in': tag_ids}}))
-                minimizes = {}
-                priors = {}
-                multiplier = []
-                for tag in tags:
-                    minimizes.update(tag['minimize'])
-                    priors.update(tag['prior'])
-
-                avoids = list(set(
-                    itertools.chain(*[utils.tag_dict_to_class(tag).avoid for tag in tags])
-                ))
-
-                score_board, repeat_one_week = self.get_score_board(
-                    patient, minimizes, avoids, priors
-                )
-
-                patient_name, csv_list = self.scoreboard_to_csv_rows(
-                    score_board, patient._id
-                )
-                filename = constants.SCOREBOARD_CSV_FILE_NAME_PATTERN.format(
-                    constants.SCOREBOARD_FOLDER,
-                    patient_name,
-                    self.today
-                )
-
-                csv_writer(filename, csv_list)
-
+                score_board, repeat_one_week = self.get_score_board(patient)
                 slots, supplierIds = self.choose_meal(score_board, repeat_one_week)
                 slots = self.reorder_slots(slots)
 
-                # Save the result to csv and update on mongo
-                if num_meal> 8:
+                if subscription_meals == 7:
                     end_date = utils.find_tuesday(self.today, 2)
                 else:
                     end_date = utils.find_tuesday(self.today, 3)
@@ -199,11 +276,35 @@ class Optimizer:
                 # self.to_mongo(slots, patient._id, self.today, end_date)
                 # self.write_csv(slots,patient._id, self.today)
 
-            # TODO: my fault!! fix this try-except which is too wide
-            except PyMongoError:
+            except ScoreboardPatientException:
                 logger.error(
                     "Error while generating meals for {}".format(patient.name)
                 )
+        return board
+
+    def choose_chemo_meals(self, score_board, slots, supplierIds):
+        # first look at current meals and choose more from the score_board
+        chemo_meals = []
+        for meal in slots:
+            if 'soup' in meal['meal'].type:
+                chemo_meals.append(meal['meal'])
+
+        if len(chemo_meals) >= 3:
+            return chemo_meals
+
+        for score in score_board:
+            meals = score_board[score]
+            for meal in meals:
+                # SKIP if not one of the suppliers we already chose
+                if meal['meal'].supplier_id not in supplierIds:
+                    continue
+                if 'soup' in meal['meal'].type:
+                    chemo_meals.append(meal['meal'])
+
+                if len(chemo_meals) >= 3:
+                    return chemo_meals
+
+        return chemo_meals
 
     def choose_meal(self, score_board, repeat_one_week):
         """
@@ -212,7 +313,6 @@ class Optimizer:
         :return:
         """
         num_repeat = 0
-        bucket = dict()
         suppliers = list(connectMongo.db.users.find({'role': 'supplier'}))
 
         # manual matching suppliers with their ID (ObjectId)
@@ -221,10 +321,9 @@ class Optimizer:
         FoodNerd = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FoodNerd'][0]
         FrozenGarden = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FrozenGarden'][0]
 
-        for supplier in [x['_id'] for x in suppliers]:
-            bucket[supplier] = list()
+        bucket = dict((x['_id'], list()) for x in suppliers)
         restart = False
-        num_meal = 15
+        subscription_meals = 15
         five_meal_supplier = None
         ten_meal_supplier = None
 
@@ -245,7 +344,7 @@ class Optimizer:
                     ten_meal_supplier = Veestro
                 elif len(bucket[Euphebe]) == 10:
                     ten_meal_supplier = Euphebe
-            if None not in [five_meal_supplier, ten_meal_supplier]:
+            if five_meal_supplier and ten_meal_supplier:
                 slots = bucket[five_meal_supplier][:5] + bucket[ten_meal_supplier][:10]
                 break
 
@@ -290,7 +389,7 @@ class Optimizer:
                     break
 
         # slots filled up
-        assert len(slots) == num_meal
+        assert len(slots) == subscription_meals
 
         ## OPTIONAL - how many repetition from past 2 weeks?
         repeat_cnt = 0
@@ -443,7 +542,7 @@ class Optimizer:
 
         return score, prior_list
 
-    def repeating_meals(self,patient_id, start_date):
+    def repeating_meals(self, patient_id, start_date):
         """
         Check previously ordered meals
 
@@ -472,7 +571,7 @@ class Optimizer:
 
         return last_week_patient_meals, two_weeks_ago_patient_meals
 
-    def get_score_board(self, patient, minimizes: dict, avoids: list, priors: dict):
+    def get_score_board(self, patient):
         """
         create a scoring system based on minimize, avoid and prior tags
         :return: {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str],
@@ -487,7 +586,7 @@ class Optimizer:
         # get meals from one, two weeks ago to check repetition: repeat_one if one week ago, repeat_two is two weeks ago
         repeat_one_week, repeat_two_week= self.repeating_meals(patient._id, self.today)
 
-        for meal in self.meals:
+        for meal in self.meals.values():
             if self.suppliers and meal.supplier_id not in self.suppliers:
                 continue
 
@@ -496,7 +595,7 @@ class Optimizer:
 
             # TODO: is it correct that this loop exits after the first match ?
             for each in list(meal.nutrition.keys()) + list(meal.ingredients.keys()):
-                if each in avoids:
+                if each in patient.avoid:
                     avoid_list.append(each)
                     score += constants.DEDUCT_AVOID
                     break
@@ -506,10 +605,10 @@ class Optimizer:
             full_meal_info.update(meal.nutrition)
 
             score, minimize_list = self.minimize_score(
-                score, minimizes, full_meal_info
+                score, patient.minimize, full_meal_info
             )
             score, prior_list = self.prioritize_score(
-                priors, minimize_list, avoid_list, meal, score
+                patient.prioritize, minimize_list, avoid_list, meal, score
             )
 
             # check repetition. deduct for every repetition of meal

@@ -5,7 +5,8 @@ from pymongo.database import Collection
 from bson.objectid import ObjectId
 import pytest
 
-from saana_lib import connectMongo, optimizeMealSimple
+from saana_lib import connectMongo, scoreboard
+
 
 PATIENT_DATA = {
     'feet': 5,
@@ -83,21 +84,37 @@ MEAL_DATA = {
 }
 
 
-TAGS_DATA = [
-    {'type': 'symptoms', 'minimize': {},
-     'tag_id': '5cab584074e88f0cb0977a10', 'name': 'inflammation',
-     'avoid': [], 'prior': {
-        'black rockfish': 0, 'mackerel': 0, 'burdock': 0,
-        'saury fish': 0, 'fish': 0, 'cabbage': 0, 'pak choi': 0, 'komatsuna': 0}
-     },
-    {'type': 'symptoms', 'minimize': {
+TAGS_DATA = [{
+    'type': 'symptoms',
+    'minimize': {},
+    'tag_id': '5cab584074e88f0cb0977a10',
+    'name': 'inflammation',
+    'avoid': [],
+    'prior': {
+        'saury fish': 0,
+        'fish': 0,
+        'cabbage': 0,
+        'pak choi': 0,
+        'komatsuna': 0
+        }
+    },{
+    'type': 'symptoms',
+    'minimize': {
         'insoluble fiber': {'min2': '15', 'min1': '10'}
-    }, 'tag_id': '5cab584074e88f0cb0977a0a', 'name': 'diarrhea', 'avoid': [],
-     'prior': {
-         'asparagus': 0, 'sweet potato': 0, 'green beans': 0,
-         'zucchini': 0, 'seaweed': 0, 'ginger': 0, 'carrot': 0, 'potato': 0}
-     }
-]
+        },
+    'tag_id': '5cab584074e88f0cb0977a0a',
+    'name': 'diarrhea',
+    'avoid': [],
+    'prior': {
+        'asparagus': 0,
+        'sweet potato': 0,
+        'green beans': 0,
+        'zucchini': 0,
+        'seaweed': 0,
+        'ginger': 0,
+        'carrot': 0,
+        'potato': 0}
+    }]
 
 
 @pytest.fixture
@@ -169,19 +186,6 @@ class MealsCollectionMock(BaseCollectionMock):
         return {ObjectId('5cb0fa2f3b7750fa4c2d5a42'): deepcopy(MEAL_DATA)}
 
 
-class IngredientsCollectionMock(BaseCollectionMock):
-    elements = list()
-
-    def find(self, *args, **kwargs):
-        return [INGREDIENTS_DATA, ]
-
-    def find_one(self, *args, **kwargs):
-        ingredients_id = [e['food_ingredient_id'].binary for e in INGREDIENTS_DATA]
-        ing = set(ingredients_id).difference(set(self.elements)).pop()
-        self.elements.append(ing)
-        return {'name': 'basil'}
-
-
 class FakeDb:
     def __init__(self, **kwargs):
         super().__init__()
@@ -194,15 +198,12 @@ def get_mongo_stub(**kwargs):
 
 
 @pytest.fixture
-def manual_input_patch(monkeypatch):
-    def manual_input_stub(a):
-        return list(), list()
-
-    monkeypatch.setattr(
-        'saana_lib.optimizeMealSimple.manual_input',
-        manual_input_stub
+def manual_input_mock(mocker):
+    m = mocker.patch(
+        'saana_lib.scoreboard.manual_input',
+        return_value=([], [])
     )
-    return monkeypatch
+    return m
 
 
 @pytest.fixture
@@ -214,7 +215,7 @@ def scoreboard_base_patch(manual_input_patch):
             return '2019-09-18T11:10:00'
 
     manual_input_patch.setattr(
-        optimizeMealSimple,
+        scoreboard,
         'datetime',
         datetime_mock
     )
@@ -230,11 +231,6 @@ def patients(monkeypatch):
         patients=PatientsCollectionMock,
         users=UsersCollectionMock,
     ))
-    monkeypatch.setattr(
-        optimizeMealSimple.Optimizer,
-        'get_patient_related_data',
-        get_patient_related_data_stub
-    )
     return monkeypatch
 
 
@@ -271,6 +267,12 @@ def tags_patch(monkeypatch):
     return monkeypatch
 
 
+@pytest.fixture(name='file_opening')
+def file_opening(mocker):
+    fopen_mock = mocker.patch('builtins.open')
+    return fopen_mock
+
+
 def assert_equal_objects(o1, o2):
     """
     o1 and o2 are two objects. might be of almost any type (i'm
@@ -281,6 +283,14 @@ def assert_equal_objects(o1, o2):
     generated during the execution of for loop over a dictionary)
     """
     def _dict_equal(d1, d2):
+        """
+        this assert over the length of d1 is to guarantee that
+        the same number of keys are contained in both dictionaries
+        that's because if d1 is empty it won't enter the loop
+        resulting in two identical objects, when indeed they
+        might not be
+        """
+        assert len(d1) == len(d2)
         for k, v in d1.items():
             assert k in d2
             assert_equal_objects(v, d2[k])
@@ -326,21 +336,28 @@ def assert_equal_tuples(t1, t2):
 
 
 @pytest.fixture(name='integration_setup')
-def integration_tests_setup():
+def integration_tests_setup(mocker):
     test_db = connectMongo.client.test_db
 
-    PATIENT_DATA.pop('_id')
-    test_db.patients.insert_one(PATIENT_DATA)
+    if test_db.patients.estimated_document_count() == 0:
+        PATIENT_DATA.pop('_id')
+        test_db.patients.insert_one(PATIENT_DATA)
 
-    USER_DATA.pop('_id')
-    test_db.users.insert_one(USER_DATA)
+    if test_db.users.estimated_document_count() == 0:
+        USER_DATA.pop('_id')
+        test_db.users.insert_one(USER_DATA)
 
-    test_db.nutrition_facts.insert_one(NUTRITION_DATA)
-    test_db.ingredients.insert_many(INGREDIENTS_DATA)
+    if test_db.nutrition_facts.estimated_document_count() == 0:
+        test_db.nutrition_facts.insert_one(NUTRITION_DATA)
+        test_db.ingredients.insert_many(INGREDIENTS_DATA)
 
-    MEAL_DATA.pop('_id')
-    test_db.meals.insert_one(MEAL_DATA)
+    if test_db.meals.estimated_document_count() == 0:
+        MEAL_DATA.pop('_id')
+        test_db.meals.insert_one(MEAL_DATA)
 
-    test_db.tags.insert_many(TAGS_DATA)
+    if test_db.tags.estimated_document_count() == 0:
+        test_db.tags.insert_many(TAGS_DATA)
+        mocker.patch.object(connectMongo, 'db', test_db)
+
     yield test_db
     connectMongo.client.drop_database('test_db')

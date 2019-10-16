@@ -2,7 +2,7 @@ import argparse
 from logging import getLogger
 
 import conf
-from saana_lib.optimizeMealSimple import Optimizer
+from saana_lib.scoreboard import Scoreboard
 
 
 logger = getLogger(__name__)
@@ -25,7 +25,8 @@ def run():
         parser = argparse.ArgumentParser()
         parser.add_argument('mode', choices=['test', 'prod'], help='running mode')
         args = parser.parse_args()
-        Optimizer(test=args.mode == 'test').optimize()
+        testing_mode = args.mode == 'test'
+        Scoreboard().as_file()
     except ConfException as e:
         logger.critical(e)
 

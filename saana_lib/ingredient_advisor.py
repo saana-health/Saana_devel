@@ -104,16 +104,16 @@ class IngredientAdvisor:
 
         to_remove = list()
         for ing in advice['prioritize']:
-            for e in advice['avoid']:
-                if ing in e:
+            for avoid_elem in advice['avoid']:
+                if ing in avoid_elem:
                     to_remove.append(ing)
         advice['prioritize'] = list(
             set(advice['prioritize']).difference(set(to_remove))
         )
 
         for ing in advice['minimize']:
-            for e in advice['avoid']:
-                if ing in e:
+            for avoid_elem in advice['avoid']:
+                if ing in avoid_elem:
                     to_remove.append(ing)
         advice['minimize'] = list(
             set(advice['minimize']).difference(set(to_remove))

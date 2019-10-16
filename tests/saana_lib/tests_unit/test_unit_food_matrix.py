@@ -1,13 +1,7 @@
 import pytest
 
-from saana_lib.process.processFoodMatrix import FoodMatrix, FoodMatrixException
-from tests.conftest import assert_equal_objects, assert_equal_tuples
-
-
-@pytest.fixture(name='file_mocker')
-def file_opening(mocker):
-    fopen_mock = mocker.patch('builtins.open')
-    return fopen_mock
+from saana_lib.process.processFoodMatrix import FoodMatrix, FoodMatrixException, TagRecord
+from tests.conftest import assert_equal_objects, assert_equal_tuples, file_opening
 
 
 @pytest.fixture
@@ -22,7 +16,20 @@ def headers_mock(mocker):
     return headers
 
 
-@pytest.mark.usefixtures("file_mocker")
+class TestCaseTagRecord(object):
+
+    @property
+    def tag_record(self):
+        return TagRecord()
+
+    def test_to_dict(self):
+        assert_equal_objects(
+            {'name': '', 'type': '', 'prior': {}, 'minimize': {}, 'avoid': []},
+            self.tag_record.to_dict()
+        )
+
+
+@pytest.mark.usefixtures("file_opening")
 class TestCaseFoodMatrix(object):
 
     @property
@@ -44,17 +51,17 @@ class TestCaseFoodMatrix(object):
         tags.find.return_value = TAGS_DATA
         return tags
 
-    def test_file_opening(self, file_mocker):
+    def test_file_opening(self, file_opening):
         self.matrix_obj.load_file()
-        assert file_mocker.call_count == 1
-        file_mocker.assert_called_once_with('fname', 'r')
+        assert file_opening.call_count == 1
+        file_opening.assert_called_once_with('fname', 'r')
 
-    def test_file_does_not_exists(self, file_mocker):
-        file_mocker.side_effect = IsADirectoryError
+    def test_file_does_not_exists(self, file_opening):
+        file_opening.side_effect = IsADirectoryError
         with pytest.raises(FoodMatrixException):
             self.matrix_obj.load_file()
 
-    def test_iterator_is_loaded_once(self, mocker, file_mocker):
+    def test_iterator_is_loaded_once(self, mocker, file_opening):
         """
         Mind that the matrix object has to be initialized outside
         the range loop, otherwise at every iteration the inner
@@ -66,7 +73,7 @@ class TestCaseFoodMatrix(object):
         for i in range(2):
             _ = matrix.content_iterator
 
-        csv_mock.assert_called_once_with(file_mocker())
+        csv_mock.assert_called_once_with(file_opening())
 
     def test_read_empty_file(self, content_iterator):
         """Without columns"""
@@ -152,6 +159,29 @@ class TestCaseFoodMatrix(object):
         """Record does not exists. Tag is new"""
         assert not self.matrix_obj.changed_status({}, 'mackerel', 'A')
 
+    def test_is_quantity_value_case_1(self):
+        m = self.matrix_obj.quantity_value('M-20')
+        assert m
+        assert m.groupdict().get('list') == 'M'
+        assert m.groupdict().get('quantity') == '20'
+
+    def test_is_quantity_value_case_2(self):
+        m = self.matrix_obj.quantity_value('50|20')
+        assert m is None
+
+    def test_is_quantity_value_case_3(self):
+        m = self.matrix_obj.quantity_value('M-10|20')
+        assert m
+        assert m.groupdict().get('list') == 'M'
+        assert m.groupdict().get('min1') == '10'
+        assert m.groupdict().get('min2') == '20'
+
+    def test_is_quantity_value_case_4(self):
+        assert not self.matrix_obj.quantity_value('M-|20')
+
+    def test_is_quantity_value_case_5(self):
+        assert not self.matrix_obj.quantity_value('M-|20')
+
     def test_update_content_existing_tag(self, content_iterator, tags_mock):
         content_iterator.return_value = [
             'type,name,mackerel,seaweed,potato,spinach',
@@ -194,14 +224,14 @@ class TestCaseFoodMatrix(object):
         )
 
 
-@pytest.mark.usefixtures('file_mocker', 'headers_mock')
+@pytest.mark.usefixtures('file_opening', 'headers_mock')
 class TestCaseUpdateContentRow(object):
 
     @property
     def matrix_obj(self):
         return FoodMatrix('fname')
 
-    def test_updated_content_row_1(self):
+    def test_updated_row_1(self):
         assert_equal_tuples(({
             'name': 'breast',
             'type': 'cancer',
@@ -209,7 +239,7 @@ class TestCaseUpdateContentRow(object):
             'minimize': {'potato': 0},
             'prior': {'spinach': 0},
             }, {}),
-            self.matrix_obj.updated_content_row(
+            self.matrix_obj.updated_row(
                 ['breast', 'cancer', 'R', 'A', 'M', 'P'], {
                     'name': 'breast',
                     'type': 'cancer',
@@ -220,7 +250,7 @@ class TestCaseUpdateContentRow(object):
             )
         )
 
-    def test_updated_content_row_2(self):
+    def test_updated_row_2(self):
         assert_equal_tuples(({
             'name': 'breast',
             'type': 'cancer',
@@ -228,7 +258,7 @@ class TestCaseUpdateContentRow(object):
             'minimize': {'potato': 0},
             'prior': {'seaweed': 0},
             }, {}),
-            self.matrix_obj.updated_content_row(
+            self.matrix_obj.updated_row(
                 ['breast', 'cancer', '', 'P', '', ''], {
                     'name': 'breast',
                     'type': 'cancer',
@@ -239,9 +269,9 @@ class TestCaseUpdateContentRow(object):
             )
         )
 
-    def test_updated_content_row_3(self):
+    def test_updated_row_3(self):
         assert_equal_tuples(
-            self.matrix_obj.updated_content_row(
+            self.matrix_obj.updated_row(
                 ['breast', 'cancer', '', 'P', '', '300.42'],
                 {
                     'name': 'breast',
@@ -260,7 +290,7 @@ class TestCaseUpdateContentRow(object):
             )
         )
 
-    def test_updated_content_row_4(self):
+    def test_updated_row_4(self):
         """Verify lower/upper range values are correctly parsed"""
         assert_equal_tuples(({
             'name': 'breast',
@@ -269,8 +299,8 @@ class TestCaseUpdateContentRow(object):
             'minimize': {'potato': 2},
             'prior': {'spinach': {'min1': 600.0, 'min2': 700.0}, 'seaweed': 0},
             }, {}),
-            self.matrix_obj.updated_content_row(
-                ['breast', 'cancer', '', 'P', '', '600|700'], {
+            self.matrix_obj.updated_row(
+                ['breast', 'cancer', '', 'P', '', '600|700', '20'], {
                     'name': 'breast',
                     'type': 'cancer',
                     'avoid': ['mackerel', 'seaweed'],
@@ -280,15 +310,15 @@ class TestCaseUpdateContentRow(object):
             )
         )
 
-    def test_updated_content_row_5(self):
+    def test_updated_row_5(self):
         assert_equal_tuples(({
             'name': 'breast',
             'type': 'cancer',
             'avoid': ['mackerel'],
             'minimize': {'potato': 2},
             'prior': {'spinach': 0, 'seaweed': 0},
-            }, {"spinach": "Invalid value 300| for cell: 1:5"}),
-            self.matrix_obj.updated_content_row(
+            }, {"spinach": "Invalid value 300| @cell: 1:5"}),
+            self.matrix_obj.updated_row(
                 ['breast', 'cancer', '', 'P', '', '300|'], {
                     'name': 'breast',
                     'type': 'cancer',
@@ -299,9 +329,9 @@ class TestCaseUpdateContentRow(object):
             )
         )
 
-    def test_updated_content_row_6(self):
+    def test_updated_row_6(self):
         assert_equal_tuples(
-            self.matrix_obj.updated_content_row(
+            self.matrix_obj.updated_row(
                 ['breast', 'cancer', '20', 'P', '', ''], {
                     'name': 'breast',
                     'type': 'cancer',
@@ -319,16 +349,65 @@ class TestCaseUpdateContentRow(object):
                             "because is in the avoid list: 1:2"})
         )
 
-    def _test_updated_content_row_7(self):
-        """Record is None, because tags has to be created"""
+
+# 'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'
+
+@pytest.mark.usefixtures('file_opening', 'headers_mock')
+class TestCaseNewContentRow(object):
+
+    @property
+    def matrix_obj(self):
+        return FoodMatrix('fname')
+
+    def test_new_record_1(self):
         assert_equal_tuples(
-            self.matrix_obj.updated_content_row(
-                ['breast', 'cancer', '20', 'P', '', ''], None, 1
+            self.matrix_obj.new_record(
+                ['breast', 'cancer', 'A-20', 'P', '30', ''], 1
             ), ({
                 'name': 'breast',
                 'type': 'cancer',
-                'avoid': ['mackerel'],
-                'minimize': {'potato': 2},
-                'prior': {'spinach': 0, 'seaweed': 0},
+                'avoid': [],
+                'minimize': {},
+                'prior': {'seaweed': 0},
+            }, {'mackerel': 'Invalid value @cell 1:2',
+                'potato': 'Invalid value @cell 1:4'})
+        )
+
+    def test_new_record_2(self):
+        assert_equal_tuples(
+            self.matrix_obj.new_record(
+                ['breast', 'cancer', 'M-20', 'P', 'R', ''], 1
+            ), ({
+                'name': 'breast',
+                'type': 'cancer',
+                'avoid': [],
+                'minimize': {'mackerel': 20.0},
+                'prior': {'seaweed': 0},
+            }, {'potato': 'Invalid value @cell 1:4'})
+        )
+
+    def test_new_record_3(self):
+        assert_equal_tuples(
+            self.matrix_obj.new_record(
+                ['breast', 'cancer', 'M-30|300', 'P', 'A', 'M'], 1
+            ), ({
+                'name': 'breast',
+                'type': 'cancer',
+                'avoid': ['potato'],
+                'minimize': {'mackerel': {'min1': 30.0, 'min2': 300.0}, 'spinach': 0},
+                'prior': {'seaweed': 0},
+            }, {})
+        )
+
+    def test_new_record_4(self):
+        assert_equal_tuples(
+            self.matrix_obj.new_record(
+                ['breast', 'cancer', 'M-30|300', 'P', 'A', 'M', 'R'], 1
+            ), ({
+                'name': 'breast',
+                'type': 'cancer',
+                'avoid': ['potato'],
+                'minimize': {'mackerel': {'min1': 30.0, 'min2': 300.0}, 'spinach': 0},
+                'prior': {'seaweed': 0},
             }, {})
         )

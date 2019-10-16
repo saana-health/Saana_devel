@@ -72,44 +72,50 @@ def add_patients(patients):
         if symps!= []:
             db.patient_symptoms.insert_many(symps)
 
-# GET
 
 def get_comorbidities(patient_id):
-    li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
+    li = list()
     return [list(x.values())[0] for x in li]
+
 
 def get_disease(patient_id):
     li = list(db.patient_diseases.find({'patient_id':patient_id},{'disease_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
 
+
 def get_symptoms(patient_id):
     li = list(db.patient_symptoms.find({'patient_id':patient_id},{'symptom_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
+
 
 def get_drugs(patient_id):
     li = list(db.patient_drugs.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
 
+
 def get_subscription(patient_id):
-    '''
+    """
     Gets subscription - 7 for 'interval_count == 2' and 15 for ' == 1'
     :param patient_id: ObjectId()
     :return: 7 or 15
-    '''
+    """
     sub = list(db.patient_subscription.find({'patient_id':patient_id}))
     # Should be only one or no subscription
     assert len(sub) < 2
 
-    if sub == []:
+    if not sub:
         return False
     subscription_id = sub[0]['subscription_id']
-    interval = list(db.mst_subscriptions.find({'_id':subscription_id}))[0]['interval_count']
-    if interval == 2:
-        return 7
-    elif interval == 1:
-        return 15
-    print('wrong subscription')
-    assert False
+    interval = list(db.mst_subscriptions.find({'_id': subscription_id}))[0]['interval_count']
+    if interval not in [1, 2]:
+        return
+
+    return {
+        1: 15,
+        2: 7,
+    }.get(interval)
+
+
 
 def get_ingredient(ingredients):
     '''

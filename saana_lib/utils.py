@@ -138,7 +138,8 @@ def add_dummy_patients():
     add_patients(dummy)
 '''
 
-def find_tuesday(curr, wk = 1):
+
+def find_tuesday(curr, wk=1):
     '''
     Get the next coming tuesday (Today if today is tuesday)
     :param curr: datetime.datetime()
@@ -146,13 +147,12 @@ def find_tuesday(curr, wk = 1):
     :return: datetime.datetime()
     '''
 
-    weekday = curr.weekday()
     while True:
-        if weekday == 1:
+        if curr.weekday() == 1:
             if wk == 1:
                 break
             wk -= 1
-        curr = curr + timedelta(days = 1)
+        curr = curr + timedelta(days=1)
         weekday = curr.weekday()
     return curr
 
