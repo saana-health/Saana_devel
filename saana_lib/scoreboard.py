@@ -39,12 +39,6 @@ class ScoreboardPatient:
         self._id = patient['_id']
         self.user_id = patient['user_id']
 
-        # NOT USED
-        self._comorbidities = None
-        self._diseases = None
-        self._treatment_drugs = None
-        self._symptoms = None
-
     @property
     def user_of_patient(self):
         u = self.db_client.users.find_one({'_id': self.user_id})
@@ -63,7 +57,7 @@ class ScoreboardPatient:
         return self.user_of_patient['email']
 
     @property
-    def comorbidities(self):
+    def _comorbidities(self):
         return list(
             o['_id'] for o in self.db_client.patient_comorbidities.find(
                 {'patient_id': self._id}
@@ -71,7 +65,7 @@ class ScoreboardPatient:
         )
 
     @property
-    def diseases(self):
+    def _diseases(self):
         return list(
             o['_id'] for o in self.db_client.patient_diseases.find(
                 {'patient_id': self._id}
@@ -79,7 +73,7 @@ class ScoreboardPatient:
         )
 
     @property
-    def symptoms(self):
+    def _symptoms(self):
         return list(
             o['_id'] for o in self.db_client.patient_symptoms.find(
                 {'patient_id': self._id}
@@ -87,12 +81,16 @@ class ScoreboardPatient:
         )
 
     @property
-    def treatment_drugs(self):
+    def _treatment_drugs(self):
         return list(
             o['_id'] for o in self.db_client.patient_drugs.find(
                 {'patient_id': self._id}
             )
         )
+
+    @property
+    def _other_restriction(self):
+        return list()
 
     @property
     def has_active_subscription(self):
@@ -123,8 +121,8 @@ class ScoreboardPatient:
     def tags(self):
         return self.db_client.tags.find(
             {'tag_id': {
-                '$in': self.symptoms + self.diseases +
-                       self.treatment_drugs + self.comorbidities
+                '$in': self._symptoms + self._diseases +
+                       self._treatment_drugs + self._comorbidities
                 }
             }
         )
@@ -156,7 +154,6 @@ class Scoreboard:
         self.db_client = connectMongo.db
         self.today = datetime.now()
         self._meals = None
-        self.suppliers, self.patients_emails = manual_input('suppliers.csv')
         self.single_patient_email = ''
 
     def get_ingredient_name(self, ingredient_id):
@@ -173,18 +170,11 @@ class Scoreboard:
         ScoreboardPatient object
         """
         for patient in self.db_client.patients.find():
-            patient = ScoreboardPatient(patient, testing_mode=False)
-            if self.is_patient_to_skip(patient):
+            patient = ScoreboardPatient(patient)
+            if not patient.has_active_subscription:
                 continue
 
-            import pdb;pdb.set_trace()
             yield patient
-
-    def is_patient_to_skip(self, patient):
-        if self.patients_emails and patient.email not in self.patients_emails:
-            return True
-        # if not patient.has_active_subscription:
-        #     return True
 
     @property
     def meals(self):
@@ -612,8 +602,10 @@ class Scoreboard:
             )
 
             # check repetition. deduct for every repetition of meal
-            score += sum([constants.REPEAT_ONE for repeat_meal in repeat_one_week if repeat_meal == meal])
-            score += sum([constants.REPEAT_TWO for repeat_meal in repeat_two_week if repeat_meal == meal])
+            score += sum([
+                constants.REPEAT_ONE for repeat_meal in repeat_one_week if repeat_meal == meal])
+            score += sum([
+                constants.REPEAT_TWO for repeat_meal in repeat_two_week if repeat_meal == meal])
 
             if score not in score_board.keys():
                 score_board[score] = list()
@@ -649,7 +641,9 @@ class Scoreboard:
         for meal in meal_info:
             patient_meal = model.Patient_meal(patient_id, meal['meal']._id, 'pending', datetime.today())
             patient_meal_id.append(
-                connectMongo.db.patient_meals.insert_one(patient_meal.class_to_dict()).inserted_id
+                connectMongo.db.patient_meals.insert_one(
+                    patient_meal.class_to_dict()
+                ).inserted_id
             )
         new_order = model.Order(
             patient_id=patient_id,

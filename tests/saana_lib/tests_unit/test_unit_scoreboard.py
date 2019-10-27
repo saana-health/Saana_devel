@@ -6,7 +6,6 @@ from saana_lib.scoreboard import Scoreboard, ScoreboardPatient, ScoreboardExcept
 from tests.conftest import assert_equal_objects, PATIENT_DATA
 
 
-@pytest.mark.usefixtures("manual_input_mock")
 class TestCaseScoreboardPatient(object):
 
     @property
@@ -20,30 +19,6 @@ class TestCaseScoreboardPatient(object):
     @pytest.fixture
     def patients_mock(self, mocker):
         return mocker.patch('saana_lib.connectMongo.db.patients')
-
-    def test_comorbities_property(self, mocker):
-        mock = mocker.patch('saana_lib.connectMongo.db.patient_comorbidities')
-        mock.find.return_value=list()
-        _ = self.default_patient.comorbidities
-        assert mock.find.call_count == 1
-
-    def test_diseases_property(self, mocker):
-        mock = mocker.patch('saana_lib.connectMongo.db.patient_diseases')
-        mock.find.return_value=list()
-        _ = self.default_patient.diseases
-        assert mock.find.call_count == 1
-
-    def test_symptoms_property(self, mocker):
-        mock = mocker.patch('saana_lib.connectMongo.db.patient_symptoms')
-        mock.find.return_value=list()
-        _ = self.default_patient.symptoms
-        assert mock.find.call_count == 1
-
-    def test_treatment_drugs_property(self, mocker):
-        mock = mocker.patch('saana_lib.connectMongo.db.patient_drugs')
-        mock.find.return_value=list()
-        _ = self.default_patient.treatment_drugs
-        assert mock.find.call_count == 1
 
     def test_user_of_patient_property_1(self, mocker, users_mock):
         users_mock.find_one.return_value = None
@@ -165,7 +140,7 @@ def repeating_meals(mocker):
     return mock
 
 
-@pytest.mark.usefixtures("manual_input_mock", "repeating_meals")
+@pytest.mark.usefixtures("repeating_meals")
 class TestCaseScoreboard(object):
 
     @pytest.fixture
@@ -187,33 +162,26 @@ class TestCaseScoreboard(object):
 
     def test_all_patients_property_1(self, mocker, db_patients_mock):
         """There is one patient which is valid"""
-        mock_1 = mocker.patch('saana_lib.scoreboard.Scoreboard.is_patient_to_skip')
-        mock_1.return_value = False
-        plist = list(Scoreboard().all_patients)
-        assert len(plist) == 1
+        has_active_subscription = mocker.patch(
+            'saana_lib.scoreboard.ScoreboardPatient.has_active_subscription',
+            new_callable=mocker.PropertyMock,
+            return_value=True
+        )
+        patient_list = list(Scoreboard().all_patients)
+        assert len(patient_list) == 1
         assert db_patients_mock.find.call_count == 1
+        assert has_active_subscription.call_count == 1
 
     def test_all_patients_property_2(self, mocker, db_patients_mock):
         """The only patient being present is skipped"""
-        mock_1 = mocker.patch('saana_lib.scoreboard.Scoreboard.is_patient_to_skip')
-        mock_1.return_value = True
-        plist = list(Scoreboard().all_patients)
-        assert len(plist) == 0
-        assert mock_1.call_count == 1
-
-    def test_is_patient_to_skip_1(self, manual_input_mock, mocker):
-        mock_2 = mocker.patch(
+        has_active_subscription = mocker.patch(
             'saana_lib.scoreboard.ScoreboardPatient.has_active_subscription',
-            new_callable=mocker.PropertyMock
+            new_callable=mocker.PropertyMock,
+            return_value=False
         )
-        mock_2.return_value = False
-        assert Scoreboard().is_patient_to_skip(ScoreboardPatient(PATIENT_DATA))
-        
-    def test_is_patient_to_skip_2(self, manual_input_mock):
-        manual_input_mock.return_value = ([], ['email'])
-        assert Scoreboard().is_patient_to_skip(
-            ScoreboardPatient(PATIENT_DATA)
-        )
+        patient_list = list(Scoreboard().all_patients)
+        assert len(patient_list) == 0
+        assert has_active_subscription.call_count == 1
 
     def test_patients_property_1(self, mocker):
         mock = mocker.patch(
@@ -308,14 +276,6 @@ class TestCaseScoreboard(object):
         """Base case: Meal's supplier != to the one manually provided
         with the supplier's file
         """
-        def manual_input_stub(a):
-            return ['s-2', ], list()
-
-        monkeypatch.setattr(
-            'saana_lib.scoreboard.manual_input',
-            manual_input_stub
-        )
-
         meal_obj = model.Meal(_id='meal-id', supplierID='s-1')
         monkeypatch.setattr(
             ScoreboardPatient,
@@ -658,12 +618,12 @@ class TestCaseScoreboardToCsv(object):
 
     def test_scoreboard_to_csv_rows_1(self, patients):
         """empty scoreboard, """
-        optimizer = ScoreboardPatient()
+        optimizer = Scoreboard()
         assert ('Admin.TestUser', [self.base_headers, ]) == optimizer.scoreboard_to_csv_rows({}, 'abf3ed')
 
     def test_scoreboard_to_csv_rows_2(self, patients):
         """scoreboard with one meal"""
-        optimizer = ScoreboardPatient()
+        optimizer = Scoreboard()
         row = [120, 'creamy celeriac soup', '', 'potassium:soy', '', '3b7750fa415d304', 'Admin']
         assert ('Admin.TestUser', [self.base_headers, row]) == optimizer.scoreboard_to_csv_rows({
             120: [{

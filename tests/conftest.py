@@ -207,14 +207,14 @@ def manual_input_mock(mocker):
 
 
 @pytest.fixture
-def scoreboard_base_patch(manual_input_patch):
+def scoreboard_base_patch(file_opening):
 
     class datetime_mock(MagicMock):
         @classmethod
         def now(cls):
             return '2019-09-18T11:10:00'
 
-    manual_input_patch.setattr(
+    file_opening.setattr(
         scoreboard,
         'datetime',
         datetime_mock
@@ -357,7 +357,14 @@ def integration_tests_setup(mocker):
 
     if test_db.tags.estimated_document_count() == 0:
         test_db.tags.insert_many(TAGS_DATA)
-        mocker.patch.object(connectMongo, 'db', test_db)
 
     yield test_db
     connectMongo.client.drop_database('test_db')
+
+
+@pytest.fixture
+def datetime_mock(mocker):
+    from datetime import datetime
+    mock = mocker.patch('saana_lib.ingredient_recommendation.datetime')
+    mock.now.return_value = datetime(2019, 5, 18, 15, 17, 8, 132263)
+    return mock

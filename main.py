@@ -3,6 +3,7 @@ from logging import getLogger
 
 import conf
 from saana_lib.scoreboard import Scoreboard
+from saana_lib.ingredient_recommendation import IngredientAdvisor
 
 
 logger = getLogger(__name__)
@@ -23,10 +24,15 @@ def run():
     try:
         bootstrap_check()
         parser = argparse.ArgumentParser()
-        parser.add_argument('mode', choices=['test', 'prod'], help='running mode')
+        parser.add_argument('patient_id', type=str, help='Patient id')
         args = parser.parse_args()
-        testing_mode = args.mode == 'test'
-        Scoreboard().as_file()
+        if args.patient_id:
+            print(args.patient_id)
+            res = IngredientAdvisor().ingredients_advice(args.patient_id)
+            print(res)
+        else:
+            pass
+            #Scoreboard().as_file()
     except ConfException as e:
         logger.critical(e)
 
