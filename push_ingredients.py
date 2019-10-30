@@ -4,17 +4,17 @@ from pymongo import MongoClient
 
 #client = MongoClient("mongodb://root:Gf7t418E12@b4e16e1.online-server.cloud:22")
 #client = MongoClient("mongodb://root:Gf7t418E12@b4e16e1.online-server.cloud:22/?authSource=saana_db&authMechanism=SCRAM-SHA-1")
-#client = MongoClient('mongodb://localhost:27017')
-MONGO_HOST = "b4e16e1.online-server.cloud"
-MONGO_PORT = 27017
-MONGO_DB = "saana_db"
-MONGO_USER = "root"
-MONGO_PASS = "Gf7t418E12"
-connection = MongoClient(MONGO_HOST, MONGO_PORT)
-db = connection[MONGO_DB]
-db.authenticate(MONGO_USER, MONGO_PASS)
+client = MongoClient('mongodb://localhost:27017')
+###MONGO_HOST = "b4e16e1.online-server.cloud"
+##MONGO_PORT = 27017
+##MONGO_DB = "saana_db"
+##MONGO_USER = "root"
+##MONGO_PASS = "Gf7t418E12"
+##connection = MongoClient(MONGO_HOST, MONGO_PORT)
+##db = connection[MONGO_DB]
+##db.authenticate(MONGO_USER, MONGO_PASS)
 
-#db = client.saana_db
+db = client.saana_db
 
 ingredient_db = db.mst_food_ingredients
 
