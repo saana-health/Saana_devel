@@ -2,9 +2,20 @@ import csv
 import os
 from pymongo import MongoClient
 from recipe_extractor import *
+from urllib.parse import quote_plus
+import conf
 
-client = MongoClient('mongodb://localhost:27017')
+
+client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+    quote_plus(conf.DATABASE_USER),
+    quote_plus(conf.DATABASE_PASSWORD),
+    quote_plus(conf.DATABASE_ADDRESS),
+    quote_plus(conf.DATABASE_PORT),
+))
+
 db = client.saana_db
+
+##client = MongoClient('mongodb://localhost:27017')
 
 ingredient_recipes = db.mst_recipes
 

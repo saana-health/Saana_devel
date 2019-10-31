@@ -4,9 +4,21 @@ from pymongo import MongoClient
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from pymongo import MongoClient
+from urllib.parse import quote_plus
+import conf
 
-client = MongoClient('mongodb://localhost:27017')
+
+client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+    quote_plus(conf.DATABASE_USER),
+    quote_plus(conf.DATABASE_PASSWORD),
+    quote_plus(conf.DATABASE_ADDRESS),
+    quote_plus(conf.DATABASE_PORT),
+))
+
 db = client.saana_db
+
+
+##client = MongoClient('mongodb://localhost:27017')
 
 ingredient_db = db.mst_food_ingredients
 recipe_db = db.mst_recipes

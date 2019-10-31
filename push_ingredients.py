@@ -1,20 +1,20 @@
 import csv
 import os
 from pymongo import MongoClient
+from urllib.parse import quote_plus
+import conf
 
-#client = MongoClient("mongodb://root:Gf7t418E12@b4e16e1.online-server.cloud:22")
-#client = MongoClient("mongodb://root:Gf7t418E12@b4e16e1.online-server.cloud:22/?authSource=saana_db&authMechanism=SCRAM-SHA-1")
-client = MongoClient('mongodb://localhost:27017')
-###MONGO_HOST = "b4e16e1.online-server.cloud"
-##MONGO_PORT = 27017
-##MONGO_DB = "saana_db"
-##MONGO_USER = "root"
-##MONGO_PASS = "Gf7t418E12"
-##connection = MongoClient(MONGO_HOST, MONGO_PORT)
-##db = connection[MONGO_DB]
-##db.authenticate(MONGO_USER, MONGO_PASS)
+
+client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+    quote_plus(conf.DATABASE_USER),
+    quote_plus(conf.DATABASE_PASSWORD),
+    quote_plus(conf.DATABASE_ADDRESS),
+    quote_plus(conf.DATABASE_PORT),
+))
 
 db = client.saana_db
+
+#client = MongoClient('mongodb://localhost:27017')
 
 ingredient_db = db.mst_food_ingredients
 
