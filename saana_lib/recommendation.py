@@ -1,12 +1,15 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pymongo.errors import WriteError
 from pymongo.collection import ObjectId
 
+from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
+from constants import constants_wrapper as constants
 from saana_lib.patient import MinimizeIngredients, AvoidIngredients, \
     PrioritizeIngredients
+from saana_lib.score import PrioritizedScore, MinimizedScore, NutrientScore
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +20,7 @@ class Recommendation:
     recommendation_type = 'min'
 
     def __init__(self, patient_id_str):
-        self.patient_id_str = patient_id_str
+        self.patient_id = ObjectId(patient_id_str)
         self._tags = None
         self._restrictions = None
 
@@ -36,7 +39,7 @@ class Recommendation:
 
     def recommendation_frame(self, ingredient_name, ingredient_quantity=0):
         return {
-            'patient_id': ObjectId(self.patient_id_str),
+            'patient_id': self.patient_id,
             'ingredient_id': self.get_or_create_ingredient(ingredient_name),
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
@@ -96,12 +99,12 @@ class AvoidRecommendation(Recommendation):
             yield self.recommendation_frame(name)
 
 
-class AllRecommendations:
+class AllRecommendations(OutIn):
 
     def __init__(self, patient_id_str):
         self.patient_id = patient_id_str
 
-    def read(self):
+    def sequence(self):
         """
         :return: the concatenation of the 3 lists
         """
@@ -109,10 +112,69 @@ class AllRecommendations:
                PrioritizeRecommendation(self.patient_id).as_list() + \
                AvoidRecommendation(self.patient_id).as_list()
 
-    def write(self):
+    def store(self):
         """
         :return: the sum of the counter of the record being written
         """
         return MinimizeRecommendation(self.patient_id).to_db() + \
                PrioritizeRecommendation(self.patient_id).to_db() + \
                AvoidRecommendation(self.patient_id).to_db()
+
+
+"""
+PATIENT_RECIPE_RECOMMENDATION
+
+patient_id: {type: MongooseSchema.ObjectId, ref: 'Patient', required: true}
+recipe_id: {type: MongooseSchema.ObjectId, ref: 'mst_recipe'}
+score: {type: Number}
+is_like: {type: Boolean, default: true}
+created_at: {type: Date}
+updated_at: {type: Date}
+"""
+class RecipeRecommendation:
+
+    def __init__(self, recipe, patient_id, recipe_id=None):
+        self.__recipe_id = recipe_id
+        self.recipe = recipe
+        self.__patient_id = patient_id
+        self._score = constants.DEFAULT_RECOMMENDATION_SCORE
+
+    @property
+    def today(self):
+        return datetime.now()
+
+    def recommendations_in_time_frame(self, start, end=None):
+        """
+        :return: the recommendations being returned in
+        """
+        if not end:
+            end = start - timedelta(days=7)
+        return list(
+            o['recipe_id'] for o in db.patient_recipe_recommendation.find(
+                {'patient_id': self.__patient_id,
+                 'created_at': {"$lte": start, "$gte": end}
+                 }, {'recipe_id': 1, '_id': 0}
+            )
+        )
+
+    def repetition_deduct_points(self, last_time):
+        """
+        Formula is: 40 - (# of weeks since it was recommended * 10)
+        3 weeks ago == -10
+        2 weeks ago == -20
+        1 weeks ago == -30
+        """
+        weeks = (self.today.isocalendar()[1] - last_time.isocalendar()[1])
+        return 40 - (weeks * 10) if weeks <= 3 else 0
+
+    def deduct_avoid(self):
+        return len(AvoidIngredients(self.__patient_id).all) * constants.DEDUCT_AVOID
+
+    @property
+    def score(self):
+        val = constants.DEFAULT_RECOMMENDATION_SCORE
+        val -= self.deduct_avoid()
+        val -= MinimizedScore(self.__recipe_id, self.__patient_id).value
+        val += PrioritizedScore(self.__recipe_id, self.__patient_id).value
+        val += NutrientScore(self.__recipe_id, self.__patient_id).value
+        return val

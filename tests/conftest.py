@@ -5,7 +5,7 @@ from pymongo.database import Collection
 from bson.objectid import ObjectId
 import pytest
 
-from saana_lib import connectMongo, scoreboard
+from saana_lib import connectMongo, ranking
 
 
 PATIENT_DATA = {
@@ -117,6 +117,12 @@ TAGS_DATA = [{
     }]
 
 
+@pytest.fixture(autouse=True)
+def set_dev_env(monkeypatch):
+    """Remove requests.sessions.Session.request for all tests."""
+    monkeypatch.setenv('DEV_ENV', 'true')
+
+
 @pytest.fixture
 def argparse_patch(monkeypatch):
     import argparse
@@ -215,7 +221,7 @@ def scoreboard_base_patch(file_opening):
             return '2019-09-18T11:10:00'
 
     file_opening.setattr(
-        scoreboard,
+        ranking,
         'datetime',
         datetime_mock
     )
@@ -365,6 +371,11 @@ def integration_tests_setup(mocker):
 @pytest.fixture
 def datetime_mock(mocker):
     from datetime import datetime
-    mock = mocker.patch('saana_lib.ingredient_recommendation.datetime')
+    mock = mocker.patch('saana_lib.recommendation.datetime')
     mock.now.return_value = datetime(2019, 5, 18, 15, 17, 8, 132263)
     return mock
+
+
+def obj_id():
+    return ObjectId('5d7258c977f06d4208211eb4')
+

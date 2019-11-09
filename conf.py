@@ -46,7 +46,7 @@ DATABASE_USER = os.environ.get("DATABASE_USER", '')
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", '')
 
 DATABASE_ADDRESS = os.environ.get('DATABASE_ADDRESS', '0.0.0.0')
-DATABASE_PORT = os.environ.get('DATABASE_ADDRESS', '27017')
+DATABASE_PORT = os.environ.get('DATABASE_PORT', '27017')
 
 
 DEV_ENV = os.environ.get("DEV_ENV") in [1, 'True', 'true']

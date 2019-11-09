@@ -4,7 +4,7 @@ import csv
 import os
 import sys
 from datetime import date, timedelta, datetime
-from . import model, connectMongo, utils, feedback, manual_input, chemo
+from . import model, connectMongo, utils, chemo
 
 DEDUCT_AVOID = -60
 DEDUCT_GR_MIN2 = -60
@@ -98,7 +98,7 @@ class Optimizer:
         print("Started getting patients from DB")
         patient_obj = []
         patients = connectMongo.db.patients.find()
-        emails = manual_input.manual_input('suppliers.csv')[1]
+        emails = []
         for patient in patients:
             # if no emails are specified -> run algo on ALL patients
             if emails != []:
@@ -186,7 +186,7 @@ class Optimizer:
                 minimizes = {}
                 priors = {}
                 multiplier = []
-                symptoms_progress = feedback.get_lateset_symptoms(patient._id)
+                symptoms_progress = {}
                 for tag in tags:
                     minimizes.update(tag['minimize'])
                     priors.update(tag['prior'])
@@ -236,7 +236,7 @@ class Optimizer:
 
         for meal in self.meals.values():
             # skip meal if not from suppliers we want
-            suppliers = manual_input.manual_input('suppliers.csv')[0]
+            suppliers = []
             if suppliers != [] and meal.supplier_id not in suppliers:
                 continue
 
@@ -337,114 +337,6 @@ class Optimizer:
         print("Finished generating score card")
         return score_board, repeat_one_week
 
-    def choose_meal(self,score_board,repeat_one_week):
-        '''
-        Choosing meals
-        :param score_board:  {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]}
-        :param repeat_one_week: [Meal()]
-        :return: [Meal()]
-        '''
-
-        # list for saving meals
-        num_repeat = 0
-        bucket = {}
-        suppliers = list(connectMongo.db.users.find({'role':'supplier'}))
-
-        # manual matching suppliers with their ID (ObjectId)
-        Veestro = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Veestro'][0]
-        Euphebe = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Euphebe'][0]
-        FoodNerd = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FoodNerd'][0]
-        FrozenGarden = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FrozenGarden'][0]
-
-        for supplier in [x['_id'] for x in suppliers]:
-            bucket[supplier] = []
-        restart = False
-        num_meal = 15
-        five_meal_supplier = None
-        ten_meal_supplier = None
-
-        while True:
-
-            # Check if two suppliers can be chosen
-            if len(bucket[Veestro]) == 15:
-                five_meal_supplier = Veestro
-                ten_meal_supplier = Veestro
-                slots = bucket[Veestro]
-                break
-            if five_meal_supplier is None:
-                if len(bucket[FoodNerd]) == 5:
-                    five_meal_supplier = FoodNerd
-                elif len(bucket[FrozenGarden]) == 5:
-                    five_meal_supplier = FrozenGarden
-            if ten_meal_supplier is None:
-                if len(bucket[Veestro]) == 10:
-                    ten_meal_supplier = Veestro
-                elif len(bucket[Euphebe]) == 10:
-                    ten_meal_supplier = Euphebe
-            if None not in [five_meal_supplier, ten_meal_supplier]:
-                slots = bucket[five_meal_supplier][:5] + bucket[ten_meal_supplier][:10]
-                break
-
-            sorted_scores = sorted(score_board.keys(), reverse=True)
-            for score in sorted_scores:
-
-                if restart:
-                    restart = False
-                    break
-
-                for meal in score_board[score]:
-
-                    supplier = meal['meal'].supplier_id
-                    if 'breakfast' in meal['meal'].type:
-                        continue
-                    try:
-                        bucket[supplier].append(meal)
-                    except:
-                        pdb.set_trace()
-
-                    # Update score board for meal just selected
-                    score_board[score].remove(meal)
-                    new_score = score + REPEAT_ZERO
-                    if new_score in score_board.keys():
-                        score_board[new_score].append(meal)
-                    else:
-                        score_board[new_score] = [meal]
-
-                    # Update score board2 - penalize more as more repetition
-                    if meal['meal'] in repeat_one_week:
-                        num_repeat += 1
-                        for score_ in sorted_scores:
-                            for repeat in repeat_one_week:
-                                for each_meal in score_board[score_]:
-                                    if each_meal['meal'] == repeat:
-                                        score_board[score_].remove(each_meal)
-                                        deduct_pnt = REPEAT_CUM*num_repeat
-                                        if score_ + deduct_pnt in score_board.keys():
-                                            score_board[score_ + deduct_pnt].append(each_meal)
-                                        else:
-                                            score_board[score_ + deduct_pnt] = [each_meal]
-
-
-                    restart = True
-                    break
-
-        # slots filled up
-        assert len(slots) == num_meal
-
-        ## OPTIONAL - how many repetition from past 2 weeks?
-        repeat_cnt = 0
-        repeat_same_week = {}
-        for each in slots:
-            if repeat_one_week is not None and each['meal'] in repeat_one_week:
-                repeat_cnt += 1
-            if each['meal'].name in repeat_same_week.keys():
-                repeat_same_week[each['meal'].name] += 1
-            else:
-                repeat_same_week[each['meal'].name] = 1
-        # print('{} repetitions from last week'.format(repeat_cnt))
-
-
-        return slots, [five_meal_supplier, ten_meal_supplier]
 
     def _repeating_meals(self,patient_id,start_date):
         '''
@@ -547,13 +439,131 @@ class Optimizer:
         return True
 
 
+"""
+Description of the next function 
 
-if __name__ == "__main__":
+Basically what was supposed to happen was selecting N meals from each supplier (as you said) but this was based on a few restrictions from the different suppliers and from us. Those being:
 
-    ## CAUTION: ALWAYS ADD NUMBERS IN CODE AS THEIR VALUES ARE NEGATIVES
-    # MINUS
+    Each shipment was going to be 15 meals
+    We wanted max 2 suppliers per order 
+    Veestro was able to ship any number of orders, Euphebe would only ship if it was 10 meals, and Food Nerd and Food Garden needed a minimum of 5 meals but could ship more. 
 
-    op = Optimizer()
-    op.optimize(TEST)
+That’s what the chunk of code between 368-386 is supposed to be doing. Basically going down the list of meals one by one and putting them in a “bucket” and determining if the meals can be separated into chunks of 5 and 10 meals from each supplier. If the breakdown didn’t work in the first 15 meals, then subsequent meals would be added until the combination worked.As part of going down the list of meals, after one was “selected” to be ordered we wanted to deduct some points from it to move it further down the scoreboard list. This was because we didn’t want to repeat meals within an order if we didn’t have to, but also if the meal was very good and loads of other meals were bad (points wise) then we should consider having that meal twice. Imagine the top three meals are 200, 190, and 180 on the scoreboard and the next highest one is like 50. It would be better to have multiple of those first meals then put in the bad meals just to fill up the order, if that makes sense. I believe that’s what’s in lines 413-425 but those loops make it very hard to decipher.After that the code is supposed to be subtracting points if a meal was in the last order, again to account for not having too many repeats on subsequent orders.
+"""
+def choose_meal(self, score_board, repeat_one_week):
+    '''
+    Choosing meals
+    :param score_board:  {int : [{'prior':[str], 'minimizes': [str]. 'avoids': [str], 'meal': Meal()]}
+    :param repeat_one_week: [Meal()]
+    :return: [Meal()]
+    '''
 
+    # list for saving meals
+    num_repeat = 0
+    bucket = {}
+    suppliers = list(connectMongo.db.users.find({'role': 'supplier'}))
 
+    # manual matching suppliers with their ID (ObjectId)
+    Veestro = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Veestro'][0]
+    Euphebe = [obj['_id'] for obj in suppliers if obj['first_name'] == 'Euphebe'][0]
+    FoodNerd = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FoodNerd'][0]
+    FrozenGarden = [obj['_id'] for obj in suppliers if obj['first_name'] == 'FrozenGarden'][0]
+
+    for supplier in [x['_id'] for x in suppliers]:
+        bucket[supplier] = []
+    restart = False
+    num_meal = 15
+    five_meal_supplier = None
+    ten_meal_supplier = None
+
+    """
+    bucker{
+
+        veestro
+        euphebe
+        foodNerd,
+        frozenGarden
+    }
+    """
+    while True:
+
+        # Check if two suppliers can be chosen
+        if len(bucket[Veestro]) == 15:
+            five_meal_supplier = Veestro
+            ten_meal_supplier = Veestro
+            slots = bucket[Veestro]
+            break
+
+        if five_meal_supplier is None:
+            if len(bucket[FoodNerd]) == 5:
+                five_meal_supplier = FoodNerd
+            elif len(bucket[FrozenGarden]) == 5:
+                five_meal_supplier = FrozenGarden
+        if ten_meal_supplier is None:
+            if len(bucket[Veestro]) == 10:
+                ten_meal_supplier = Veestro
+            elif len(bucket[Euphebe]) == 10:
+                ten_meal_supplier = Euphebe
+
+        # if not five_meal_supplier and not ten_meal_supplier:
+        #     slots = bucket[five_meal_supplier][:5] + bucket[ten_meal_supplier][:10]
+        #     break
+        #
+
+        # DESCENDANT SCORE
+        sorted_scores = sorted(score_board.keys(), reverse=True)
+        for score in sorted_scores:
+
+            if restart:
+                restart = False
+                break
+
+            for meal in score_board[score]:
+
+                supplier = meal['meal'].supplier_id
+                if 'breakfast' in meal['meal'].type:
+                    continue
+
+                bucket[supplier].append(meal)
+
+                # Update score board for meal just selected
+                score_board[score].remove(meal)
+                new_score = score + REPEAT_ZERO
+                if new_score in score_board.keys():
+                    score_board[new_score].append(meal)
+                else:
+                    score_board[new_score] = [meal]
+
+                # Update score board2 - penalize more as more repetition
+                if meal['meal'] in repeat_one_week:
+                    num_repeat += 1
+                    for score_ in sorted_scores:
+                        for repeat in repeat_one_week:
+                            for each_meal in score_board[score_]:
+                                if each_meal['meal'] == repeat:
+                                    score_board[score_].remove(each_meal)
+                                    deduct_pnt = REPEAT_CUM * num_repeat
+                                    if score_ + deduct_pnt in score_board.keys():
+                                        score_board[score_ + deduct_pnt].append(each_meal)
+                                    else:
+                                        score_board[score_ + deduct_pnt] = [each_meal]
+
+                restart = True
+                break
+
+    # slots filled up
+    assert len(slots) == num_meal
+
+    ## OPTIONAL - how many repetition from past 2 weeks?
+    repeat_cnt = 0
+    repeat_same_week = {}
+    for each in slots:
+        if repeat_one_week is not None and each['meal'] in repeat_one_week:
+            repeat_cnt += 1
+        if each['meal'].name in repeat_same_week.keys():
+            repeat_same_week[each['meal'].name] += 1
+        else:
+            repeat_same_week[each['meal'].name] = 1
+    # print('{} repetitions from last week'.format(repeat_cnt))
+
+    return slots, [five_meal_supplier, ten_meal_supplier]

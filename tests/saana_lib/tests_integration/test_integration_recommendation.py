@@ -2,14 +2,16 @@ from datetime import datetime
 
 import pytest
 
-from tests.conftest import assert_equal_objects
-from saana_lib.ingredient_recommendation import AvoidRecommendation, MinimizeRecommendation
+from tests.conftest import assert_equal_objects, obj_id
+from saana_lib.recommendation import AvoidRecommendation, MinimizeRecommendation, \
+    RecipeRecommendation
+
 
 
 @pytest.fixture
 def tags_mock(mocker):
     m = mocker.patch(
-        'saana_lib.ingredient_recommendation.IngredientRecommendation.tags',
+        'saana_lib.recommendation.IngredientRecommendation.tags',
         new_callable=mocker.PropertyMock
     )
     return m
@@ -20,7 +22,7 @@ def test_new_ingredient_is_created(integration_setup, mocker, datetime_mock):
     calling the as_list() method.
     """
     test_db = integration_setup
-    mocker.patch('saana_lib.ingredient_recommendation.db', test_db)
+    mocker.patch('saana_lib.recommendation.db', test_db)
     test_db.mst_food_ingredients.insert_one({
         'name': 'flax',
         'created_at': datetime.now().isoformat(),
@@ -46,7 +48,7 @@ def test_two_same_recommendations_are_created(
     from pymongo.collection import ObjectId
 
     test_db = integration_setup
-    mocker.patch('saana_lib.ingredient_recommendation.db', test_db)
+    mocker.patch('saana_lib.recommendation.db', test_db)
 
     res = test_db.mst_food_ingredients.insert_one({
         'name': 'flax',
@@ -69,11 +71,8 @@ def test_two_same_recommendations_are_created(
         return_value={"flax": 0}
     )
 
-    _ = MinimizeRecommendation('5cab584074e88f0cb0977a08').to_db()
+    _ = MinimizeRecommendation(obj_id().__str__()).to_db()
 
     assert test_db.patient_ingredient_recommendation.estimated_document_count() == 2
     assert test_db.patient_ingredient_recommendation.find_one()['type'] == 'min'
-
-
-
 

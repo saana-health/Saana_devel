@@ -1,6 +1,7 @@
-from saana_lib.process import processEuphebe, processFrozenGarden, processFoodNerd, processVeestro, processFoodFlo, processFoodMatrix, match_names
+from saana_lib.process import processVeestro, match_names
 import os
-from saana_lib import connectMongo, model
+from saana_lib import connectMongo, tag
+
 
 def add_meals():
     PATH = os.getcwd()
@@ -45,7 +46,7 @@ def add_meals():
     print('Done')
 
 def add_tags():
-    master_dict, columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
+    master_dict, columns = tag.processFoodMatrixCSV('foodtag0328.csv')
     connectMongo.db.tags.insert_many(list(master_dict.values()))
 
 if __name__=="__main__":

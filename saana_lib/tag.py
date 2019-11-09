@@ -1,7 +1,13 @@
 import csv
 from re import match
-from saana_lib import connectMongo, utils
+
+from pymongo.collection import ObjectId
+
 from constants import constants_wrapper as constants
+from exceptions import RequiredArgumentException
+from saana_lib.abstract import OutIn
+from saana_lib.connectMongo import db
+from saana_lib.utils import similar
 
 """
 NOTE: This function does NOT find and replace what is currently 
@@ -14,7 +20,127 @@ class FoodMatrixException(Exception):
     """"""
 
 
-class TagRecord(object):
+class Cell:
+
+    def __init__(self, value=None):
+        self.value = value
+
+    def read(self):
+        """
+        :return: the current cell's content
+        """
+        pass
+
+    def delete(self):
+        """
+        delete's the current cell's content
+        """
+        pass
+
+    def contains(self):
+        """
+        compares the current cell's content with the one provided
+        :returns True/False
+        """
+        pass
+
+    def update(self):
+        """
+        changes the current cell's content
+        """
+        pass
+
+    def is_empty(self):
+        """
+        :return: True/False whether the content
+        """
+
+
+class Tag:
+
+    def __init__(self, tag_id=None, content_row=list(), tag_name=None, tag_type=None):
+        self.tag_id = tag_id
+        if not isinstance(tag_id, ObjectId):
+            self.tag_id = ObjectId(tag_id)
+
+        self.content_row = content_row
+        if tag_id:
+            self.tag = db.tags.find_one({'tag_id': tag_id})
+        elif tag_name and tag_type:
+            self.tag = db.tags.find_one({'name': tag_name, 'type': tag_type})
+        else:
+            self.tag = None
+
+        if not (self.tag or self.content_row):
+            raise RequiredArgumentException("")
+
+    def sequence(self, group_name):
+        list_key = {
+            'prior': 'P',
+            'minimize': 'M',
+            'nutrient': 'N',
+        }.get(group_name)
+        if self.content_row:
+            self.tag[group_name] = {}
+            for cell in self.content_row:
+                if not len(cell) == 2:
+                    continue
+
+                quantity_rex = r'^{}-(?P<quantity>\d+(\.\d+)?)$'.format(list_key)
+                range_rex = r'^{}-(?P<lower>\d+)\|(?P<upper>\d+)$'.format(list_key)
+                m = match(quantity_rex, cell[1] ) or match(range_rex, cell[1])
+                if m:
+                    if 'quantity' in m.groupdict():
+                        quantity = m.groupdict().get('quantity')
+                    else:
+                        quantity = m.groupdict()
+                    self.tag[group_name].update({cell[0]: quantity})
+        return self.tag[group_name]
+
+    @property
+    def prioritize_sequence(self):
+        return self.sequence('prior')
+
+    @property
+    def minimize_sequence(self):
+        return self.sequence('minimize')
+
+    @property
+    def nutrient_sequence(self):
+        return self.sequence('nutrient')
+
+    @property
+    def avoid_sequence(self):
+        if self.content_row:
+            self.tag['avoid'] = {}
+            for cell in self.content_row:
+                if not len(cell) == 2:
+                    continue
+                m = match(r'^A-(?P<quantity>\d+(\.\d+)?)$', cell[1])
+                if m:
+                    quantity = m.groupdict().get('quantity')
+                    self.tag['avoid'].update({cell[0]: quantity})
+        return self.tag['avoid']
+
+    def all_elements_names(self):
+        if not self.tag:
+            return list()
+
+        return list(self.prioritize_sequence) + list(self.minimize_sequence) + \
+            list(self.nutrient_sequence)
+
+
+class Table(OutIn):
+    """"""
+
+
+class Matrix(OutIn):
+    """"""
+
+
+
+
+class TagEntity(object):
 
     def __init__(self):
         self.name = ''
@@ -33,14 +159,16 @@ class TagRecord(object):
         }
 
 
-class FoodMatrix(object):
+
+
+class TagMatrix(object):
 
     def __init__(self, filename):
         self.master_dict = {}
         self.ignored = []
         self.filename = filename
         self._content_iterator = None
-        self.client_db = connectMongo.db
+        self.client_db = db
         self.cols_to_skip = 2
         self._tags = None
         self.new = False
@@ -138,11 +266,11 @@ class FoodMatrix(object):
         changed = False
         if not current_record:
             return changed
-        elif action == constants.ELEMENT_AVOID_ACTION_KEY:
+        elif action == constants.ELEMENT_AVOID_KEY:
             changed = elem not in current_record['avoid']
-        elif action == constants.ELEMENT_MINIMIZE_ACTION_KEY:
+        elif action == constants.ELEMENT_MINIMIZE_KEY:
             changed = elem not in current_record['minimize']
-        elif action == constants.ELEMENT_PRIORITIZE_ACTION_KEY:
+        elif action == constants.ELEMENT_PRIORITIZE_KEY:
             changed = elem not in current_record['prior']
         return changed
 
@@ -176,16 +304,16 @@ class FoodMatrix(object):
                 changed_status = self.changed_status(
                     current_record, elem_name, row_value
                 )
-                if row_value == constants.ELEMENT_REMOVE_ACTION_KEY or changed_status:
+                if row_value == constants.ELEMENT_REMOVE_KEY or changed_status:
                     current_record = self.remove_element(elem_name, current_record)
 
-                if row_value == constants.ELEMENT_AVOID_ACTION_KEY:
+                if row_value == constants.ELEMENT_AVOID_KEY:
                     if elem_name not in current_record['avoid']:
                         current_record['avoid'].append(elem_name)
-                elif row_value == constants.ELEMENT_PRIORITIZE_ACTION_KEY:
+                elif row_value == constants.ELEMENT_PRIORITIZE_KEY:
                     if elem_name not in current_record['prior']:
                         current_record['prior'][elem_name] = 0
-                elif row_value == constants.ELEMENT_MINIMIZE_ACTION_KEY:
+                elif row_value == constants.ELEMENT_MINIMIZE_KEY:
                     if elem_name not in current_record['minimize']:
                         current_record['minimize'][elem_name] = 0
 
@@ -227,9 +355,9 @@ class FoodMatrix(object):
     @property
     def key_mappings(self):
         return {
-            constants.ELEMENT_AVOID_ACTION_KEY: 'avoid',
-            constants.ELEMENT_PRIORITIZE_ACTION_KEY: 'prior',
-            constants.ELEMENT_MINIMIZE_ACTION_KEY: 'minimize'
+            constants.ELEMENT_AVOID_KEY: 'avoid',
+            constants.ELEMENT_PRIORITIZE_KEY: 'prior',
+            constants.ELEMENT_MINIMIZE_KEY: 'minimize'
         }
 
     def new_record(self, row, row_n):
@@ -257,7 +385,7 @@ class FoodMatrix(object):
                 record[list_name][elem_name] = val
 
             elif row_value in self.key_mappings:
-                if row_value == constants.ELEMENT_AVOID_ACTION_KEY:
+                if row_value == constants.ELEMENT_AVOID_KEY:
                     record[self.key_mappings.get(row_value)].append(elem_name)
                 else:
                     record[self.key_mappings.get(row_value)][elem_name] = 0
@@ -340,14 +468,14 @@ def processFoodMatrixCSV(filename):
         if name == '':
             continue
 
-        tags = list(connectMongo.db.mst_diseases.find())
-        tags += list(connectMongo.db.mst_comorbidities.find())
-        tags += list(connectMongo.db.mst_drugs.find())
-        tags += list(connectMongo.db.mst_symptoms.find())
+        tags = list(db.mst_diseases.find())
+        tags += list(db.mst_comorbidities.find())
+        tags += list(db.mst_drugs.find())
+        tags += list(db.mst_symptoms.find())
         tag_id = None
 
         for tag in tags:
-            if name in tag['name'].lower() or utils.similar(name, tag['name'], 0.7):
+            if name in tag['name'].lower() or similar(name, tag['name'], 0.7):
                 print('{}   |   {}'.format(name, tag['name']))
                 tag_id = tag['_id']
 

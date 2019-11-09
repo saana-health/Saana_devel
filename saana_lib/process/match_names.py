@@ -1,13 +1,12 @@
-from . import processFoodMatrix
+from saana_lib import tag
 import os
-import pdb
 
 PATH = os.path.join(os.getcwd(),'csv/Euphebe/')
 
 
 def match_euphebe(euphebe_all):
     # get full lists from food tag matrix and euphebe of all nutritions and ingredients
-    _, matrix_columns = processFoodMatrix.processFoodMatrixCSV('foodtag0328.csv')
+    _, matrix_columns = tag.processFoodMatrixCSV('foodtag0328.csv')
 
     # dictionary to be used to convert (exact match)
     convert_dic = {

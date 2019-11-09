@@ -1,7 +1,8 @@
 import pytest
 
-from saana_lib.process.processFoodMatrix import FoodMatrix, FoodMatrixException, TagRecord
-from tests.conftest import assert_equal_objects, assert_equal_tuples, file_opening
+from exceptions import RequiredArgumentException
+from saana_lib.tag import Cell, Tag
+from tests.conftest import assert_equal_objects, assert_equal_tuples, obj_id
 
 
 @pytest.fixture
@@ -16,25 +17,57 @@ def headers_mock(mocker):
     return headers
 
 
-class TestCaseTagRecord(object):
+class TestCaseTag:
 
-    @property
-    def tag_record(self):
-        return TagRecord()
+    def test_tag_initialisation_with_tag_id(self, mocker):
+        m = mocker.patch('saana_lib.tag.db.tags')
+        _ = Tag(tag_id=obj_id())
+        m.find_one.assert_called_once_with({'tag_id': obj_id()})
 
-    def test_to_dict(self):
+    def test_tag_initialisation_with_tag_name(self, mocker):
+        m = mocker.patch('saana_lib.tag.db.tags')
+        _ = Tag(tag_name='breast', tag_type='cancer')
+        m.find_one.assert_called_once_with({'name': 'breast', 'type': 'cancer'})
+
+    def test_tag_initialisation_with_content_row(self, mocker):
+        m = mocker.patch('saana_lib.tag.db.tags')
+        _ = Tag(content_row=[['cell-1'], ['cell-2']])
+        m.find_one.assert_not_called()
+
+    def test_tag_initialisation_requires_one_argument(self):
+        with pytest.raises(RequiredArgumentException):
+            _ = Tag()
+
+    def test_tag_prioritize_sequence_single_quantity(self):
+        tag = Tag(content_row=[['flax', 'P-20']])
+        assert {'flax': '20'} == tag.prioritize_sequence
+
+    def test_tag_prioritize_sequence_quantity_range(self):
+        tag = Tag(content_row=[['flax', 'P-200|300']])
         assert_equal_objects(
-            {'name': '', 'type': '', 'prior': {}, 'minimize': {}, 'avoid': []},
-            self.tag_record.to_dict()
+            {'flax': {'lower': '200', 'upper': '300'}},
+            tag.prioritize_sequence
         )
 
+    def test_tag_prioritize_invalid_cell_value(self):
+        tag = Tag(content_row=[['flax', 'P-200|']])
+        assert tag.prioritize_sequence == {}
 
-@pytest.mark.usefixtures("file_opening")
-class TestCaseFoodMatrix(object):
+    def test_tag_minimize_sequence_single_quantity(self):
+        tag = Tag(content_row=[['flax', 'M-10']])
+        assert {'flax': '10'} == tag.minimize_sequence
 
-    @property
-    def matrix_obj(self):
-        return FoodMatrix('fname')
+    def test_sequence_content_parsing(self):
+        tag = Tag(content_row=[
+            ['flax', 'A-10'], ['broccoli', 'P-0'], ['sodium', 'N-300']
+        ])
+        assert {'flax': '10'} == tag.avoid_sequence
+        assert {} == tag.minimize_sequence
+        assert {'broccoli': '0'} == tag.prioritize_sequence
+        assert {'sodium': '300'} == tag.nutrient_sequence
+
+
+class TestCaseTagMatrix(object):
 
     @pytest.fixture
     def content_iterator(self, mocker):
@@ -348,6 +381,11 @@ class TestCaseUpdateContentRow(object):
             }, {"mackerel": "Cannot assign a quantity value to mackerel "
                             "because is in the avoid list: 1:2"})
         )
+
+
+@pytest.mark.usefixtures("file_opening")
+class TestCaseTagFile(object):
+    pass
 
 
 # 'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'

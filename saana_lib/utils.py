@@ -139,24 +139,6 @@ def add_dummy_patients():
 '''
 
 
-def find_tuesday(curr, wk=1):
-    '''
-    Get the next coming tuesday (Today if today is tuesday)
-    :param curr: datetime.datetime()
-    :param wk: int
-    :return: datetime.datetime()
-    '''
-
-    while True:
-        if curr.weekday() == 1:
-            if wk == 1:
-                break
-            wk -= 1
-        curr = curr + timedelta(days=1)
-        weekday = curr.weekday()
-    return curr
-
-
 def similar(s1, s2, _ratio):
     """
     A util function to check if two strings are 'similar',
@@ -166,16 +148,7 @@ def similar(s1, s2, _ratio):
     return SequenceMatcher(None, s1, s2).ratio() > _ratio
 
 
-def add_suppliers():
-    '''
-    Util func for adding suppliers
-    :return: None
-    '''
-    for name in ['Euphebe','FoodNerd','Veestro','FrozenGarden','FoodFlo']:
-        connectMongo.db.users.insert_one({'first_name':name, 'email': name+'@example.com', 'role':'supplier'})
-
-
-def csv_writer(filename, rows):
+def out_to_csv(filename, rows):
     logger.info("Writing to csv file: {}".format(filename))
     with open(filename, 'w') as csvfile:
         writer = csv.writer(csvfile)
@@ -183,5 +156,7 @@ def csv_writer(filename, rows):
     logger.info("Successfully wrote to a csv file")
 
 
-if __name__ == "__main__":
-    add_suppliers()
+def out_to_xls(filename, rows):
+    pass
+
+

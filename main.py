@@ -2,8 +2,8 @@ import argparse
 from logging import getLogger
 
 import conf
-from saana_lib.scoreboard import Scoreboard
-from saana_lib.ingredient_recommendation import IngredientAdvisor
+from saana_lib.ranking import Scoreboard
+from saana_lib.recommendation import IngredientAdvisor
 
 
 logger = getLogger(__name__)

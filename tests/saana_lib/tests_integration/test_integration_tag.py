@@ -1,7 +1,7 @@
 import pytest
 
 from tests.conftest import assert_equal_objects
-from saana_lib.process.processFoodMatrix import FoodMatrix, FoodMatrixException
+from saana_lib.tag import FoodMatrix
 
 
 @pytest.fixture
