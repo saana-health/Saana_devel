@@ -1,30 +1,8 @@
-from datetime import timedelta
-
 from pymongo.collection import ObjectId
 
-from constants import constants_wrapper as constants
 from saana_lib.connectMongo import db
 
 
-"""
-Schema of MST_RECIPE
-
-name: {type: String, required: true,},
-url: {type: String,},
-created_at: {type: Date},
-image_url: {type: String,},
-food: [{
-    food_ingredient_id: {type: ObjectId, ref: 'Mst_Food_Ingredient',},
-    quantity: {type: Number,},
-    unit: {type: String},}
-]
-nutrients: [{
-    nutrient_id: {type: ObjectId, ref: 'Mst_Food_Ingredient',},
-    quantity: {type: Number,},
-    unit: {type: String},}
-}],
-updated_at: {type: Date}
-"""
 class Recipe:
 
     def __init__(self, recipe_id=None):
@@ -85,6 +63,6 @@ class Recipe:
     @property
     def nutrients(self):
         return dict(
-            (nutrient['nutrient_id'], nutrient)
-            for nutrient in self.recipe['nutrient']
+            (nutrient['_id'], nutrient)
+            for nutrient in self.recipe.get('nutrients', {})
         )

@@ -4,7 +4,8 @@ from abc import ABCMeta
 from constants import constants_wrapper as constants
 from saana_lib.connectMongo import db
 from saana_lib.patient import SymptomsProgress, Nutrients
-from saana_lib.recommendation import MinimizeIngredients, PrioritizeIngredients
+from saana_lib.recommendation import MinimizeIngredients, PrioritizeIngredients, \
+    AvoidIngredients
 from saana_lib.recipe import Recipe
 
 
@@ -73,10 +74,10 @@ class MinimizedScore(RecipeScore):
     @property
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
-        for ingr_id, quantity in self.recipe.ingredients_id_quantity.items():
-            if ingr_id in minimized:
-                quantity_ref = minimized[ingr_id]
-                yield ingr_id, quantity, quantity_ref
+        for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
+            if ingr_name in minimized:
+                quantity_ref = minimized[ingr_name]
+                yield ingr_name, quantity, quantity_ref
 
     @property
     def value(self):
@@ -106,6 +107,20 @@ class PrioritizedScore(RecipeScore):
     @property
     def value(self):
         return sum(self.ingredient_set) * constants.ADD_PRIOR
+
+
+class AvoidScore(RecipeScore):
+
+    @property
+    def ingredient_set(self):
+        avoids = AvoidIngredients(self.patient_id).all
+        for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
+            if ingr_name in avoids:
+                yield 1
+
+    @property
+    def value(self):
+        return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
 
 
 class NutrientScore(RecipeScore):
@@ -161,4 +176,4 @@ class NutrientScore(RecipeScore):
         the simplest way to get the name of a single nutrient is
         to query it.
         """
-        return len(self.nutrient_set) + self.add_calories_score()
+        return len(self.nutrient_set) + self.add_calories_score

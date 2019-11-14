@@ -1,17 +1,35 @@
 import pytest
 
-from pymongo.collection import ObjectId
-
 from datetime import datetime
-from tests.conftest import assert_equal_objects
+from tests.conftest import assert_equal_objects, obj_id
 from saana_lib.patient import Patient, PatientDisease, PatientComorbidity, \
     PatientDrug, PatientSymptom, PatientOtherRestrictions, MinimizeIngredients, \
     AvoidIngredients, PrioritizeIngredients, IngredientFilter, PatientSubscription, \
     SymptomsProgress, Nutrients
 
 
-def obj_id():
-    return ObjectId('5d7258c977f06d4208211eb4')
+patient_id = obj_id
+
+
+@pytest.fixture
+def all_tags(mocker):
+    return mocker.patch(
+        'saana_lib.patient.PatientTags.all_tags',
+        new_callable=mocker.PropertyMock,
+        return_value=[
+            {'avoid': ["broccoli", "flax"]},
+            {'avoid': ["kale", "onion", "flax"]}
+        ]
+    )
+
+
+@pytest.fixture
+def other_restrictions(mocker):
+    return mocker.patch(
+        'saana_lib.patient.AvoidIngredients.other_restrictions',
+        new_callable=mocker.PropertyMock,
+        return_value=[]
+    )
 
 
 class TestCasePatient:
@@ -19,20 +37,20 @@ class TestCasePatient:
 
     def test_patient_read_method(self):
         with pytest.raises(NotImplementedError):
-            _ = Patient('5d7258c977f06d4208211eb4').read()
+            _ = Patient(patient_id()).read()
 
     def test_user_of_patient(self, mocker):
         user_collection = mocker.patch('saana_lib.patient.db.users')
         user_id_prop = mocker.patch('saana_lib.patient.Patient.user_id')
-        _ = Patient(obj_id()).user_of_patient
+        _ = Patient(patient_id()).user_of_patient
 
         user_collection.find_one.assert_called_with({'_id': user_id_prop})
 
     def test_user_id(self, mocker):
         patients_collection = mocker.patch('saana_lib.patient.db.patients')
-        _ = Patient(obj_id()).user_id
+        _ = Patient(patient_id()).user_id
 
-        patients_collection.find_one.assert_called_with({'_id': obj_id()})
+        patients_collection.find_one.assert_called_with({'_id': patient_id()})
 
     def test_user_not_found(self, mocker):
         from exceptions import UserNotFound
@@ -42,14 +60,14 @@ class TestCasePatient:
         users.find_one.return_value = None
 
         with pytest.raises(UserNotFound):
-            _ = Patient(obj_id()).user_of_patient
+            _ = Patient(patient_id()).user_of_patient
 
     def test_patient_not_found(self, mocker):
         from exceptions import PatientNotFound
         mocker.patch('saana_lib.patient.db.patients.find_one()', return_value=None)
 
         with pytest.raises(PatientNotFound):
-            _ = Patient(obj_id()).patient_instance
+            _ = Patient(patient_id()).patient_instance
 
 
 class TestCaseReadAsTagsBehavior:
@@ -59,27 +77,27 @@ class TestCaseReadAsTagsBehavior:
 
     def test_patient_diseases(self, mocker):
         met = mocker.patch('saana_lib.connectMongo.db.patient_diseases')
-        _ = PatientDisease('5d7258c977f06d4208211eb4').read_as_tags()
+        _ = PatientDisease(patient_id()).read_as_tags()
 
-        met.find.assert_called_once_with({'patient_id': obj_id()})
+        met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_comorbidities(self, mocker):
         met = mocker.patch('saana_lib.connectMongo.db.patient_comorbidities')
-        _ = PatientComorbidity('5d7258c977f06d4208211eb4').read_as_tags()
+        _ = PatientComorbidity(patient_id()).read_as_tags()
 
-        met.find.assert_called_once_with({'patient_id': obj_id()})
+        met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_drugs(self, mocker):
         met = mocker.patch('saana_lib.connectMongo.db.patient_drugs')
-        _ = PatientDrug('5d7258c977f06d4208211eb4').read_as_tags()
+        _ = PatientDrug(patient_id()).read_as_tags()
 
-        met.find.assert_called_once_with({'patient_id': obj_id()})
+        met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_symptom(self, mocker):
         met = mocker.patch('saana_lib.connectMongo.db.patient_symptoms')
-        _ = PatientSymptom('5d7258c977f06d4208211eb4').read_as_tags()
+        _ = PatientSymptom(patient_id()).read_as_tags()
 
-        met.find.assert_called_once_with({'patient_id': obj_id()})
+        met.find.assert_called_once_with({'patient_id': patient_id()})
 
 
 class TestCaseReadAsTagsValues(object):
@@ -90,7 +108,6 @@ class TestCaseReadAsTagsValues(object):
     but instead of asserting over the values itself, I check
     that the correct collection is queried (behavior test)
     """
-    obj_id = '5d7258c977f06d4208211eb4'
 
     @pytest.fixture
     def tags_mock(self, mocker):
@@ -98,34 +115,34 @@ class TestCaseReadAsTagsValues(object):
 
     def test_patient_disease_values(self, mocker, tags_mock):
         met = mocker.patch('saana_lib.connectMongo.db.patient_diseases')
-        met.find.return_value = [{'disease_id': 'tag_id'},]
+        met.find.return_value = [{'disease_id': 'er87g'},]
 
-        _ = PatientDisease('5d7258c977f06d4208211eb4').read_as_tags()
-        met.find.assert_called_once_with({'patient_id': obj_id()})
-        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['tag_id']}})
+        _ = PatientDisease(patient_id()).read_as_tags()
+        met.find.assert_called_once_with({'patient_id': patient_id()})
+        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['er87g']}})
 
     def test_patient_comorbidity_values(self, mocker, tags_mock):
         met = mocker.patch('saana_lib.connectMongo.db.patient_comorbidities')
-        met.find.return_value = [{'comorbidity_id': 'tag_id'}, ]
+        met.find.return_value = [{'comorbidity_id': 'ry85t'}, ]
 
-        _ = PatientComorbidity('5d7258c977f06d4208211eb4').read_as_tags()
-        met.find.assert_called_once_with({'patient_id': obj_id()})
-        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['tag_id']}})
+        _ = PatientComorbidity(patient_id()).read_as_tags()
+        met.find.assert_called_once_with({'patient_id': patient_id()})
+        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['ry85t']}})
 
     def test_patient_drug_values(self, mocker, tags_mock):
         met = mocker.patch('saana_lib.connectMongo.db.patient_drugs')
-        met.find.return_value = [{'drug_id': 'tag_id'}, ]
+        met.find.return_value = [{'drug_id': 'ut64p'}, ]
 
-        _ = PatientDrug('5d7258c977f06d4208211eb4').read_as_tags()
-        met.find.assert_called_once_with({'patient_id': obj_id()})
-        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['tag_id']}})
+        _ = PatientDrug(patient_id()).read_as_tags()
+        met.find.assert_called_once_with({'patient_id': patient_id()})
+        tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['ut64p']}})
 
     def test_patient_symptom_values(self, mocker, tags_mock):
         met = mocker.patch('saana_lib.connectMongo.db.patient_symptoms')
         met.find.return_value = [{'symptom_id': 'tag_id'}, ]
 
-        _ = PatientSymptom('5d7258c977f06d4208211eb4').read_as_tags()
-        met.find.assert_called_once_with({'patient_id': obj_id()})
+        _ = PatientSymptom(patient_id()).read_as_tags()
+        met.find.assert_called_once_with({'patient_id': patient_id()})
         tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['tag_id']}})
 
 
@@ -138,12 +155,12 @@ class TestCaseOtherRestriction:
         return mocker.patch('saana_lib.connectMongo.db.patient_other_restrictions')
 
     def test_patient_other_restrictions(self, collection_mock):
-        _ = PatientOtherRestrictions('5d7258c977f06d4208211eb4').read_as_tags()
-        collection_mock.find_one.assert_called_once_with({'patient_id': obj_id()})
+        _ = PatientOtherRestrictions(patient_id()).read_as_tags()
+        collection_mock.find_one.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_other_restriction_empty(self, collection_mock):
         collection_mock.find_one.return_value = {'other_restriction': ''}
-        assert PatientOtherRestrictions('5d7258c977f06d4208211eb4').read_as_list() == []
+        assert PatientOtherRestrictions(patient_id()).read_as_list() == []
 
     def test_patient_other_restriction_not_empty(self, collection_mock):
         collection_mock.find_one.return_value = {
@@ -151,82 +168,39 @@ class TestCaseOtherRestriction:
         }
 
         assert_equal_objects(
-            PatientOtherRestrictions('5d7258c977f06d4208211eb4').read_as_list(),
+            PatientOtherRestrictions(patient_id()).read_as_list(),
             ['less', 'sugar', 'more', 'red', 'meat']
         )
 
 
 class TestCaseAvoidIngredient(object):
 
-    def test_avoid_ingredient(self, mocker):
-        all_tags = mocker.patch(
-            'saana_lib.patient.PatientTags.all_tags',
-            new_callable=mocker.PropertyMock,
-            return_value=[
-                {'avoid': ["broccoli", "flax"]},
-                {'avoid': ["kale", "onion", "flax"]}
-            ]
-        )
-        mocker.patch(
-            'saana_lib.patient.PatientOtherRestrictions.read',
-            return_value=list()
-        )
-
+    def test_avoid_ingredient(self, all_tags, other_restrictions):
         assert_equal_objects(
-            AvoidIngredients(obj_id()).all,
-            {"broccoli", "flax", "kale", "onion"}
-        )
-        all_tags.assert_called_once_with()
-
-    def test_avoid_and_other_restrictions_behavior(self, mocker):
-        all_tags = mocker.patch(
-            'saana_lib.patient.PatientTags.all_tags',
-            new_callable=mocker.PropertyMock,
-            return_value=[
-                {'avoid': ["broccoli", "flax"]},
-                {'avoid': ["onion", "flax"]}
-            ]
-        )
-        restrictions = mocker.patch(
-            'saana_lib.patient.PatientOtherRestrictions.read',
-            return_value=list()
-        )
-
-        _ = AvoidIngredients(obj_id()).all
-
-        all_tags.assert_called_once_with()
-        restrictions.assert_called_once_with()
-
-    def test_avoid_and_other_restrictions_values(self, mocker):
-        all_tags = mocker.patch(
-            'saana_lib.patient.PatientTags.all_tags',
-            new_callable=mocker.PropertyMock,
-            return_value=[
-                {'avoid': ["broccoli", "flax"]},
-                {'avoid': ["onion", "flax"]}
-            ]
-        )
-        restrictions = mocker.patch(
-            'saana_lib.patient.PatientOtherRestrictions.read',
-            return_value=['kale']
-        )
-
-        assert_equal_objects(
-            AvoidIngredients(obj_id()).all,
+            AvoidIngredients(patient_id()).all,
             {"broccoli", "flax", "kale", "onion"}
         )
 
+    def test_avoid_and_other_restrictions_behavior(self, all_tags, other_restrictions):
+        _ = AvoidIngredients(patient_id()).all
         all_tags.assert_called_once_with()
-        restrictions.assert_called_once_with()
+        other_restrictions.assert_called_once_with()
+
+    def test_avoid_and_other_restrictions_values(self, all_tags, other_restrictions):
+        other_restrictions.return_value = ['spinach']
+        assert_equal_objects(
+            AvoidIngredients(patient_id()).all,
+            {"broccoli", "flax", "kale", "onion", "spinach"}
+        )
 
     def test_ingredient_exists(self, mocker):
         """Verify that plurals cases return True"""
         met = mocker.patch(
             'saana_lib.patient.db.mst_food_ingredients'
         )
-
         met.find.return_value = [{'name': 'peppers'}, {'name': 'soy'}]
-        assert AvoidIngredients(obj_id()).ingredient_exists('peppers')
+
+        assert AvoidIngredients(patient_id()).ingredient_exists('peppers')
 
     def test_ingredient_exists_tricky_case(self, mocker):
         """Mixed ingredient may match if the the ingredient name match
@@ -235,9 +209,9 @@ class TestCaseAvoidIngredient(object):
         met = mocker.patch(
             'saana_lib.patient.db.mst_food_ingredients'
         )
-
         met.find.return_value = [{'name': 'peppers'}, {'name': 'soy'}]
-        assert AvoidIngredients(obj_id()).ingredient_exists('hot peppers')
+
+        assert AvoidIngredients(patient_id()).ingredient_exists('hot peppers')
 
 
 def test_prioritize_ingredients(mocker):
@@ -271,8 +245,8 @@ def test_prioritize_ingredients(mocker):
 
 
 def test_minimize_ingredients(mocker):
-    """
-    This test shows that filter_minimize
+    """This test shows that filter_minimize is not
+    transparent in the process.
     """
     all_tags = mocker.patch(
         'saana_lib.patient.MinimizeIngredients.all_tags',
@@ -284,9 +258,7 @@ def test_minimize_ingredients(mocker):
         return_value={}
     )
 
-    assert_equal_objects(
-        MinimizeIngredients(obj_id()).all, dict()
-    )
+    assert_equal_objects(MinimizeIngredients(patient_id()).all, {})
     all_tags.assert_called_once_with()
 
 
@@ -303,7 +275,7 @@ def test_nutrients(mocker):
     )
     _ = Nutrients(obj_id()).all
     all_tags.assert_called_once_with()
-    nutrient_filter.assert_called_once_with(obj_id(), {1: 2, 3: 4})
+    nutrient_filter.assert_called_once_with(patient_id(), {1: 2, 3: 4})
 
 
 @pytest.fixture(name='minimize_all_tags_mock')
@@ -323,13 +295,7 @@ def prioritize_ingredients_all_tags_mock(mocker):
 
 
 @pytest.fixture(name='avoid_all_tags')
-def avoid_ingredients_all_tags_mock(mocker):
-    mocker.patch(
-        'saana_lib.patient.AvoidIngredients.other_restrictions',
-        new_callable=mocker.PropertyMock,
-        return_value=list()
-    )
-
+def avoid_ingredients_all_tags_mock(other_restrictions, mocker):
     return mocker.patch(
         'saana_lib.patient.AvoidIngredients.all_tags',
         new_callable=mocker.PropertyMock,
@@ -344,7 +310,7 @@ class TestCaseIngredientsRepeatedExecution(object):
     def test_minimize(self, minimize_all_tags_mock, mocker):
         mocker.patch('saana_lib.patient.IngredientFilter.filter_minimize')
 
-        obj = MinimizeIngredients(obj_id())
+        obj = MinimizeIngredients(patient_id())
         for i in range(3):
             _ = obj.all
 
@@ -353,14 +319,14 @@ class TestCaseIngredientsRepeatedExecution(object):
     def test_prioritize(self, prioritize_all_tags_mock, mocker):
         mocker.patch('saana_lib.patient.IngredientFilter.filter_prioritize')
 
-        obj = PrioritizeIngredients(obj_id())
+        obj = PrioritizeIngredients(patient_id())
         for i in range(3):
             _ = obj.all
 
         prioritize_all_tags_mock.assert_called_once_with()
 
     def test_avoid(self, avoid_all_tags):
-        obj = AvoidIngredients(obj_id())
+        obj = AvoidIngredients(patient_id())
         for i in range(3):
             _ = obj.all
 
@@ -379,7 +345,7 @@ class TestCaseIngredientFilter(object):
             'saana_lib.patient.IngredientFilter.filter_prioritize'
         )
 
-        _ = PrioritizeIngredients(obj_id()).all
+        _ = PrioritizeIngredients(patient_id()).all
         filter_prioritize.assert_called_once_with(obj_id(), {'soy': 0, 'flax': 2})
 
     def test_filter_minimize(self, mocker):
@@ -394,16 +360,16 @@ class TestCaseIngredientFilter(object):
             'saana_lib.patient.IngredientFilter.filter_minimize'
         )
 
-        _ = MinimizeIngredients(obj_id()).all
+        _ = MinimizeIngredients(patient_id()).all
         filter_minimize.assert_called_once_with(
-            obj_id(), {"insoluble fiber": {"min1": "10", "min2": "15"}}
+            patient_id(), {"insoluble fiber": {"min1": "10", "min2": "15"}}
         )
 
     def test_filter_prioritize_values_case_1(self, avoid_all_tags):
         avoid_all_tags.return_value = [{'avoid': ['soy', 'flax']}]
         assert_equal_objects(
             IngredientFilter.filter_prioritize(
-                obj_id(), {'beets': 0, 'flax': 1, 'carrot': 2}
+                patient_id(), {'beets': 0, 'flax': 1, 'carrot': 2}
             ), {'beets': 0, 'carrot': 2}
         )
 
@@ -417,7 +383,7 @@ class TestCaseIngredientFilter(object):
 
         assert_equal_objects(
             IngredientFilter.filter_prioritize(
-                obj_id(), {'beets': 0, 'flax': 1, 'carrot': 2}
+                patient_id(), {'beets': 0, 'flax': 1, 'carrot': 2}
             ), {'beets': 0}
         )
 
@@ -425,16 +391,14 @@ class TestCaseIngredientFilter(object):
         avoid_all_tags.return_value = [{'avoid': ['soy', 'flax']}]
         assert_equal_objects(
             IngredientFilter.filter_minimize(
-                obj_id(), {'soy': 0, 'flax': 1, 'carrot': {'min1': 2, 'min2': 30}}
+                patient_id(), {'soy': 0, 'flax': 1, 'carrot': {'min1': 2, 'min2': 30}}
             ), {'carrot': {'min1': 2, 'min2': 30}}
         )
 
 
 class TestCaseSubscription:
-
-    """
-    The next three tests check the logic circuit, testing almost each
-    possible flow
+    """The next three tests check the logic circuit,
+    testing almost each possible flow
     """
     @pytest.fixture
     def subscription(self, mocker):
@@ -444,11 +408,11 @@ class TestCaseSubscription:
 
     def test_subscription_exists(self, subscription):
         subscription.find_one.return_value = None
-        assert not PatientSubscription(obj_id()).exists
+        assert not PatientSubscription(patient_id()).exists
 
     def test_inactive_subscription(self, subscription):
         subscription.find_one.return_value = {'status': 'inactive'}
-        assert not PatientSubscription(obj_id()).is_active
+        assert not PatientSubscription(patient_id()).is_active
 
     def test_weekly_order(self, subscription, mocker):
         subscription.find_one.return_value = {'subscription_id': 1}
@@ -456,7 +420,7 @@ class TestCaseSubscription:
             'saana_lib.patient.db.mst_subscriptions',
         )
         met.find_one.return_value = {'interval_count': 1}
-        assert PatientSubscription(obj_id()).weekly_order
+        assert PatientSubscription(patient_id()).weekly_order
 
     def test_patient_has_subscription(self, mocker):
         mocker.patch(
@@ -467,7 +431,7 @@ class TestCaseSubscription:
             'saana_lib.patient.PatientSubscription.is_active',
             new_callable=mocker.PropertyMock
         )
-        assert PatientSubscription(obj_id()).patient_has_subscription
+        assert PatientSubscription(patient_id()).patient_has_subscription
 
 
 class TestCaseSymptomsProgress:
@@ -481,14 +445,14 @@ class TestCaseSymptomsProgress:
 
     def test_symptoms_sorted_by_date(self, mocker):
         symptoms_mock = mocker.patch('saana_lib.patient.db.patient_symptoms')
-        _ = SymptomsProgress(obj_id()).symptoms_sorted_by_date
-        symptoms_mock.find.assert_called_once_with({'patient_id': obj_id()})
+        _ = SymptomsProgress(patient_id()).symptoms_sorted_by_date
+        symptoms_mock.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_symptoms_better(self, sorted_symptoms_mock, mocker):
-        sorted_symptoms_mock.return_value = {obj_id().__str__(): [1, 2]}
+        sorted_symptoms_mock.return_value = {patient_id().__str__(): [1, 2]}
         m = mocker.patch('saana_lib.tag.db.tags')
-        m.find_one.return_value = {'prior': []}
-        assert list(SymptomsProgress(obj_id()).better) == []
+        m.find_one.return_value = {'prior': [], 'minimize': [], 'nutrient': []}
+        assert list(SymptomsProgress(patient_id()).better) == [[]]
 
     """
     Note:
@@ -498,7 +462,7 @@ class TestCaseSymptomsProgress:
     """
 
     def test_symptoms_worsen(self, sorted_symptoms_mock, mocker):
-        sorted_symptoms_mock.return_value = {obj_id().__str__(): [2, 1]}
+        sorted_symptoms_mock.return_value = {patient_id().__str__(): [2, 1]}
         m = mocker.patch('saana_lib.tag.db.tags')
         m.find_one.return_value = {
             'prior': {'burdock': 0},
@@ -507,7 +471,7 @@ class TestCaseSymptomsProgress:
             'nutrient': {'vitamin': 0}
         }
         assert_equal_objects(
-            list(SymptomsProgress(obj_id()).worsen)[0],
+            SymptomsProgress(patient_id()).worsen,
             ['burdock', 'spinach', 'vitamin']
         )
 
@@ -515,7 +479,7 @@ class TestCaseSymptomsProgress:
         """If the symptoms scale remain constant, they will be
         considered a good sign.
         """
-        sorted_symptoms_mock.return_value = {obj_id().__str__(): [2, 2]}
+        sorted_symptoms_mock.return_value = {patient_id().__str__(): [2, 2]}
         m = mocker.patch('saana_lib.tag.db.tags')
         m.find_one.return_value = {
             'prior': {'burdock': 0},
@@ -524,7 +488,7 @@ class TestCaseSymptomsProgress:
             'nutrient': {'vitamin': 0}
         }
         assert_equal_objects(
-            list(SymptomsProgress(obj_id()).better)[0],
+            list(SymptomsProgress(patient_id()).better)[0],
             ['burdock', 'spinach', 'vitamin']
         )
 
@@ -533,7 +497,7 @@ class TestCaseSymptomsProgress:
             'saana_lib.patient.SymptomsProgress.worsen',
             new_callable=mocker.PropertyMock,
         )
-        _ = SymptomsProgress(obj_id()).worsen_multiplier_ingredients
+        _ = SymptomsProgress(patient_id()).worsen_multiplier_ingredients
         worsen.assert_called_once_with()
 
     def test_better_multiplier_ingredients(self, sorted_symptoms_mock, mocker):
@@ -541,24 +505,24 @@ class TestCaseSymptomsProgress:
             'saana_lib.patient.SymptomsProgress.better',
             new_callable=mocker.PropertyMock,
         )
-        _ = SymptomsProgress(obj_id()).better_multiplier_ingredients
+        _ = SymptomsProgress(patient_id()).better_multiplier_ingredients
         better.assert_called_once_with()
 
     def test_multiplier_ingredients_values(self, sorted_symptoms_mock, mocker):
         tags = mocker.patch('saana_lib.patient.db.tags')
         tags.find.return_value = [{'prior': {'milk': 2}}, {'prior': {'nuts': 0}}]
-        sorted_symptoms_mock.return_value = {obj_id().__str__(): [1, 1]}
+        sorted_symptoms_mock.return_value = {patient_id().__str__(): [1, 1]}
         assert_equal_objects(
-            SymptomsProgress(obj_id()).better_multiplier_ingredients,
+            SymptomsProgress(patient_id()).better_multiplier_ingredients,
             ['milk', 'nuts']
         )
 
     def test_multiplier_ingredients_values_2(self, sorted_symptoms_mock, mocker):
         tags = mocker.patch('saana_lib.patient.db.tags')
         tags.find.return_value = [{'minimize': {'milk': 2}}, {'minimize': {'nuts': 0}}]
-        sorted_symptoms_mock.return_value = {obj_id().__str__(): [2, 1]}
+        sorted_symptoms_mock.return_value = {patient_id().__str__(): [2, 1]}
         assert_equal_objects(
-            SymptomsProgress(obj_id()).worsen_multiplier_ingredients,
+            SymptomsProgress(patient_id()).worsen_multiplier_ingredients,
             ['milk', 'nuts']
         )
 

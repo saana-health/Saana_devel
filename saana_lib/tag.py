@@ -69,7 +69,7 @@ class Tag:
         elif tag_name and tag_type:
             self.tag = db.tags.find_one({'name': tag_name, 'type': tag_type})
         else:
-            self.tag = None
+            self.tag = {}
 
         if not (self.tag or self.content_row):
             raise RequiredArgumentException("")

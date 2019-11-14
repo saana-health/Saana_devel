@@ -1,8 +1,8 @@
 from datetime import datetime
 
 import pytest
-from pymongo.collection import ObjectId
 
+from tests.conftest import obj_id
 from saana_lib.chemo import Chemo
 
 
@@ -12,13 +12,12 @@ def datetime_mock(mocker):
     return mock
 
 
-def obj_id():
-    return ObjectId('5d7258c977f06d4208211eb4')
+patient_id = obj_id
 
 
 @pytest.mark.usefixtures("scoreboard_base_patch")
 class TestCaseChemo:
-    klass = Chemo(obj_id())
+    klass = Chemo(patient_id())
 
     def test_chemo_dates_when_is_tuesday(self, datetime_mock):
         datetime_mock.now.return_value = datetime(2019, 10, 15)
@@ -35,9 +34,6 @@ class TestCaseChemo:
             return_value=list()
         )
         assert self.klass.recipes({}, [1, 2]) == [1, 2]
-
-    """Test names are bad, because the 
-    """
 
     def test_recipe_from_slots(self, mocker):
         mocker.patch(

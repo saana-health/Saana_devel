@@ -1,9 +1,8 @@
 from logging import getLogger
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 from pymongo.collection import ObjectId
 
-from constants import constants_wrapper as constants
 from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
 from saana_lib.recommendation import RecipeRecommendation
@@ -47,8 +46,8 @@ class RankingOut(OutIn):
             if counter == limit:
                 break
 
-            for recipe in recipes:
-                self.proxy(recipe)
+            for recipe_recommendation in recipes:
+                self.proxy(recipe_recommendation)
                 counter += 1
 
     def sequence(self):
@@ -59,7 +58,7 @@ class RankingToDatabase(RankingOut):
     """"""
 
     def proxy(self, content):
-        db.patient_recipe_recommendation.insert_one(content)
+        db.patient_recipe_recommendation.insert_one(content.db_format)
 
 
 class RankingToFile(RankingOut):

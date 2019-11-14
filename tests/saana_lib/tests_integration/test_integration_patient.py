@@ -3,18 +3,17 @@ from datetime import datetime
 from pymongo.collection import ObjectId
 import pytest
 
-from saana_lib.patient import SymptomsProgress
-from tests.conftest import assert_equal_objects
+from saana_lib.patient import SymptomsProgress, MinimizeIngredients, \
+    AvoidIngredients
+from tests.conftest import assert_equal_objects, PATIENT
 
 
 @pytest.fixture
-def symptoms_progress_test_db(integration_setup, mocker):
-    test_db = integration_setup
-
+def symptoms_progress_test_db(integration_db):
     patient_id = ObjectId('5cabf2ad37c87f3ac00e8701')
     symptom_id_1 = ObjectId('5cab584074e88f0cb0977a0f')
     symptom_id_2 = ObjectId('5cabf2ad37c87f3ac00e870d')
-    test_db.patient_symptoms.insert_many([
+    integration_db.patient_symptoms.insert_many([
         {'symptom_id': symptom_id_1,
          'created_at': datetime(2019, 4, 2, 1),
          'updated_at': datetime(2019, 4, 2, 1),
@@ -42,9 +41,8 @@ def symptoms_progress_test_db(integration_setup, mocker):
          'symptoms_scale': 2},
         ]
     )
-    mocker.patch('saana_lib.patient.db', test_db)
     yield patient_id, symptom_id_1, symptom_id_2
-    test_db.patient_symptoms.drop()
+    integration_db.patient_symptoms.drop()
 
 
 def test_symptoms_sorted_by_date(symptoms_progress_test_db):
@@ -55,4 +53,11 @@ def test_symptoms_sorted_by_date(symptoms_progress_test_db):
         {symptom_id_1: [8, 2, 3], symptom_id_2: [1, 5]}
     )
 
+
+def test_patient_avoid_ingredients(integration_db):
+    assert_equal_objects(
+        AvoidIngredients(PATIENT['_id']).all, {
+            'carrot', 'pak choi', 'ginger'
+        }
+    )
 

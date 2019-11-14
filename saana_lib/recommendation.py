@@ -9,7 +9,8 @@ from saana_lib.connectMongo import db
 from constants import constants_wrapper as constants
 from saana_lib.patient import MinimizeIngredients, AvoidIngredients, \
     PrioritizeIngredients
-from saana_lib.score import PrioritizedScore, MinimizedScore, NutrientScore
+from saana_lib.score import PrioritizedScore, MinimizedScore, AvoidScore, \
+    NutrientScore
 
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class Recommendation:
 
     @property
     def _all(self):
-        for name, quantity in self.ingredients_class.all.items():
+        for name, quantity in self.ingredients_class(self.patient_id).all.items():
             yield self.recommendation_frame(name, quantity)
 
     def as_list(self):
@@ -95,7 +96,7 @@ class AvoidRecommendation(Recommendation):
 
     @property
     def _all(self):
-        for name in self.ingredients_class.all:
+        for name in self.ingredients_class(self.patient_id).all:
             yield self.recommendation_frame(name)
 
 
@@ -109,16 +110,16 @@ class AllRecommendations(OutIn):
         :return: the concatenation of the 3 lists
         """
         return MinimizeRecommendation(self.patient_id).as_list() + \
-               PrioritizeRecommendation(self.patient_id).as_list() + \
-               AvoidRecommendation(self.patient_id).as_list()
+            PrioritizeRecommendation(self.patient_id).as_list() + \
+            AvoidRecommendation(self.patient_id).as_list()
 
     def store(self):
         """
         :return: the sum of the counter of the record being written
         """
         return MinimizeRecommendation(self.patient_id).to_db() + \
-               PrioritizeRecommendation(self.patient_id).to_db() + \
-               AvoidRecommendation(self.patient_id).to_db()
+            PrioritizeRecommendation(self.patient_id).to_db() + \
+            AvoidRecommendation(self.patient_id).to_db()
 
 
 """
@@ -131,12 +132,15 @@ is_like: {type: Boolean, default: true}
 created_at: {type: Date}
 updated_at: {type: Date}
 """
+
+
 class RecipeRecommendation:
 
     def __init__(self, recipe, patient_id, recipe_id=None):
-        self.__recipe_id = recipe_id
         self.recipe = recipe
-        self.__patient_id = patient_id
+        self._patient_id = patient_id
+        if recipe and not recipe_id:
+            self._recipe_id = recipe['_id']
         self._score = constants.DEFAULT_RECOMMENDATION_SCORE
 
     @property
@@ -151,7 +155,7 @@ class RecipeRecommendation:
             end = start - timedelta(days=7)
         return list(
             o['recipe_id'] for o in db.patient_recipe_recommendation.find(
-                {'patient_id': self.__patient_id,
+                {'patient_id': self._patient_id,
                  'created_at': {"$lte": start, "$gte": end}
                  }, {'recipe_id': 1, '_id': 0}
             )
@@ -167,14 +171,23 @@ class RecipeRecommendation:
         weeks = (self.today.isocalendar()[1] - last_time.isocalendar()[1])
         return 40 - (weeks * 10) if weeks <= 3 else 0
 
-    def deduct_avoid(self):
-        return len(AvoidIngredients(self.__patient_id).all) * constants.DEDUCT_AVOID
-
     @property
     def score(self):
         val = constants.DEFAULT_RECOMMENDATION_SCORE
-        val -= self.deduct_avoid()
-        val -= MinimizedScore(self.__recipe_id, self.__patient_id).value
-        val += PrioritizedScore(self.__recipe_id, self.__patient_id).value
-        val += NutrientScore(self.__recipe_id, self.__patient_id).value
+        val += AvoidScore(self._recipe_id, self._patient_id).value
+        val += MinimizedScore(self._recipe_id, self._patient_id).value
+        val += PrioritizedScore(self._recipe_id, self._patient_id).value
+        val += NutrientScore(self._recipe_id, self._patient_id).value
+
         return val
+
+    @property
+    def db_format(self):
+        return {
+            'patient_id': self._patient_id,
+            'recipe_id': self._recipe_id,
+            'score': self.score,
+            'is_like': True,
+            'created_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat()
+        }

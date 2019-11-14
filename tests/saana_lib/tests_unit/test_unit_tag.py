@@ -67,6 +67,7 @@ class TestCaseTag:
         assert {'sodium': '300'} == tag.nutrient_sequence
 
 
+@pytest.mark.skip('')
 class TestCaseTagMatrix(object):
 
     @pytest.fixture
@@ -257,6 +258,7 @@ class TestCaseTagMatrix(object):
         )
 
 
+@pytest.mark.skip('')
 @pytest.mark.usefixtures('file_opening', 'headers_mock')
 class TestCaseUpdateContentRow(object):
 
@@ -388,8 +390,7 @@ class TestCaseTagFile(object):
     pass
 
 
-# 'type', 'name', 'mackerel', 'seaweed', 'potato', 'spinach'
-
+@pytest.mark.skip('')
 @pytest.mark.usefixtures('file_opening', 'headers_mock')
 class TestCaseNewContentRow(object):
 

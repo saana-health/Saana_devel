@@ -1,10 +1,13 @@
 import pytest
 
-from pymongo.collection import ObjectId
-
 from saana_lib.score import MinimizedScore, PrioritizedScore, \
-    IngredientScore, NutrientScore
+    IngredientScore, NutrientScore, AvoidScore
 from tests.conftest import obj_id
+
+
+recipe_id = obj_id
+patient_id = obj_id
+nutrient_id = obj_id
 
 
 class TestCaseRecipeMinimizeScore:
@@ -15,75 +18,117 @@ class TestCaseRecipeMinimizeScore:
             new_callable=mocker.PropertyMock,
             return_value=list()
         )
-        klass = MinimizedScore(obj_id(), obj_id())
+        klass = MinimizedScore(recipe_id(), patient_id())
         for i in range(3):
             _ = klass.worsen_ingredients
         worsen.assert_called_once_with()
 
-    def test_one_minimize_ingredients_in_recipe(self, mocker):
-        m = mocker.patch(
-            'saana_lib.recipe.Recipe.ingredients_id_quantity',
-            new_callable=mocker.PropertyMock,
-            return_value={'a3dw': 20, 'o93f': 3}
-        )
+    def test_one_minimize_ingredient_in_recipe(self, mocker):
         minimize_all = mocker.patch(
             'saana_lib.recommendation.MinimizeIngredients.all',
             new_callable=mocker.PropertyMock,
-            return_value={'t5bv': {'min1': 0, 'min2': 2}, 'o93f': 2},
+            return_value={'seaweed': {'min1': 0, 'min2': 2}, 'fish': 2}
+        )
+        ingredients_id_quantity = mocker.patch(
+            'saana_lib.recipe.Recipe.ingredients_name_quantity',
+            new_callable=mocker.PropertyMock,
+            return_value={'cabbage': 20, 'fish': 3}
         )
 
         res = list(MinimizedScore(obj_id(), obj_id()).ingredient_set)
-        assert res == [('o93f', 3, 2)]
-        assert m.call_count == 1
+        assert res == [('fish', 3, 2)]
+        assert ingredients_id_quantity.call_count == 1
         minimize_all.assert_called_once_with()
 
     def test_ingredient_score_value(self, mocker):
-        sorted_symptoms = mocker.patch(
+        worsened_symptoms = mocker.patch(
             'saana_lib.patient.SymptomsProgress.worsen',
             new_callable=mocker.PropertyMock,
-            return_value={'t5bv': [1, 2], 'a3dw': [7, 3]}
+            return_value={'carrot': [1, 2], 'saury fish': [7, 3]}
         )
 
-        worsen_ingredients = MinimizedScore(obj_id(), obj_id()).worsen_ingredients
+        worsen_ingredients = MinimizedScore(recipe_id(), patient_id()).worsen_ingredients
         assert len(worsen_ingredients) == 2
-        assert 't5bv' in worsen_ingredients
-        sorted_symptoms.assert_called_once_with()
+        assert 'carrot' in worsen_ingredients
+        worsened_symptoms.assert_called_once_with()
+
+    @pytest.fixture
+    def worsen_symptom_ingredients(self, mocker):
+        mocked_method = mocker.patch(
+            'saana_lib.score.MinimizedScore.worsen_ingredients',
+            new_callable=mocker.PropertyMock,
+            return_value=list()
+        )
+        return mocked_method, mocker
+
+    def test_minimize_score_value(self, worsen_symptom_ingredients):
+        mocked_method, mocker = worsen_symptom_ingredients
+        mocker.patch(
+            'saana_lib.score.MinimizedScore.ingredient_set',
+            new_callable=mocker.PropertyMock,
+            return_value=[
+                ('t5bv', 2, {'min1': 2, 'min2': 4}),
+                ('a3dw', 30, 10)
+            ]
+        )
+        assert MinimizedScore(recipe_id(), patient_id()).value == -60
+
+    def test_score_element_of_worsened_symptom(self, worsen_symptom_ingredients):
+        mocked_method, mocker = worsen_symptom_ingredients
+        mocked_method.return_value = ['a3dw']
+        mocker.patch(
+            'saana_lib.score.MinimizedScore.ingredient_set',
+            new_callable=mocker.PropertyMock,
+            return_value=[
+                ('t5bv', 1, {'min1': 2, 'min2': 4}),
+                ('a3dw', 30, 10)
+            ]
+        )
+        assert MinimizedScore(recipe_id(), patient_id()).value == -45
 
 
 class TestCasePrioritizeScore:
-    klass = PrioritizedScore(obj_id(), obj_id())
-
-    def test_ingredient_set(self, mocker):
-        m = mocker.patch(
-            'saana_lib.recipe.Recipe.ingredients_name_quantity',
-            new_callable=mocker.PropertyMock,
-        )
-        _all = mocker.patch(
-            'saana_lib.recommendation.PrioritizeIngredients.all',
-            new_callable=mocker.PropertyMock,
-        )
-        _ = list(self.klass.ingredient_set)
-
-        _all.assert_called_once_with()
-        m.assert_called_once_with()
+    klass = PrioritizedScore(recipe_id(), patient_id())
 
     def test_prioritize_score_value(self, mocker):
-        mocker.patch(
-            'saana_lib.recipe.Recipe.ingredients_name_quantity',
-            new_callable=mocker.PropertyMock,
-            return_value={'dill': 20, 'flax': 3}
-        )
+        """This test implicitly assert that both mocks
+        are being called
+        """
         mocker.patch(
             'saana_lib.recommendation.PrioritizeIngredients.all',
             new_callable=mocker.PropertyMock,
-            return_value={'wrap': 3, 'dill': 2},
+            return_value={'zucchini': 3, 'seaweed': 12},
         )
-
+        mocker.patch(
+            'saana_lib.recipe.Recipe.ingredients_name_quantity',
+            new_callable=mocker.PropertyMock,
+            return_value={'seaweed': 13}
+        )
         assert self.klass.value == 10
 
 
+class TestCaseAvoidScore:
+    klass = AvoidScore(recipe_id(), patient_id())
+
+    def test_prioritize_score_value(self, mocker):
+        """This test implicitly assert that both mocks
+        are being called
+        """
+        mocker.patch(
+            'saana_lib.recommendation.AvoidIngredients.all',
+            new_callable=mocker.PropertyMock,
+            return_value=['zucchini', 'seaweed'],
+        )
+        mocker.patch(
+            'saana_lib.recipe.Recipe.ingredients_name_quantity',
+            new_callable=mocker.PropertyMock,
+            return_value={'seaweed': 13}
+        )
+        assert self.klass.value == -60
+
+
 class TestCaseNutrientScore:
-    klass = NutrientScore(obj_id(), obj_id())
+    klass = NutrientScore(recipe_id(), patient_id())
 
     def test_nutrient_set(self, mocker):
         _all = mocker.patch(
@@ -108,31 +153,33 @@ class TestCaseNutrientScore:
 
     def test_calories_score_out_range(self, get_nutrient_facts_mock):
         get_nutrient_facts_mock.return_value = (200, {'lower': 100, 'upper': 180})
-        assert self.klass.calories_score(obj_id()) == -20
+        assert self.klass.calories_score(nutrient_id()) == -20
 
     def test_calories_score_in_range(self, get_nutrient_facts_mock):
         get_nutrient_facts_mock.return_value = (120, {'lower': 100, 'upper': 150})
-        assert self.klass.calories_score(obj_id()) == -10
+        assert self.klass.calories_score(nutrient_id()) == -10
 
     def test_calories_lt_threshold(self, get_nutrient_facts_mock):
         get_nutrient_facts_mock.return_value = (100, 200)
-        assert self.klass.calories_score(obj_id()) == 10
+        assert self.klass.calories_score(nutrient_id()) == 10
 
     def test_calories_gt_threshold(self, get_nutrient_facts_mock):
         get_nutrient_facts_mock.return_value = (300, 200)
-        assert self.klass.calories_score(obj_id()) == -10
+        assert self.klass.calories_score(nutrient_id()) == -10
 
     def test_add_calories_score(self, mocker):
-        calories_score = mocker.patch('saana_lib.score.NutrientScore.calories_score')
+        calories_score = mocker.patch(
+            'saana_lib.score.NutrientScore.calories_score'
+        )
         m = mocker.patch('saana_lib.score.db.mst_nutrients')
-        m.find_one.return_value = obj_id()
+        m.find_one.return_value = nutrient_id()
         mocker.patch(
             'saana_lib.score.NutrientScore.nutrient_set',
             new_callable=mocker.PropertyMock,
-            return_value=[obj_id()]
+            return_value=[nutrient_id()]
         )
         _ = self.klass.add_calories_score
-        calories_score.assert_called_with(obj_id())
+        calories_score.assert_called_with(nutrient_id())
 
 
 class TestCaseIngredientScore:

@@ -113,7 +113,10 @@ class PatientOtherRestrictions(Patient):
             {"patient_id": self.pid}
         )
 
-        patient_restriction = restriction['other_restriction']
+        if restriction is None:
+            return ""
+
+        patient_restriction = restriction.get('other_restriction')
         patient_restriction = patient_restriction.replace('\n', space_sep)
         patient_restriction = patient_restriction.replace(',', space_sep)
 
@@ -195,7 +198,7 @@ class PrioritizeIngredients(PatientTags):
 class Nutrients(PatientTags):
     """
     Inside each Tags, I expect the Nutrients array to have this
-    schema. In this way the
+    schema.
 
     {'nutrient': [
         { 'ObjectId: {
@@ -232,12 +235,16 @@ class AvoidIngredients(PatientTags):
 
     @property
     def all_ingredients_names(self):
-        return map(lambda d: d['name'], db.mst_food_ingredients.find(
-                {}, {'name': 1, '_id': 0}))
+        return map(
+            lambda d: d['name'], db.mst_food_ingredients.find(
+                {}, {'name': 1, '_id': 0})
+        )
 
     def ingredient_exists(self, ingredient_name):
-        return any(True for name in self.all_ingredients_names
-                   if ingredient_name in name or name in ingredient_name)
+        return any(
+            True for name in self.all_ingredients_names
+            if ingredient_name in name or name in ingredient_name
+        )
 
     @property
     def other_restrictions(self):
@@ -360,12 +367,14 @@ class SymptomsProgress(PatientSymptom):
         :returns the list of all elements (avoid, nutrients, minimize
         and prioritize) that belong to that this symptom
         """
+        l = []
         for symptom_id, symptom_scale in self.symptoms_sorted_by_date.items():
             if len(symptom_scale) < 2:
                 continue
 
             if symptom_scale[0] - symptom_scale[1] > 0:
-                yield Tag(symptom_id).all_elements_names()
+                l.extend(Tag(symptom_id).all_elements_names())
+        return l
 
     @property
     def better(self):

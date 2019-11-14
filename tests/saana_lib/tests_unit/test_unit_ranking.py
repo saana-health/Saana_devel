@@ -2,14 +2,16 @@ from datetime import datetime
 
 from tests.conftest import obj_id
 from saana_lib.ranking import Ranking, RankingToDatabase, RankingToFile
-from tests.conftest import assert_equal_objects
+
+
+patient_id = obj_id
 
 
 class TestCaseRanking:
 
     def test_ranking_compute(self, mocker):
         find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
-        _ = Ranking(obj_id()).compute()
+        _ = Ranking(patient_id()).compute()
         find_recipes.find.assert_called_once_with()
 
     def test_recommendation_have_same_score(self, mocker):
@@ -33,25 +35,25 @@ class TestCaseRanking:
             new_callable=mocker.PropertyMock,
             side_effect=range(10, 31, 10)
         )
-        _ = Ranking(obj_id()).compute()
+        _ = Ranking(patient_id()).compute()
         assert list(_) == [30, 20, 10]
         assert m.call_count == 3
 
     def test_ranking_ascending_order(self, mocker):
         find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
-        find_recipes.find.return_value = range(3)
+        find_recipes.find.return_value = [{}, {}, {}]
 
         mocker.patch(
             'saana_lib.recommendation.RecipeRecommendation.score',
             new_callable=mocker.PropertyMock,
             side_effect=range(10, 31, 10)
         )
-        _ = Ranking(obj_id()).compute(descending=False)
+        _ = Ranking(patient_id()).compute(descending=False)
         assert list(_) == [10, 20, 30]
 
 
 class TestCaseOutIn:
-    klass = RankingToDatabase(obj_id())
+    klass = RankingToDatabase(patient_id())
 
     def test_store_elements_count_exceed_default_limit(self, mocker):
         """
@@ -66,6 +68,7 @@ class TestCaseOutIn:
         assert m.insert_one.call_count == 20
 
     def test_store_less_element_than_limit(self, mocker):
+        mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
         m = mocker.patch('saana_lib.ranking.db.patient_recipe_recommendation')
         _compute = mocker.patch('saana_lib.ranking.Ranking.compute')
 
@@ -75,6 +78,7 @@ class TestCaseOutIn:
 
     def test_store_order_is_preserved(self, mocker):
         from collections import OrderedDict
+        mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
         m = mocker.patch('saana_lib.ranking.db.patient_recipe_recommendation')
         mocker.patch(
             'saana_lib.ranking.Ranking.compute',
@@ -114,6 +118,6 @@ class TestCaseRankingToFile:
             'saana_lib.ranking.Ranking.compute',
             return_value=dict((i, [{}]) for i in range(3, 0, -1))
         )
-        RankingToFile(obj_id()).store()
+        RankingToFile(patient_id()).store()
         m.assert_called_once_with()
 
