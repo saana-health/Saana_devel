@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from tests.conftest import obj_id
 from saana_lib.ranking import Ranking, RankingToDatabase, RankingToFile
 
@@ -9,15 +11,17 @@ patient_id = obj_id
 
 class TestCaseRanking:
 
+    @pytest.fixture(autouse=True)
+    def find_recipes(self, mocker):
+        find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
+        find_recipes.find.return_value = [{'_id': 1}, {'_id': 1}, {'_id': 1}, ]
+
     def test_ranking_compute(self, mocker):
         find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
         _ = Ranking(patient_id()).compute()
         find_recipes.find.assert_called_once_with()
 
     def test_recommendation_have_same_score(self, mocker):
-        find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
-        find_recipes.find.return_value = range(3)
-
         mocker.patch(
             'saana_lib.recommendation.RecipeRecommendation.score',
             new_callable=mocker.PropertyMock,
@@ -27,9 +31,6 @@ class TestCaseRanking:
         assert len(_[10]) == 3
 
     def test_ranking_default_order(self, mocker):
-        find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
-        find_recipes.find.return_value = range(3)
-
         m = mocker.patch(
             'saana_lib.recommendation.RecipeRecommendation.score',
             new_callable=mocker.PropertyMock,
@@ -40,9 +41,6 @@ class TestCaseRanking:
         assert m.call_count == 3
 
     def test_ranking_ascending_order(self, mocker):
-        find_recipes = mocker.patch('saana_lib.ranking.db.mst_recipe')
-        find_recipes.find.return_value = [{}, {}, {}]
-
         mocker.patch(
             'saana_lib.recommendation.RecipeRecommendation.score',
             new_callable=mocker.PropertyMock,
@@ -58,35 +56,22 @@ class TestCaseOutIn:
     def test_store_elements_count_exceed_default_limit(self, mocker):
         """
         There are 5 elements for each score. Verify that the limit
-        is respected although the # of elements exceed it
+        is respected although the # of elements exceeds it
         """
-        m = mocker.patch('saana_lib.ranking.db.patient_recipe_recommendation')
+        proxy = mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
         _compute = mocker.patch('saana_lib.ranking.Ranking.compute')
 
         _compute.return_value = dict((i, list(range(5))) for i in range(10))
         self.klass.store()
-        assert m.insert_one.call_count == 20
+        assert proxy.call_count == 20
 
     def test_store_less_element_than_limit(self, mocker):
-        mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
-        m = mocker.patch('saana_lib.ranking.db.patient_recipe_recommendation')
+        proxy = mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
         _compute = mocker.patch('saana_lib.ranking.Ranking.compute')
 
         _compute.return_value = dict((i, list(range(5))) for i in range(2))
         self.klass.store()
-        assert m.insert_one.call_count == 10
-
-    def test_store_order_is_preserved(self, mocker):
-        from collections import OrderedDict
-        mocker.patch('saana_lib.ranking.RankingToDatabase.proxy')
-        m = mocker.patch('saana_lib.ranking.db.patient_recipe_recommendation')
-        mocker.patch(
-            'saana_lib.ranking.Ranking.compute',
-            return_value=OrderedDict((i, [i]) for i in range(3, 0, -1))
-        )
-
-        self.klass.store()
-        assert tuple(m.insert_one.mock_calls[0])[1][0] == 3
+        assert proxy.call_count == 10
 
 
 class TestCaseRankingToFile:

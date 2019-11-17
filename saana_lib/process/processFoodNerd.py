@@ -2,7 +2,7 @@ import csv
 import os
 import pdb
 from .match_names import match_euphebe, change_names
-from ..model import Meal
+from saana_lib.old_code_not_used import Meal
 from .. import connectMongo
 
 PATH = os.path.join(os.getcwd(),'csv/FoodNerd/')

@@ -40,5 +40,7 @@ class ConstantsWrapper:
 
     DEFAULT_RECOMMENDATION_SCORE = 100
 
+    RECIPES_TO_RANK = 20
+
 
 constants_wrapper = ConstantsWrapper()

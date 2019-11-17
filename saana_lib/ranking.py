@@ -3,6 +3,7 @@ from collections import OrderedDict
 from datetime import datetime
 from pymongo.collection import ObjectId
 
+from constants import constants_wrapper as constants
 from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
 from saana_lib.recommendation import RecipeRecommendation
@@ -39,7 +40,7 @@ class RankingOut(OutIn):
     def __init__(self, patient_id):
         self.patient_id = ObjectId(patient_id)
 
-    def store(self, limit=20):
+    def store(self, limit=constants.RECIPES_TO_RANK):
         counter = 0
         _ranking = Ranking(self.patient_id).compute()
         for score, recipes in _ranking.items():
@@ -51,7 +52,7 @@ class RankingOut(OutIn):
                 counter += 1
 
     def sequence(self):
-        """"""
+        """TODO to implement"""
 
 
 class RankingToDatabase(RankingOut):

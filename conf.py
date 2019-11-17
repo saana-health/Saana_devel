@@ -42,7 +42,7 @@ LOGGING_SETTINGS = {
 
 
 config.dictConfig(LOGGING_SETTINGS)
-DATABASE_USER = os.environ.get("DATABASE_USER", '')
+DATABASE_USER = os.environ.get("DATABASE_USER")
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", '')
 
 DATABASE_ADDRESS = os.environ.get('DATABASE_ADDRESS', '0.0.0.0')

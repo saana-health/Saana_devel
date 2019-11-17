@@ -18,3 +18,7 @@ class RankingException(SaanaBaseException):
 class RequiredArgumentException(SaanaBaseException):
     """"""
 
+
+class DatabaseConfException(SaanaBaseException):
+    """"""
+

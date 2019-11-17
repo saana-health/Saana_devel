@@ -1,7 +1,7 @@
 import csv
 from .. import connectMongo
 import os
-from ..model import Meal
+from saana_lib.old_code_not_used import Meal
 from difflib import SequenceMatcher
 import re
 

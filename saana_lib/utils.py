@@ -4,8 +4,7 @@ import csv
 from datetime import date, timedelta
 from difflib import SequenceMatcher
 
-from saana_lib import connectMongo
-from saana_lib.model import Meal, Tag, Patient
+from saana_lib.old_code_not_used import Meal, Tag, Patient
 
 
 logger = logging.getLogger(__name__)
