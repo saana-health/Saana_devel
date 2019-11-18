@@ -1,49 +1,10 @@
 5d59bcff2fb97d420770c5ba
 score,meal,minimize,prior,avoid,supplier_id,supplier_name
-200,b'baked mac & cheez dinner',[],"['milk', 'coconut oil', 'oil', 'brussels sprouts', 'butter', 'potato', 'parsley', 'onion', 'cauliflower', 'beans']",[],5cb0fa253b7750fa415d3045,Veestro
-180,b'carrot osso bucco',[],"['mushroom', 'milk', 'oil', 'butter', 'potato', 'parsley', 'onion', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-170,b'shepherdless pie',[],"['mushroom', 'milk', 'oil', 'potato', 'spinach', 'onion', 'kale']",[],5cb0fa253b7750fa415d3045,Veestro
-170,b'mushroom stroganoff',[],"['mushroom', 'milk', 'oil', 'butter', 'spinach', 'onion', 'beans']",[],5cb0fa253b7750fa415d3045,Veestro
-170,b'lentil and spinach tagine',[],"['milk', 'coconut oil', 'oil', 'butter', 'potato', 'spinach', 'onion']",[],5cb0fa253b7750fa415d3045,Veestro
-160,"b""creamy italian chick'n""",[],"['oil', 'potato', 'parsley', 'onion', 'broccoli', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-160,"b""country fried chick'n""",[],"['oil', 'potato', 'onion', 'cauliflower', 'broccoli', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-160,"b""thai chick'n stew""",[],"['oil', 'butter', 'potato', 'nut butter', 'onion', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'ultimate veggie wrap',[],"['milk', 'oil', 'potato', 'spinach', 'onion', 'cauliflower']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'pasta bolognese',[],"['mushroom', 'oil', 'spinach', 'parsley', 'onion', 'egg']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'chinese eggplant stirfry',[],"['oil', 'butter', 'egg', 'cauliflower', 'kale', 'nut butter']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'pad thai',[],"['milk', 'oil', 'seaweed', 'cauliflower', 'kale', 'radish']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'paella valenciana',[],"['oil', 'potato', 'parsley', 'onion', 'beans', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-160,b'spanish torta',[],"['oil', 'potato', 'spinach', 'parsley', 'onion', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-150,"b""chick'n quesadilla""",[],"['oil', 'potato', 'spinach', 'onion', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'eggplant casserole',[],"['oil', 'spinach', 'parsley', 'onion', 'egg']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'veggie pesto pizza',[],"['nuts', 'coconut oil', 'oil', 'potato', 'onion']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'golden chickpea stew',[],"['oil', 'potato', 'onion', 'cauliflower', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'enfrijolada rustica',[],"['coconut oil', 'oil', 'potato', 'onion', 'cauliflower']",[],5cb0fa253b7750fa415d3045,Veestro
-150,"b""pepp'roni pizza""",[],"['coconut oil', 'oil', 'potato', 'parsley', 'onion']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'lentil meatloaf',[],"['oil', 'parsley', 'onion', 'cauliflower', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'savory croquettes',[],"['nuts', 'oil', 'butter', 'potato', 'onion']",[],5cb0fa253b7750fa415d3045,Veestro
-150,b'omelet primavera',[],"['mushroom', 'oil', 'potato', 'spinach', 'onion']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'red curry with tofu',[],"['oil', 'cauliflower', 'milk', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'veggie lasagna',[],"['onion', 'oil', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-140,"b""chick'n nuggets""",[],"['onion', 'potato', 'oil', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'tuscan calzone',[],"['onion', 'oil', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-140,"b""southwest bbq chick'n""",[],"['onion', 'milk', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'spinach pie',[],"['oil', 'mushroom', 'spinach', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'beluga lentil braise',[],"['beans', 'milk', 'potato', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'portobello steak dinner',[],"['onion', 'mushroom', 'kale', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'kale and quinoa salad',[],"['onion', 'kale', 'oil', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'quinoa bake',[],"['onion', 'oil', 'potato', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'latin stew',[],"['onion', 'beans', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'pizza napoletana',[],"['coconut oil', 'potato', 'oil', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-140,b'all-american breakfast',[],"['onion', 'milk', 'oil', 'turmeric']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'soba noodles in peanut sauce',[],"['oil', 'nuts', 'broccoli']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'veggie empanadas',[],"['potato', 'oil', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'moroccan melange',[],"['milk', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'mushroom risotto',[],"['mushroom', 'kale', 'beans']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'black bean pasta alfredo',[],"['milk', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'breakfast burrito',[],"['onion', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'three layer scramble',[],"['onion', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-130,b'oatmeal breakfast pie',[],"['nuts', 'potato', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-120,b'mediterranean falafel',[],"['turmeric', 'parsley']",[],5cb0fa253b7750fa415d3045,Veestro
-120,b'enchilada casserole',[],"['onion', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
-120,b'tortilla chili',[],"['onion', 'oil']",[],5cb0fa253b7750fa415d3045,Veestro
+130,b'sweet potato and zucchini gratin with grilled chicken 4p',[],"['potato', 'oil', 'milk']",[],5d6ec6e477f06d4208211ea3,Colruyt
+130,b'plate cake with provencal vegetables ricotta and coppa 4p',[],"['egg', 'oil', 'onion']",[],5d6ec6e477f06d4208211ea3,Colruyt
+120,b'creamy wholemeal spaghetti with smoked salmon leek and spinach 4p',[],"['oil', 'spinach']",[],5d6ec6e477f06d4208211ea3,Colruyt
+120,b'hasselback tomatoes with sweet potato fries 4p',[],"['potato', 'oil']",[],5d6ec6e477f06d4208211ea3,Colruyt
+110,b'pork tenderloin with soba noodles and spring fresh vegetables 4p',[],['butter'],[],5d6ec6e477f06d4208211ea3,Colruyt
+110,b'salmon rolls with pearl couscous and citrus salad 4p',[],['cabbage'],[],5d6ec6e477f06d4208211ea3,Colruyt
+70,b'balls in coconut curry sauce with mango and snow peas 4p',[],"['mushroom', 'oil', 'milk']",['ground pork'],5d6ec6e477f06d4208211ea3,Colruyt
+70,b'wraps with beef strips and guacamole of broccoli 4p',[],"['oil', 'broccoli', 'avocado']",['beef'],5d6ec6e477f06d4208211ea3,Colruyt
