@@ -8,49 +8,6 @@ import pytest
 from saana_lib import connectMongo, ranking
 
 
-@pytest.fixture(autouse=True)
-def set_dev_env(monkeypatch):
-    """Remove requests.sessions.Session.request for all tests."""
-    monkeypatch.setenv('DEV_ENV', 'true')
-
-
-@pytest.fixture
-def argparse_patch(monkeypatch):
-    import argparse
-
-    class ArgumentParserMock:
-
-        def add_argument(self, *args, **kwargs):
-            pass
-
-        def parse_args(self):
-            return argparse.Namespace(mode='test')
-
-    monkeypatch.setattr(argparse, 'ArgumentParser', ArgumentParserMock)
-    return monkeypatch
-
-
-@pytest.fixture
-def scoreboard_base_patch(file_opening):
-
-    class datetime_mock(MagicMock):
-        @classmethod
-        def now(cls):
-            return '2019-09-18T11:10:00'
-
-    file_opening.setattr(
-        ranking,
-        'datetime',
-        datetime_mock
-    )
-
-
-@pytest.fixture(name='file_opening')
-def file_opening(mocker):
-    fopen_mock = mocker.patch('builtins.open')
-    return fopen_mock
-
-
 def assert_equal_objects(o1, o2):
     """
     o1 and o2 are two objects. might be of almost any type (i'm
@@ -113,57 +70,51 @@ def assert_equal_tuples(t1, t2):
         assert_equal_objects(element, t2[pos])
 
 
+def obj_id():
+    return ObjectId('5d7258c977f06d4208211eb4')
+
+
+@pytest.fixture(autouse=True)
+def set_dev_env(monkeypatch):
+    """Remove requests.sessions.Session.request for all tests."""
+    monkeypatch.setenv('DEV_ENV', 'true')
+
+
 @pytest.fixture
-def integration_database_setup():
-    from datetime import timedelta
-    base_datetime = datetime(2019, 10, 10)
-    test_db = connectMongo.client.test_db
+def argparse_patch(monkeypatch):
+    import argparse
 
-    if test_db.patients.estimated_document_count() == 0:
-        PATIENT['_id'] = ObjectId('311ee45a02f611eaaf720242')
-        PATIENT['created_at'] = base_datetime - timedelta(days=1)
-        PATIENT['updated_at'] = base_datetime - timedelta(days=1)
-        test_db.patients.insert_one(PATIENT)
+    class ArgumentParserMock:
 
-    if test_db.users.estimated_document_count() == 0:
-        USER['_id'] = ObjectId('309a734602f611eaaf720242')
-        USER['created_at'] = base_datetime - timedelta(days=2)
-        USER['updated_at'] = base_datetime - timedelta(days=2)
-        test_db.users.insert_one(USER)
+        def add_argument(self, *args, **kwargs):
+            pass
 
-    if test_db.nutrition_facts.estimated_document_count() == 0:
-        test_db.nutrition_facts.insert_many(NUTRITIONS)
-        test_db.mst_food_ingredients.insert_many(INGREDIENTS)
+        def parse_args(self):
+            return argparse.Namespace(mode='test')
 
-    if test_db.mst_recipe.estimated_document_count() == 0:
-        test_db.mst_recipe.insert_many(RECIPES)
+    monkeypatch.setattr(argparse, 'ArgumentParser', ArgumentParserMock)
+    return monkeypatch
 
-    if test_db.tags.estimated_document_count() == 0:
-        test_db.tags.insert_many(TAGS)
-        test_db.patient_symptoms.insert_one({
-            'symptom_id': TAGS[0]['tag_id'],
-            'patient_id': PATIENT['_id'],
-            'created_at': base_datetime,
-            'updated_at': base_datetime,
-            'symptoms_scale': 4
-        })
-        test_db.patient_comorbidities.insert_one({
-            'comorbidity_id': TAGS[1]['tag_id'],
-            'patient_id': PATIENT['_id'],
-            'created_at': base_datetime,
-            'updated_at': base_datetime,
-            'symptoms_scale': 3
-        })
-        test_db.patient_diseases.insert_one({
-            'disease_id': TAGS[2]['tag_id'],
-            'patient_id': PATIENT['_id'],
-            'created_at': base_datetime,
-            'updated_at': base_datetime,
-            'symptoms_scale': 5
-        })
 
-    yield test_db
-    connectMongo.client.drop_database('test_db')
+@pytest.fixture
+def scoreboard_base_patch(file_opening):
+
+    class datetime_mock(MagicMock):
+        @classmethod
+        def now(cls):
+            return '2019-09-18T11:10:00'
+
+    file_opening.setattr(
+        ranking,
+        'datetime',
+        datetime_mock
+    )
+
+
+@pytest.fixture(name='file_opening')
+def file_opening(mocker):
+    fopen_mock = mocker.patch('builtins.open')
+    return fopen_mock
 
 
 @pytest.fixture
@@ -174,8 +125,77 @@ def datetime_mock(mocker):
     return mock
 
 
-def obj_id():
-    return ObjectId('5d7258c977f06d4208211eb4')
+@pytest.fixture(name='testing_db')
+def testing_db_init():
+    yield connectMongo.client.test_db
+    connectMongo.client.drop_database('test_db')
+
+
+@pytest.fixture(autouse=True)
+def test_unit_db(testing_db, mocker):
+    """
+    every test inherits this fixture automatically, so that
+    everywhere saana_db (the production db) is replaced with
+    testing_db.
+    """
+    mocker.patch('saana_lib.patient.db', testing_db)
+    mocker.patch('saana_lib.ranking.db', testing_db)
+    mocker.patch('saana_lib.recipe.db', testing_db)
+    mocker.patch('saana_lib.recommendation.db', testing_db)
+    mocker.patch('saana_lib.score.db', testing_db)
+    mocker.patch('saana_lib.tag.db', testing_db)
+    yield testing_db
+
+
+@pytest.fixture
+def integration_db(test_unit_db, datetime_mock):
+    from datetime import timedelta
+    base_datetime = datetime(2019, 10, 10)
+
+    if test_unit_db.patients.estimated_document_count() == 0:
+        PATIENT['_id'] = ObjectId('311ee45a02f611eaaf720242')
+        PATIENT['created_at'] = base_datetime - timedelta(days=1)
+        PATIENT['updated_at'] = base_datetime - timedelta(days=1)
+        test_unit_db.patients.insert_one(PATIENT)
+
+    if test_unit_db.users.estimated_document_count() == 0:
+        USER['_id'] = ObjectId('309a734602f611eaaf720242')
+        USER['created_at'] = base_datetime - timedelta(days=2)
+        USER['updated_at'] = base_datetime - timedelta(days=2)
+        test_unit_db.users.insert_one(USER)
+
+    if test_unit_db.nutrition_facts.estimated_document_count() == 0:
+        test_unit_db.nutrition_facts.insert_many(NUTRITIONS)
+        test_unit_db.mst_food_ingredients.insert_many(INGREDIENTS)
+
+    if test_unit_db.mst_recipe.estimated_document_count() == 0:
+        test_unit_db.mst_recipe.insert_many(RECIPES)
+
+    if test_unit_db.tags.estimated_document_count() == 0:
+        test_unit_db.tags.insert_many(TAGS)
+        test_unit_db.patient_symptoms.insert_one({
+            'symptom_id': TAGS[0]['tag_id'],
+            'patient_id': PATIENT['_id'],
+            'created_at': base_datetime,
+            'updated_at': base_datetime,
+            'symptoms_scale': 4
+        })
+        test_unit_db.patient_comorbidities.insert_one({
+            'comorbidity_id': TAGS[1]['tag_id'],
+            'patient_id': PATIENT['_id'],
+            'created_at': base_datetime,
+            'updated_at': base_datetime,
+            'symptoms_scale': 3
+        })
+        test_unit_db.patient_diseases.insert_one({
+            'disease_id': TAGS[2]['tag_id'],
+            'patient_id': PATIENT['_id'],
+            'created_at': base_datetime,
+            'updated_at': base_datetime,
+            'symptoms_scale': 5
+        })
+
+    return test_unit_db
 
 
 PATIENT = {
@@ -454,14 +474,3 @@ RECIPES = [{
     ],
     'nutrients': NUTRITIONS[3:6]
 }]
-
-
-@pytest.fixture
-def integration_db(integration_database_setup, mocker, datetime_mock):
-    mocker.patch('saana_lib.patient.db', integration_database_setup)
-    mocker.patch('saana_lib.ranking.db', integration_database_setup)
-    mocker.patch('saana_lib.recipe.db', integration_database_setup)
-    mocker.patch('saana_lib.recommendation.db', integration_database_setup)
-    mocker.patch('saana_lib.score.db', integration_database_setup)
-    mocker.patch('saana_lib.tag.db', integration_database_setup)
-    return integration_database_setup

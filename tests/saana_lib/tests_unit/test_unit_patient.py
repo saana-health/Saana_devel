@@ -76,25 +76,25 @@ class TestCaseReadAsTagsBehavior:
     """
 
     def test_patient_diseases(self, mocker):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_diseases')
+        met = mocker.patch('saana_lib.patient.db.patient_diseases')
         _ = PatientDisease(patient_id()).read_as_tags()
 
         met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_comorbidities(self, mocker):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_comorbidities')
+        met = mocker.patch('saana_lib.patient.db.patient_comorbidities')
         _ = PatientComorbidity(patient_id()).read_as_tags()
 
         met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_drugs(self, mocker):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_drugs')
+        met = mocker.patch('saana_lib.patient.db.patient_drugs')
         _ = PatientDrug(patient_id()).read_as_tags()
 
         met.find.assert_called_once_with({'patient_id': patient_id()})
 
     def test_patient_symptom(self, mocker):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_symptoms')
+        met = mocker.patch('saana_lib.patient.db.patient_symptoms')
         _ = PatientSymptom(patient_id()).read_as_tags()
 
         met.find.assert_called_once_with({'patient_id': patient_id()})
@@ -111,10 +111,10 @@ class TestCaseReadAsTagsValues(object):
 
     @pytest.fixture
     def tags_mock(self, mocker):
-        return mocker.patch('saana_lib.connectMongo.db.tags')
+        return mocker.patch('saana_lib.patient.db.tags')
 
     def test_patient_disease_values(self, mocker, tags_mock):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_diseases')
+        met = mocker.patch('saana_lib.patient.db.patient_diseases')
         met.find.return_value = [{'disease_id': 'er87g'},]
 
         _ = PatientDisease(patient_id()).read_as_tags()
@@ -122,7 +122,7 @@ class TestCaseReadAsTagsValues(object):
         tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['er87g']}})
 
     def test_patient_comorbidity_values(self, mocker, tags_mock):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_comorbidities')
+        met = mocker.patch('saana_lib.patient.db.patient_comorbidities')
         met.find.return_value = [{'comorbidity_id': 'ry85t'}, ]
 
         _ = PatientComorbidity(patient_id()).read_as_tags()
@@ -130,7 +130,7 @@ class TestCaseReadAsTagsValues(object):
         tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['ry85t']}})
 
     def test_patient_drug_values(self, mocker, tags_mock):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_drugs')
+        met = mocker.patch('saana_lib.patient.db.patient_drugs')
         met.find.return_value = [{'drug_id': 'ut64p'}, ]
 
         _ = PatientDrug(patient_id()).read_as_tags()
@@ -138,7 +138,7 @@ class TestCaseReadAsTagsValues(object):
         tags_mock.find.assert_called_once_with({'tag_id': {'$in': ['ut64p']}})
 
     def test_patient_symptom_values(self, mocker, tags_mock):
-        met = mocker.patch('saana_lib.connectMongo.db.patient_symptoms')
+        met = mocker.patch('saana_lib.patient.db.patient_symptoms')
         met.find.return_value = [{'symptom_id': 'tag_id'}, ]
 
         _ = PatientSymptom(patient_id()).read_as_tags()
@@ -152,7 +152,7 @@ class TestCaseOtherRestriction:
     """
     @pytest.fixture
     def collection_mock(self, mocker):
-        return mocker.patch('saana_lib.connectMongo.db.patient_other_restrictions')
+        return mocker.patch('saana_lib.patient.db.patient_other_restrictions')
 
     def test_patient_other_restrictions(self, collection_mock):
         _ = PatientOtherRestrictions(patient_id()).read_as_tags()

@@ -6,12 +6,6 @@ from tests.conftest import assert_equal_objects
 recipe_id = obj_id
 
 
-def test_recipe_init(mocker):
-    ingredients_collection = mocker.patch('saana_lib.recipe.db.mst_recipe')
-    _ = Recipe(recipe_id())
-    ingredients_collection.find_one.assert_called_with({'_id': obj_id()})
-
-
 def test_ingredients_id_prop_values(mocker):
     mocker.patch(
         'saana_lib.recipe.Recipe.recipe',

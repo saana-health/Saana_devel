@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from pymongo.collection import ObjectId
-from pymongo import ASCENDING, DESCENDING
+from pymongo import DESCENDING
 
 from constants import constants_wrapper as constants
 from exceptions import PatientNotFound, UserNotFound

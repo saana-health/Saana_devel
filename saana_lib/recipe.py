@@ -9,11 +9,10 @@ class Recipe:
         self.recipe_id = recipe_id
         if not isinstance(self.recipe_id, ObjectId):
             self.recipe_id = ObjectId(self.recipe_id)
-        self._recipe = db.mst_recipe.find_one({'_id': self.recipe_id})
 
     @property
     def recipe(self):
-        return self._recipe
+        return db.mst_recipe.find_one({'_id': self.recipe_id})
 
     @property
     def ingredients(self):
