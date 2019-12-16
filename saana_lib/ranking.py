@@ -24,6 +24,7 @@ class Ranking:
     def compute(self, descending=True):
         _ranking = dict()
         for recipe in db.mst_recipe.find():
+            print(recipe)
             recommendation = RecipeRecommendation(recipe, self.patient_id)
             score = recommendation.score
             if score not in _ranking:
