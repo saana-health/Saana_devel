@@ -22,7 +22,9 @@ class Ranking:
         self.today = datetime.now()
 
     def compute(self, descending=True):
+        print 'Here'
         _ranking = dict()
+        print 'Or Here'
         for recipe in db.mst_recipe.find():
             print(recipe)
             recommendation = RecipeRecommendation(recipe, self.patient_id)
