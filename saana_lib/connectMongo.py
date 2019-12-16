@@ -12,6 +12,7 @@ client = MongoClient('mongodb://{}:{}@{}'.format(
 db = client.saana_db
 
 print(db)
+print(db.mst_recipes.find())
 
 
 def insert_meal(meals):

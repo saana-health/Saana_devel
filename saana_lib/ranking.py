@@ -25,7 +25,7 @@ class Ranking:
         print('Here')
         _ranking = dict()
         print('Or Here')
-        for recipe in db.mst_recipe.find():
+        for recipe in db.mst_recipes.find():
             print('Is there a recipe?')
             print(recipe)
             recommendation = RecipeRecommendation(recipe, self.patient_id)
