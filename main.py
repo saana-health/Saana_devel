@@ -21,6 +21,7 @@ def bootstrap_check():
 
 
 def run():
+    print 'Start of the process'
     bootstrap_check()
     parser = argparse.ArgumentParser()
     parser.add_argument('patient_id', type=str, help='Patient id')
