@@ -40,14 +40,14 @@ class Recipe:
         query is needed.
         """
         return dict(
-            (e['food_ingredient_fullname'], e['quantity'])
+            (e['ingredient_full_name'], e['quantity'])
             for e in self.ingredients
         )
 
     @property
     def ingredients_names(self):
         return list(
-            e['food_ingredient_fullname'] for e in self.ingredients
+            e['ingredient_full_name'] for e in self.ingredients
         )
 
     @property
