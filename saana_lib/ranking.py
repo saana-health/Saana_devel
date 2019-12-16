@@ -66,7 +66,7 @@ class RankingToDatabase(RankingOut):
     """"""
 
     def proxy(self, content):
-        db.patient_recipe_recommendation.insert_one(content.db_format)
+        db.patient_recipe_recommendations.insert_one(content.db_format)
 
 
 class RankingToFile(RankingOut):

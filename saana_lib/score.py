@@ -165,7 +165,8 @@ class NutrientScore(RecipeScore):
 
     @property
     def add_calories_score(self):
-        nutrient_obj_id = db.mst_nutrients.find_one({'name': 'calories'})
+    #   TODO CHECK DB
+    #   nutrient_obj_id = db.mst_nutrients.find_one({'name': 'calories'})
         if nutrient_obj_id in self.nutrient_set:
             return self.calories_score(nutrient_obj_id)
         return 0

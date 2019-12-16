@@ -12,7 +12,7 @@ class Recipe:
 
     @property
     def recipe(self):
-        return db.mst_recipe.find_one({'_id': self.recipe_id})
+        return db.mst_recipes.find_one({'_id': self.recipe_id})
 
     @property
     def ingredients(self):

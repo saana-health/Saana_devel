@@ -67,7 +67,7 @@ class Recommendation:
         inserted_count = 0
         for recommendation in self._all:
             try:
-                insert_result = db.patient_ingredient_recommendation.insert_one(
+                insert_result = db.patient_ingredient_recommendations.insert_one(
                     recommendation
                 )
 
@@ -154,7 +154,7 @@ class RecipeRecommendation:
         if not end:
             end = start - timedelta(days=7)
         return list(
-            o['recipe_id'] for o in db.patient_recipe_recommendation.find(
+            o['recipe_id'] for o in db.patient_recipe_recommendations.find(
                 {'patient_id': self._patient_id,
                  'created_at': {"$lte": start, "$gte": end}
                  }, {'recipe_id': 1, '_id': 0}
@@ -177,7 +177,8 @@ class RecipeRecommendation:
         val += AvoidScore(self._recipe_id, self._patient_id).value
         val += MinimizedScore(self._recipe_id, self._patient_id).value
         val += PrioritizedScore(self._recipe_id, self._patient_id).value
-        val += NutrientScore(self._recipe_id, self._patient_id).value
+#   TODO CHECK MST_NUTRIENTS
+#        val += NutrientScore(self._recipe_id, self._patient_id).value
 
         return val
 
