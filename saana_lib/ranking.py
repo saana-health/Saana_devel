@@ -43,6 +43,7 @@ class RankingOut(OutIn):
 
     def store(self, limit=constants.RECIPES_TO_RANK):
         counter = 0
+        print('Test')
         _ranking = Ranking(self.patient_id).compute()
         for score, recipes in _ranking.items():
             if counter == limit:
