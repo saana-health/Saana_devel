@@ -47,7 +47,7 @@ class RankingOut(OutIn):
         counter = 0
         print('Test')
         _ranking = Ranking(self.patient_id).compute()
-        print _ranking
+        print (_ranking)
         for score, recipes in _ranking.items():
             if counter == limit:
                 break
