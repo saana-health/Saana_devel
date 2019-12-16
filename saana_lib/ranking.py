@@ -54,7 +54,7 @@ class RankingOut(OutIn):
 
             for recipe_recommendation in recipes:
                 self.proxy(recipe_recommendation)
-                print recipe_recommendation
+                print (recipe_recommendation)
                 counter += 1
 
     def sequence(self):
