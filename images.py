@@ -4,7 +4,7 @@ import urllib
 from io import StringIO
 import image
 import validators
-from urlparse import urlparse
+from urllib.parse import urlparse
 from fuzzywuzzy import process
 
 ##html_page = urllib2.urlopen("http://imgur.com")
