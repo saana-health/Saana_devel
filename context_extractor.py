@@ -17,7 +17,7 @@ try:
   import matplotlib.pyplot as mpl
   plottingEnabled = True
 except:
-  print "Matplotlib not detected, plotting disabled"
+  print("Matplotlib not detected, plotting disabled")
   plottingEnabled = False
   
 def normpdf(x, a, x0, sigma):
