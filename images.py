@@ -1,15 +1,10 @@
 from bs4 import BeautifulSoup
-import urllib2
-import re
+import urllib.request
 import urllib, cStringIO
 from PIL import Image
-import math
-from os.path import join, normpath
 import validators
 from urlparse import urlparse
-from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-import metadata_parser
 
 ##html_page = urllib2.urlopen("http://imgur.com")
 ##soup = BeautifulSoup(html_page)
@@ -36,7 +31,7 @@ def best_image_function(name, images_all, images_name):
     max_width = 0
     max_img = ""
     Ratios =  process.extract(name,images_all)
-    print Ratios
+    print(Ratios)
     if Ratios != []:
         highest = process.extractOne(name,images_all)
         #print highest
@@ -58,8 +53,8 @@ def best_image_function(name, images_all, images_name):
                         if width > max_width:
                             max_width = width
                             max_img = real_url
-                        print width
-                        print height
+                        print(width)
+                        print(height)
                     except IOError:
                         pass
                 return max_img               
@@ -71,7 +66,7 @@ def get_img_title(baseurl):
     images_nom = []
     tagBool = False
     img_title = ("", "")
-    opener = urllib2.build_opener()
+    opener = urllib.request.build_opener()
     opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0')]
     j = opener.open(baseurl)
     data = j.read()
@@ -93,7 +88,7 @@ def get_img_title(baseurl):
             img_title = (title, tag.get("content", None))
             break
     if tagBool == False:
-        print "else"
+        print("else")
         for image in links:
             images_url.append(image['src'])
             images_nom.append(image['alt'])
