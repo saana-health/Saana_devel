@@ -73,7 +73,7 @@ def get_ingredient_highest(ingredients):
         #print matching_ingredients
         length = len(matching_ingredients)
         if length == 0:
-            print "no ingredient matching in db"
+            print("no ingredient matching in db")
             ingredient_db.insert_one({'name': ingredients})
         else:
             Ratios = process.extract(ingredients,strOptions)
