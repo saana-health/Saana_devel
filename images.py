@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import urllib.request
-import urllib, cStringIO
+import urllib
+from io import StringIO
 from PIL import Image
 import validators
 from urlparse import urlparse
@@ -47,7 +48,7 @@ def best_image_function(name, images_all, images_name):
                     #print img
                     real_url = validate_url(img)
                     try:
-                        file = cStringIO.StringIO(urllib.urlopen(real_url).read())
+                        file = StringIO.StringIO(urllib.urlopen(real_url).read())
                         im=Image.open(file)
                         width, height = im.size
                         if width > max_width:
