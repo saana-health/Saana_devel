@@ -2,7 +2,7 @@
 import time
 import string
 from nltk.corpus import wordnet
-from pattern.en import singularize, pluralize
+from pattern.text.en import singularize, pluralize
 from pint import UnitRegistry
 ureg = UnitRegistry()
 import sqlite3 as lite
