@@ -1,10 +1,6 @@
-import numpy as np
+
 import time
-import random
-import sys
-import json
 import string
-import urllib2
 keep = string.lowercase + string.digits + string.whitespace
 table = string.maketrans(keep, keep)
 delete = ''.join(set(string.printable) - set(keep))
@@ -20,12 +16,7 @@ from os.path import isfile, join
 from context_extractor import *
 from compare_ingredients import *
 from images import *
-from unidecode import unidecode
-import operator
 from collections import OrderedDict
-import markdown
-from bs4 import BeautifulSoup
-import requests
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 import conf
