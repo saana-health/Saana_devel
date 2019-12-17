@@ -1,7 +1,3 @@
-import csv
-import os
-from pymongo import MongoClient
-from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from pymongo import MongoClient
 from urllib.parse import quote_plus
@@ -55,7 +51,7 @@ def get_ingredient_highest(ingredients):
             #print split
             obj2 = ingredient_db.find({'name': {'$regex':split}})
             if obj2 is None:
-                print "FALSE"             
+                print("FALSE")
             else:
                 for record in obj2:
                     #print record
