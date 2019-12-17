@@ -31,14 +31,14 @@ from urllib.parse import quote_plus
 import conf
 
 
-client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+client = MongoClient('mongodb://{}:{}@{}'.format(
     quote_plus(conf.DATABASE_USER),
     quote_plus(conf.DATABASE_PASSWORD),
     quote_plus(conf.DATABASE_ADDRESS),
-    quote_plus(conf.DATABASE_PORT),
-))
+), authSource='saana_db')
 
 db = client.saana_db
+
 
 ##client = MongoClient('mongodb://localhost:27017')
 
@@ -405,7 +405,7 @@ def extract_recipe_main(url):
 #print extract_recipe_main('http://www.foodnetwork.com/recipes/alton-brown/baked-macaroni-and-cheese-recipe.html')
 #print extract_recipe_main('http://www.foodnetwork.com/recipes/alton-brown/southern-biscuits-recipe.html')
 #print extract_recipe_main(sys.argv[1])
-print extract_recipe_main('https://www.forksoverknives.com/recipes/broccoli-pasta-salad-with-red-pepper-pesto')
+#print extract_recipe_main('https://www.forksoverknives.com/recipes/broccoli-pasta-salad-with-red-pepper-pesto')
 #print get_image('https://www.forksoverknives.com/recipes/broccoli-pasta-salad-with-red-pepper-pesto')
 
 '''

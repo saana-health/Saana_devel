@@ -6,12 +6,11 @@ from urllib.parse import quote_plus
 import conf
 
 
-client = MongoClient('mongodb://{}:{}@{}:{}'.format(
+client = MongoClient('mongodb://{}:{}@{}'.format(
     quote_plus(conf.DATABASE_USER),
     quote_plus(conf.DATABASE_PASSWORD),
     quote_plus(conf.DATABASE_ADDRESS),
-    quote_plus(conf.DATABASE_PORT),
-))
+), authSource='saana_db')
 
 db = client.saana_db
 
@@ -41,5 +40,5 @@ def processRecipes(filename):
 ##            recipes_list.append(ingredients)
 ##            recipes = {}
             
-processRecipes(PATH+'wfpb_recipes.csv')
+processRecipes(PATH+'remaining-recipes.csv')
 #recipes_db.insert_many(ingredient_list)
