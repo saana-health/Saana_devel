@@ -1,9 +1,6 @@
 
 import time
 import string
-keep = string.lowercase + string.digits + string.whitespace
-table = string.maketrans(keep, keep)
-delete = ''.join(set(string.printable) - set(keep))
 from nltk.corpus import wordnet
 from pattern.en import singularize, pluralize
 from pint import UnitRegistry
