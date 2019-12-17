@@ -17,6 +17,7 @@ from collections import OrderedDict
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 import conf
+import simplejson as json
 
 
 client = MongoClient('mongodb://{}:{}@{}'.format(
