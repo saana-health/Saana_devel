@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from pymongo import MongoClient
-from urlparse import quote_plus
+from urllib.parse import quote_plus
 import conf
 
 

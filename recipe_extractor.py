@@ -396,8 +396,8 @@ def extract_recipe_main(url):
   recipe['name'] = data_title # find title
   recipe['url'] = url
   recipe['image_url'] = data_img
-  print recipe
-  print "inserting recipe in db"
+  print(recipe)
+  print("inserting recipe in db")
   recipe_db.insert_one({'name': data_title, 'food': ingredient_list, 'url': url, 'image_url': data_img})
   return recipe
 
