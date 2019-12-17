@@ -71,7 +71,7 @@ def get_img_title(baseurl):
     opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0')]
     j = opener.open(baseurl)
     data = j.read()
-    soup = BeautifulSoup(data, features="html5lib")
+    soup = BeautifulSoup(data, features="html.parser")
     links = soup.find_all('img')
     #print links
     title = soup.title.string
