@@ -8,11 +8,7 @@ from urllib.parse import quote_plus
 import conf
 
 
-client = MongoClient('mongodb://{}:{}@{}'.format(
-    quote_plus(conf.DATABASE_USER),
-    quote_plus(conf.DATABASE_PASSWORD),
-    quote_plus(conf.DATABASE_ADDRESS),
-), authSource='saana_db')
+client = MongoClient('mongodb://{admin}:{g3am1ba5ck9de8er}@127.0.0.1', authSource='saana_db')
 
 db = client.saana_dbb
 
