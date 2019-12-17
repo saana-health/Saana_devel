@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import urllib
 from io import StringIO
-from PIL import Image
+import image
 import validators
 from urlparse import urlparse
 from fuzzywuzzy import process
@@ -49,7 +49,7 @@ def best_image_function(name, images_all, images_name):
                     real_url = validate_url(img)
                     try:
                         file = StringIO.StringIO(urllib.urlopen(real_url).read())
-                        im=Image.open(file)
+                        im=image.open(file)
                         width, height = im.size
                         if width > max_width:
                             max_width = width
@@ -90,9 +90,9 @@ def get_img_title(baseurl):
             break
     if tagBool == False:
         print("else")
-        for image in links:
-            images_url.append(image['src'])
-            images_nom.append(image['alt'])
+        for m_image in links:
+            images_url.append(m_image['src'])
+            images_nom.append(m_image['alt'])
             #print images_url
             #print images_nom
         img_title = (title, best_image_function(title, images_url, images_nom))
