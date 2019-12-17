@@ -1,15 +1,9 @@
-import urllib2
+import urllib.request
 import html2text
-import re
 import numpy as np
-import json
 from scipy.optimize import curve_fit
-from unidecode import unidecode 
 import os
-from bs4 import BeautifulSoup
-#import urllib, cStringIO
-from PIL import Image
-import math
+
 
 try:
   import matplotlib as matplot
@@ -41,7 +35,7 @@ def count_occurences(context, sentence):
   return occurences
 
 def get_url_markdown(baseurl):
-  opener = urllib2.build_opener()
+  opener = urllib.request.build_opener()
   opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0')]
   j = opener.open(baseurl)
   data = j.read()
