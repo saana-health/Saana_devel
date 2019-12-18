@@ -197,5 +197,4 @@ class RecipeRecommendation:
             'recipe_id': self._recipe_id,
             'score': self.score,
             'is_deleted': False,
-            
         }
