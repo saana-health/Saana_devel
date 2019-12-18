@@ -1,6 +1,8 @@
 from saana_lib.process import processColruyt, processOisix, processEuphebe, processFrozenGarden, processFoodNerd, processVeestro, processFoodFlo, processFoodMatrix, match_names
 import os
-from saana_lib import connectMongo, model
+
+from saana_lib.process import processOisix, match_names
+from saana_lib import connectMongo
 
 
 def add_meals():

@@ -1,41 +1,48 @@
-from . import connectMongo
-import pdb
+from datetime import datetime, timedelta
 
-def get_chemo_dates(patient_id, date_from, date_to):
-    chemo_dates = list(connectMongo.db.patient_treatment_dates.find({'patient_id':patient_id, 'treatment_date':\
-        {'$gte':date_from, '$lte':date_to}}))
-    treatment_dates = [x['treatment_date'] for x in chemo_dates]
-    delta_dates = [(treatment_date - date_from).days for treatment_date in treatment_dates]
-    return delta_dates
+from saana_lib.connectMongo import db
 
-def choose_chemo_meals(score_board,slots, supplierIds):
-    # first look at current meals and choose more from the score_board
-    chemo_meals = []
-    for meal in slots:
-        if 'soup' in meal['meal'].type:
-            chemo_meals.append(meal['meal'])
 
-    if len(chemo_meals) >= 3:
+class Chemo:
+
+    def __init__(self, patient_id):
+        self.patient_id = patient_id
+
+    @property
+    def today(self):
+        return datetime.now()
+
+    @property
+    def next_tuesday(self):
+        curr = self.today
+        for i in range(7):
+            if curr.weekday() == 1:
+                break
+            curr += timedelta(days=1)
+        return curr
+
+    @property
+    def _treatment_dates_ahead(self):
+        return any(
+            x['treatment_date'] for x in db.patient_treatment_dates.find({
+                'patient_id': self.patient_id,
+                'treatment_date': {'$gte': self.today, '$lte': self.next_tuesday()}
+                }, {'treatment_date': 1, '_id': 0}
+            )
+        )
+
+    def recipes(self, score_board, slots):
+        if not self._treatment_dates_ahead:
+            return slots
+
+        chemo_meals = [recipe for recipe in slots if 'soup' in recipe.name]
+
+        for score in score_board:
+            if len(chemo_meals) >= 3:
+                return chemo_meals
+            recipe_list = score_board[score]
+            for recipe in recipe_list:
+                if 'soup' in recipe.name:
+                    chemo_meals.append(recipe)
         return chemo_meals
-
-    for score in score_board:
-        meals = score_board[score]
-        if len(chemo_meals) >= 3:
-            return chemo_meals
-        for meal in meals:
-            # SKIP if not one of the suppliers we already chose
-            if meal['meal'].supplier_id not in supplierIds:
-                continue
-            if 'soup' in meal['meal'].type:
-                chemo_meals.append(meal['meal'])
-    return chemo_meals
-
-
-def reorder_chemo(slots, patient_id, start_date, end_date, score_board, supplierIds):
-    delta_dates = get_chemo_dates(patient_id, start_date, end_date)
-    if delta_dates == []:
-        return slots
-    else:
-        chemo_meals = choose_chemo_meals(score_board, slots, supplierIds)
-        return slots
 

@@ -1,7 +1,7 @@
 import csv
 import pickle
 import os
-from ..model import Meal
+from saana_lib.old_code_not_used import Meal
 from .. import connectMongo
 from ..utils import similar
 from difflib import SequenceMatcher

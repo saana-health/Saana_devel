@@ -1,6 +1,5 @@
-import pdb
-
 from .supplement import filter_opposing
+
 
 def optimizeHerb(patient_id):
     '''

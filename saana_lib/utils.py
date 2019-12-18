@@ -1,10 +1,14 @@
-#test
 # from mixpanel_api import Mixpanel
+import logging
 import csv
-import pdb
-from .model import Meal, Tag, Patient
 from datetime import date, timedelta
 from difflib import SequenceMatcher
+
+from saana_lib.old_code_not_used import Meal, Tag, Patient
+
+
+logger = logging.getLogger(__name__)
+
 
 def create_histogram(combined,keywords,filter = [],filename = ''):
     '''
@@ -90,6 +94,7 @@ def tag_dict_to_class(dict):
     new_tag.dict_to_class(dict)
     return new_tag
 
+
 def patient_dict_to_class(patient):
     '''
     Convert dict to Patient()
@@ -132,41 +137,25 @@ def add_dummy_patients():
     add_patients(dummy)
 '''
 
-def find_tuesday(curr, wk = 1):
-    '''
-    Get the next coming tuesday (Today if today is tuesday)
-    :param curr: datetime.datetime()
-    :param wk: int
-    :return: datetime.datetime()
-    '''
 
-    weekday = curr.weekday()
-    while True:
-        if weekday == 1:
-            if wk == 1:
-                break
-            wk -= 1
-        curr = curr + timedelta(days = 1)
-        weekday = curr.weekday()
-    return curr
+def similar(s1, s2, _ratio):
+    """
+    A util function to check if two strings are 'similar',
+    defined by the value below. This is used for mapping
+    items to meals
+    """
+    return SequenceMatcher(None, s1, s2).ratio() > _ratio
 
-def similar(a,b,r):
-    '''
-    A util function to check if two strings are 'similar', defined by the value below. This is used for mapping items to meals
-    :param a: (str) string 1 to compare
-    :param b: (str) string 2 to compare
-    :return: True if similar, False otherwise
-    '''
-    return SequenceMatcher(None,a,b).ratio() > r
 
-def add_suppliers():
-    '''
-    Util func for adding suppliers
-    :return: None
-    '''
-    import connectMongo
-    for name in ['Euphebe','FoodNerd','Veestro','FrozenGarden','FoodFlo']:
-        connectMongo.db.users.insert_one({'first_name':name, 'email': name+'@example.com', 'role':'supplier'})
+def out_to_csv(filename, rows):
+    logger.info("Writing to csv file: {}".format(filename))
+    with open(filename, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(rows)
+    logger.info("Successfully wrote to a csv file")
 
-if __name__ == "__main__":
-    add_suppliers()
+
+def out_to_xls(filename, rows):
+    pass
+
+

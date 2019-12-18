@@ -1,6 +1,6 @@
 import csv
 import os
-from ..model import Meal
+from saana_lib.old_code_not_used import Meal
 from .. import connectMongo
 from ..utils import similar
 from .match_names import match_euphebe, change_names

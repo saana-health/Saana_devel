@@ -1,21 +1,19 @@
 from pymongo import MongoClient
-import pdb
-import os
-import urllib.parse
+from urllib.parse import quote_plus
+import conf
 
-# DB Keys
-DATABASE_USER = os.environ.get("DATABASE_USER",'')
-DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD",'')
 
-# cast to the correct object
-username = urllib.parse.quote_plus(DATABASE_USER)
-password = urllib.parse.quote_plus(DATABASE_PASSWORD)
+client = MongoClient('mongodb://{}:{}@{}'.format(
+    quote_plus(conf.DATABASE_USER),
+    quote_plus(conf.DATABASE_PASSWORD),
+    quote_plus(conf.DATABASE_ADDRESS)
+), authSource='saana_db')
 
-# Connect to DB
-client = MongoClient('mongodb://{}:{}@127.0.0.1'.format(username,password), authSource='saana_db')
 db = client.saana_db
 
-# ADD
+print(db)
+print(db.mst_recipes.find())
+
 
 def insert_meal(meals):
     '''
@@ -29,10 +27,9 @@ def insert_meal(meals):
         if db.meal_infos.find({'name':meal.name}).count() > 0:
             continue
         meal_dictionaries.append(meal.class_to_dict())
-    if meal_dictionaries != []:
+    if meal_dictionaries:
         db.meal_infos.insert_many(meal_dictionaries)
-        # except:
-        #     pdb.set_trace()
+
 
 def add_patients(patients):
     '''
@@ -48,22 +45,26 @@ def add_patients(patients):
         patients = [patients]
 
     for patient in patients:
-        user_id = db.users.insert_one({'first_name':patient.name, 'role':'patient'}).inserted_id
-        patient_id = db.patients.insert_one({'user_id':user_id}).inserted_id
-        subscription_id = db.mst_subscriptions.find_one({'interval_count':2})['_id']
-        patient_subscription_id = db.patient_subscription.insert_one({'patient_id':patient_id, 'subscription_id':subscription_id,\
-                                                                      'status':'active'})
+        user_id = db.users.insert_one({'first_name':patient.name, 'role':'patient'}
+        ).inserted_id
+        patient_id = db.patients.insert_one({'user_id': user_id}).inserted_id
+        subscription_id = db.mst_subscriptions.find_one({'interval_count': 2})['_id']
+        patient_subscription_id = db.patient_subscription.insert_one({
+            'patient_id':patient_id,
+            'subscription_id':subscription_id,
+            'status':'active'}
+        )
         comos = []
         drugs = []
         symps = []
         for como in patient.comorbidities:
-            doc = {'patient_id':patient_id, 'comorbidity_id':como}
+            doc = {'patient_id': patient_id, 'comorbidity_id': como}
             comos.append(doc)
         for drug in patient.treatment_drugs:
-            doc = {'patient_id':patient_id, 'drug_id':drug}
+            doc = {'patient_id': patient_id, 'drug_id': drug}
             drugs.append(doc)
         for symp in patient.symptoms:
-            doc= {'patient_id': patient_id, 'symptom_id':symp}
+            doc= {'patient_id': patient_id, 'symptom_id': symp}
             symps.append(doc)
         db.patient_diseases.insert_one({'patient_id':patient_id, 'disease_id':patient.disease})
         if drugs != []:
@@ -73,44 +74,50 @@ def add_patients(patients):
         if symps!= []:
             db.patient_symptoms.insert_many(symps)
 
-# GET
 
 def get_comorbidities(patient_id):
-    li = list(db.patient_comorbidities.find({'patient_id':patient_id},{'comorbidity_id':1, '_id':0}))
+    li = list()
     return [list(x.values())[0] for x in li]
+
 
 def get_disease(patient_id):
     li = list(db.patient_diseases.find({'patient_id':patient_id},{'disease_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
 
+
 def get_symptoms(patient_id):
     li = list(db.patient_symptoms.find({'patient_id':patient_id},{'symptom_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
+
 
 def get_drugs(patient_id):
     li = list(db.patient_drugs.find({'patient_id':patient_id},{'drug_id':1, '_id':0}))
     return [list(x.values())[0] for x in li]
 
+
 def get_subscription(patient_id):
-    '''
+    """
     Gets subscription - 7 for 'interval_count == 2' and 15 for ' == 1'
     :param patient_id: ObjectId()
     :return: 7 or 15
-    '''
+    """
     sub = list(db.patient_subscription.find({'patient_id':patient_id}))
     # Should be only one or no subscription
     assert len(sub) < 2
 
-    if sub == []:
+    if not sub:
         return False
     subscription_id = sub[0]['subscription_id']
-    interval = list(db.mst_subscriptions.find({'_id':subscription_id}))[0]['interval_count']
-    if interval == 2:
-        return 7
-    elif interval == 1:
-        return 15
-    print('wrong subscription')
-    assert False
+    interval = list(db.mst_subscriptions.find({'_id': subscription_id}))[0]['interval_count']
+    if interval not in [1, 2]:
+        return
+
+    return {
+        1: 15,
+        2: 7,
+    }.get(interval)
+
+
 
 def get_ingredient(ingredients):
     '''
@@ -130,6 +137,3 @@ def get_ingredient(ingredients):
         return_dict['quantity'] = quantity
         ingredients_field.append(return_dict)
     return ingredients_field
-
-if __name__ == "__main__":
-    pdb.set_trace()

@@ -5,6 +5,7 @@ __pycache__/
 # dump folder
 dump/
 dump.zip
+dumps/
 
 # venv folder
 venv/
@@ -16,6 +17,8 @@ masterOrder/*
 
 # pycharm files
 .idea/
+
+node_modules/
 
 # py cache
 __pycache__/
