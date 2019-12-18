@@ -49,14 +49,16 @@ class RankingOut(OutIn):
         print('Test')
         _ranking = Ranking(self.patient_id).compute()
         print (_ranking)
+        recipes_all = []
         for score, recipes in _ranking.items():
             if counter == limit:
                 break
 
             for recipe_recommendation in recipes:
-                self.proxy(recipe_recommendation)
                 print (recipe_recommendation)
+                recipes_all.append(recipe_recommendation.recipe_format) #recipe in array
                 counter += 1
+        self.proxy(recipes_all) #insert all recipes 
 
     def sequence(self):
         """TODO to implement"""

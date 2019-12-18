@@ -186,9 +186,16 @@ class RecipeRecommendation:
     def db_format(self):
         return {
             'patient_id': self._patient_id,
+            'recipes': self.recipes_all,
+            'created_date': datetime.now().isoformat(),
+            'updated_date': datetime.now().isoformat()
+        }
+
+    @property
+    def recipe_format(self):
+        return {
             'recipe_id': self._recipe_id,
             'score': self.score,
-            'is_like': True,
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat()
+            'is_deleted': False,
+            
         }
