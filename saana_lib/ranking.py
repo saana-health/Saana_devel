@@ -58,7 +58,14 @@ class RankingOut(OutIn):
                 print (recipe_recommendation)
                 recipes_all.append(recipe_recommendation.recipe_format) #recipe in array
                 counter += 1
-        self.proxy(recipes_all) #insert all recipes 
+
+        patient_rec = {
+            'patient_id': self.patient_id,
+            'recipes': recipes_all,
+            'created_date': datetime.now().isoformat(),
+            'updated_date': datetime.now().isoformat()
+            }
+        self.proxy(patient_rec) #insert all recipes 
 
     def sequence(self):
         """TODO to implement"""
@@ -68,7 +75,7 @@ class RankingToDatabase(RankingOut):
     """"""
 
     def proxy(self, content):
-        db.patient_recipe_recommendations.insert_one(content.db_format)
+        db.patient_recipe_recommendations.insert_one(content)
 
 
 class RankingToFile(RankingOut):

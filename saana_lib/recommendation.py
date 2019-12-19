@@ -182,14 +182,14 @@ class RecipeRecommendation:
 
         return val
 
-    @property
-    def db_format(self):
-        return {
-            'patient_id': self._patient_id,
-            'recipes': self.recipes_all,
-            'created_date': datetime.now().isoformat(),
-            'updated_date': datetime.now().isoformat()
-        }
+##    @property
+##    def db_format(self):
+##        return {
+##            'patient_id': self._patient_id,
+##            'recipes': self.recipes_all,
+##            'created_date': datetime.now().isoformat(),
+##            'updated_date': datetime.now().isoformat()
+##        }
 
     @property
     def recipe_format(self):
