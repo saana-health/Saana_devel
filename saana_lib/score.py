@@ -145,11 +145,11 @@ class AvoidScore(RecipeScore):
     @property
     def ingredient_set(self):
         avoids = AvoidIngredients(self.patient_id).all
-        print avoids
+        print (avoids)
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            print ingr_name
-            print quantity
+            print (ingr_name)
+            print (quantity)
             if matching_ingredients(ingr_name, avoids) == True:
                 yield 1
 ##            if ingr_name in avoids:
