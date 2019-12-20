@@ -19,7 +19,6 @@ def matching_ingredients(ingredients, obj):
     '''
     ingr = ingredients
     obj_tags = obj
-    length_tags = len(list_tags)
     compare = 0
     comparison = False
     
@@ -36,7 +35,7 @@ def matching_ingredients(ingredients, obj):
             if compare > 0:
                 comparison = True
                 return True
-            compare = ingr.find(item)
+            compare = split.find(item)
             if compare > 0:
                 comparison = True
                 return True
