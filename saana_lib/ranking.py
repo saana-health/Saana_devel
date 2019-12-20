@@ -8,7 +8,7 @@ from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
 from saana_lib.recommendation import RecipeRecommendation, AllRecommendations
 from saana_lib.utils import out_to_xls
-
+import datetime
 
 logger = getLogger(__name__)
 
@@ -59,7 +59,7 @@ class RankingOut(OutIn):
             'patient_id': self.patient_id,
             'recipe': recipes_all,
             'is_deleted': False,
-            'created_at': datetime.now().isoformat(),
+            'created_at': datetime.datetime.utcnow().isoformat().strftime('%Y-%m-%d %H:%M:%SZ'),
             'updated_at': datetime.now().isoformat()
             }
         self.proxy(patient_rec) #insert all recipes 
