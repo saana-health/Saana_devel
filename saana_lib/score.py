@@ -11,32 +11,32 @@ from saana_lib.recipe import Recipe
 
 logger = logging.getLogger(__name__)
 
-def matching_ingredients(ingredients, list_ing):
+def matching_ingredients(ingredients, obj):
     '''
     find if there is match between ingredients names 
     :param ingredients: [str] and list of ingredients 
     return True if similar 
     '''
     ingr = ingredients
-    list_tags = list_ing
+    obj_tags = obj
     length_tags = len(list_tags)
     compare = 0
     comparison = False
     
-    for i in range(length_tags):
-        compare = list_tags[i].find(ingr)
+    for item in obj_tags.items():
+        compare = item.find(ingr)
         if compare > 0:
             comparison = True
             return True
 
     splits = ingr.split()
     for split in splits:
-        for i in range(length_tags):
-            compare = list_tags[i].find(split)
+        for item in obj_tags.items():
+            compare = item.find(split)
             if compare > 0:
                 comparison = True
                 return True
-            compare = ingr.find(list_tags[i])
+            compare = ingr.find(item)
             if compare > 0:
                 comparison = True
                 return True
