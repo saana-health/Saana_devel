@@ -101,8 +101,8 @@ class MinimizedScore(RecipeScore):
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-              if matching_ingredients(ingr_name, prioritized) != "":
-                  quantity_ref = minimized[matching_ingredients(ingr_name, prioritized)]
+              if matching_ingredients(ingr_name, minimized) != "":
+                  quantity_ref = minimized[matching_ingredients(ingr_name, minimized)]
                   yield ingr_name, quantity, quantity_ref
 ##                # add quantity stuff
 ##                #yiel quantity ref..
