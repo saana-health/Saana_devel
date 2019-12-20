@@ -22,12 +22,8 @@ class Ranking:
         self.today = datetime.now()
 
     def compute(self, descending=True):
-        print('Here')
         _ranking = dict()
-        print('Or Here')
         for recipe in db.mst_recipes.find():
-            print('Is there a recipe?')
-            print(recipe)
             recommendation = RecipeRecommendation(recipe, self.patient_id)
             score = recommendation.score
             if score not in _ranking:
@@ -61,9 +57,9 @@ class RankingOut(OutIn):
 
         patient_rec = {
             'patient_id': self.patient_id,
-            'recipes': recipes_all,
-            'created_date': datetime.now().isoformat(),
-            'updated_date': datetime.now().isoformat()
+            'recipe': recipes_all,
+            'created_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat()
             }
         self.proxy(patient_rec) #insert all recipes 
 

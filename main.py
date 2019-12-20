@@ -4,6 +4,7 @@ from logging import getLogger
 import conf
 from exceptions import SaanaBaseException, DatabaseConfException
 from saana_lib.ranking import RankingToDatabase
+from saana_lib.recommendation import Recommendation
 
 
 logger = getLogger(__name__)
@@ -27,6 +28,7 @@ def run():
     parser.add_argument('patient_id', type=str, help='Patient id')
     args = parser.parse_args()
     if args.patient_id:
+        AllRecommendation(patient_id=args.patient_id).store()
         RankingToDatabase(patient_id=args.patient_id).store()
 
 
