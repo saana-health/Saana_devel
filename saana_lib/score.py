@@ -101,9 +101,13 @@ class MinimizedScore(RecipeScore):
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in minimized:
-                quantity_ref = minimized[ingr_name]
-                yield ingr_name, quantity, quantity_ref
+            if matching_ingredients(ingr_name, minimized) == True:
+                # add quantity stuff
+                #yiel quantity ref..
+                yield 1
+##            if ingr_name in minimized:
+##                quantity_ref = minimized[ingr_name]
+##                yield ingr_name, quantity, quantity_ref
 
     @property
     def value(self):
@@ -127,8 +131,11 @@ class PrioritizedScore(RecipeScore):
     def ingredient_set(self):
         prioritized = PrioritizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
+            if matching_ingredients(ingr_name, prioritized) == True:
+                # add quantity stuff
                 yield 1
+##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
+##                yield 1
 
     @property
     def value(self):
@@ -143,10 +150,7 @@ class AvoidScore(RecipeScore):
         print (avoids)
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            print (ingr_name)
-            print (quantity)
             if matching_ingredients(ingr_name, avoids) == True:
-                print (matching_ingredients(ingr_name, avoids))
                 yield 1
 ##            if ingr_name in avoids:
 ##                yield 1
