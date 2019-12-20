@@ -72,9 +72,6 @@ class RankingToDatabase(RankingOut):
 
     def proxy(self, content):
         db.patient_recipe_recommendations.insert_one(content)
-
-class RecommendationToDatabase(AllRecommendations)
-
     
 
 class RankingToFile(RankingOut):
