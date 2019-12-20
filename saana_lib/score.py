@@ -11,6 +11,37 @@ from saana_lib.recipe import Recipe
 
 logger = logging.getLogger(__name__)
 
+def matching_ingredients(ingredients, list_ing):
+    '''
+    find if there is match between ingredients names 
+    :param ingredients: [str] and list of ingredients 
+    return True if similar 
+    '''
+    ingr = ingredients
+    list_tags = list_ing
+    length_tags = len(list_tags)
+    compare = 0
+    comparison = False
+    
+    for i in range(length_tags):
+        compare = list_tags[i].find(ingr)
+        if compare > 0:
+            comparison = True
+            return True
+
+    splits = ingr.split()
+    for split in splits:
+        for i in range(length_tags):
+            compare = list_tags[i].find(split)
+            if compare > 0:
+                comparison = True
+                return True
+            compare = ingr.find(list_tags[i])
+            if compare > 0:
+                comparison = True
+                return True
+    if comparison = False:
+        return False
 
 class RecipeScore:
     __metaclass__ = ABCMeta
@@ -116,9 +147,11 @@ class AvoidScore(RecipeScore):
         avoids = AvoidIngredients(self.patient_id).all
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in avoids:
+            if matching_ingredients(ingr_name, avoids) == True
                 yield 1
-
+##            if ingr_name in avoids:
+##                yield 1
+            
     @property
     def value(self):
         return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
@@ -179,3 +212,6 @@ class NutrientScore(RecipeScore):
         to query it.
         """
         return len(self.nutrient_set) + self.add_calories_score
+
+
+
