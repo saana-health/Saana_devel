@@ -29,7 +29,7 @@ def run():
     args = parser.parse_args()
     if args.patient_id:
         ingredient_rec = AllRecommendations(args.patient_id).store()
-        #RankingToDatabase(patient_id=args.patient_id).store()
+        RankingToDatabase(patient_id=args.patient_id).store()
 
 
 if __name__ == "__main__":
