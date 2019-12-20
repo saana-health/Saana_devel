@@ -151,6 +151,7 @@ class AvoidScore(RecipeScore):
             print (ingr_name)
             print (quantity)
             if matching_ingredients(ingr_name, avoids) == True:
+                print matching_ingredients(ingr_name, avoids)
                 yield 1
 ##            if ingr_name in avoids:
 ##                yield 1
