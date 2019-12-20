@@ -44,7 +44,7 @@ class Recommendation:
     def recommendation_frame(self, ingredient_name, ingredient_quantity=0):
         return {
             'patient_id': self.patient_id,
-            'ingredient_name': self.ingredient_name
+            'ingredient_name': self.ingredient_name,
             #'ingredient_id': self.get_or_create_ingredient(ingredient_name),
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
