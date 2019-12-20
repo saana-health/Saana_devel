@@ -4,7 +4,7 @@ from logging import getLogger
 import conf
 from exceptions import SaanaBaseException, DatabaseConfException
 from saana_lib.ranking import RankingToDatabase
-from saana_lib.recommendation import Recommendation
+from saana_lib.recommendation import Recommendation, AllRecommendation
 
 
 logger = getLogger(__name__)
