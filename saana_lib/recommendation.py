@@ -45,7 +45,7 @@ class Recommendation:
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
             'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat()
         }
 
     @property
