@@ -8,7 +8,6 @@ from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
 from saana_lib.recommendation import RecipeRecommendation, AllRecommendations
 from saana_lib.utils import out_to_xls
-import datetime
 
 logger = getLogger(__name__)
 
@@ -19,7 +18,7 @@ class Ranking:
         self.patient_id = patient_id
         if not isinstance(patient_id, ObjectId):
             self.patient_id = ObjectId(patient_id)
-        self.today = datetime.datetime.utcnow()
+        self.today = datetime.now()
 
     def compute(self, descending=True):
         _ranking = dict()
@@ -59,8 +58,8 @@ class RankingOut(OutIn):
             'patient_id': self.patient_id,
             'recipe': recipes_all,
             'is_deleted': False,
-            'created_at': datetime.datetime.utcnow().isoformat().strftime('%Y-%m-%d %H:%M:%SZ'),
-            'updated_at': datetime.datetime.utcnow().isoformat().strftime('%Y-%m-%d %H:%M:%SZ')
+            'created_at': datetime.utcnow().isoformat(),
+            'updated_at': datetime.utcnow().isoformat()
             }
         self.proxy(patient_rec) #insert all recipes 
 
@@ -87,7 +86,7 @@ class RankingToFile(RankingOut):
     def proxy(self, content):
         self.filename = "{}-{}".format(
             self.patient_id.__str__(),
-            datetime.datetime.utcnow().isoformat().strftime("%Y-%m-%d"),
+            datetime.now().strftime("%Y-%m-%d"),
         )
         if not self.headers:
             self.write_headers()
