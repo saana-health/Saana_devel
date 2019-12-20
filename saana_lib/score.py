@@ -103,27 +103,30 @@ class MinimizedScore(RecipeScore):
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
               if matching_ingredients(ingr_name, minimized) != "":
                   quantity_ref = minimized[matching_ingredients(ingr_name, minimized)]
-                  yield ingr_name, quantity, quantity_ref
+                  #yield ingr_name, quantity, quantity_ref
 ##                # add quantity stuff
 ##                #yiel quantity ref..
-##                yield 1
+                  yield 1
 ##            if ingr_name in minimized:
                 
 
     @property
     def value(self):
         """"""
-        for ingr_id, quantity, ref_quantity in self.ingredient_set:
-            isc = IngredientScore(ingr_id in self.worsen_ingredients)
-            if isinstance(ref_quantity, dict):
-                self.score += isc.lower_upper_bound_score(
-                    quantity, ref_quantity
-                )
-            else:
-                self.score += isc.single_value_score(
-                    quantity, ref_quantity
-                )
-        return self.score
+        return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
+##        for ingr_id, quantity, ref_quantity in self.ingredient_set:
+            #add symptomes stuff
+            
+##            isc = IngredientScore(ingr_id in self.worsen_ingredients)
+##            if isinstance(ref_quantity, dict):
+##                self.score += isc.lower_upper_bound_score(
+##                    quantity, ref_quantity
+##                )
+##            else:
+##                self.score += isc.single_value_score(
+##                    quantity, ref_quantity
+##                )
+##        return self.score
 
 
 class PrioritizedScore(RecipeScore):
