@@ -18,25 +18,23 @@ def matching_ingredients(ingredients, obj):
     return True if similar 
     '''
     ingr = ingredients
+    #change to ingredient short name not full name
     obj_tags = obj
-    compare = 0
     comparison = False
     
     for item in obj_tags:
-        compare = item.find(ingr)
-        if compare > 0:
+        if item in ingr:
             comparison = True
             return True
-
     splits = ingr.split()
     for split in splits:
+        print (split)
         for item in obj_tags:
-            compare = item.find(split)
-            if compare > 0:
+            print (item)
+            if split in item:
                 comparison = True
                 return True
-            compare = split.find(item)
-            if compare > 0:
+            if item in split:
                 comparison = True
                 return True
     if comparison == False:
