@@ -20,23 +20,22 @@ def matching_ingredients(ingredients, obj):
     ingr = ingredients
     #change to ingredient short name not full name
     obj_tags = obj
+    matched_ingr = ""
     comparison = False
-    
+
     for item in obj_tags:
         if item in ingr:
             comparison = True
-            return True
+            matched_ingr = item
     splits = ingr.split()
-    for split in splits:
-        for item in obj_tags:
-            if split in item:
-                comparison = True
-                return True
-            if item in split:
-                comparison = True
-                return True
     if comparison == False:
-        return False
+        for split in splits:
+            for item in obj_tags:
+                if split in item:
+                    matched_ingr = item
+                if item in split:
+                    matched_ingr = item
+    return matched_ingr
 
 class RecipeScore:
     __metaclass__ = ABCMeta
@@ -101,13 +100,13 @@ class MinimizedScore(RecipeScore):
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, minimized) == True:
-                # add quantity stuff
-                #yiel quantity ref..
-                yield 1
-##            if ingr_name in minimized:
-##                quantity_ref = minimized[ingr_name]
-##                yield ingr_name, quantity, quantity_ref
+##            if matching_ingredients(ingr_name, minimized) == True:
+##                # add quantity stuff
+##                #yiel quantity ref..
+##                yield 1
+            if ingr_name in minimized:
+                quantity_ref = minimized[ingr_name]
+                yield ingr_name, quantity, quantity_ref
 
     @property
     def value(self):
@@ -131,7 +130,7 @@ class PrioritizedScore(RecipeScore):
     def ingredient_set(self):
         prioritized = PrioritizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, prioritized) == True:
+            if matching_ingredients(ingr_name, prioritized) != "":
                 # add quantity stuff
                 yield 1
 ##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
@@ -150,7 +149,7 @@ class AvoidScore(RecipeScore):
         print (avoids)
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, avoids) == True:
+            if matching_ingredients(ingr_name, avoids) != "":
                 yield 1
 ##            if ingr_name in avoids:
 ##                yield 1
