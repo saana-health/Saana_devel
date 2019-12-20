@@ -22,7 +22,7 @@ def matching_ingredients(ingredients, obj):
     compare = 0
     comparison = False
     
-    for item in obj_tags.items():
+    for item in obj_tags:
         compare = item.find(ingr)
         if compare > 0:
             comparison = True
@@ -30,7 +30,7 @@ def matching_ingredients(ingredients, obj):
 
     splits = ingr.split()
     for split in splits:
-        for item in obj_tags.items():
+        for item in obj_tags:
             compare = item.find(split)
             if compare > 0:
                 comparison = True
