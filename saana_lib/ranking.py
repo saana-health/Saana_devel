@@ -6,7 +6,7 @@ from pymongo.collection import ObjectId
 from constants import constants_wrapper as constants
 from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
-from saana_lib.recommendation import RecipeRecommendation
+from saana_lib.recommendation import RecipeRecommendation, AllRecommendations
 from saana_lib.utils import out_to_xls
 
 
