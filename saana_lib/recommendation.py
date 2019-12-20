@@ -51,7 +51,7 @@ class Recommendation:
             'language': 'en',
             'is_deleted': False,
             #'created_at': datetime.now().isoformat(),
-            'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
+            'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
             'updated_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
         }
 
