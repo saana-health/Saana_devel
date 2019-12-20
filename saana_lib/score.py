@@ -35,6 +35,7 @@ def matching_ingredients(ingredients, obj):
                     matched_ingr = item
                 if item in split:
                     matched_ingr = item
+    print (matched_ingr)
     return matched_ingr
 
 class RecipeScore:
@@ -100,13 +101,14 @@ class MinimizedScore(RecipeScore):
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-##            if matching_ingredients(ingr_name, minimized) == True:
+              if matching_ingredients(ingr_name, prioritized) != "":
+                  quantity_ref = minimized[matching_ingredients(ingr_name, prioritized)]
+                  yield ingr_name, quantity, quantity_ref
 ##                # add quantity stuff
 ##                #yiel quantity ref..
 ##                yield 1
-            if ingr_name in minimized:
-                quantity_ref = minimized[ingr_name]
-                yield ingr_name, quantity, quantity_ref
+##            if ingr_name in minimized:
+                
 
     @property
     def value(self):
@@ -130,8 +132,7 @@ class PrioritizedScore(RecipeScore):
     def ingredient_set(self):
         prioritized = PrioritizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, prioritized) != "":
-                # add quantity stuff
+            if matching_ingredients(ingr_name, prioritized) != "" and quantity > prioritized[matching_ingredients(ingr_name, prioritized)]:
                 yield 1
 ##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
 ##                yield 1
@@ -146,7 +147,6 @@ class AvoidScore(RecipeScore):
     @property
     def ingredient_set(self):
         avoids = AvoidIngredients(self.patient_id).all
-        print (avoids)
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
             if matching_ingredients(ingr_name, avoids) != "":
