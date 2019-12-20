@@ -40,7 +40,7 @@ def matching_ingredients(ingredients, list_ing):
             if compare > 0:
                 comparison = True
                 return True
-    if comparison = False:
+    if comparison == False:
         return False
 
 class RecipeScore:
