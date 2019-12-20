@@ -48,6 +48,8 @@ class Recommendation:
             #'ingredient_id': self.get_or_create_ingredient(ingredient_name),
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
+            'language': 'en',
+            'is_deleted': False,
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
         }

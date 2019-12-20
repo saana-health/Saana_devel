@@ -20,7 +20,7 @@ def bootstrap_check():
             "Please set the DATABASE_PASSWORD environment variable"
         )
 
-
+#stores ingredient recommendations and then recipes recommendations with score
 def run():
     print('Start of the process')
     bootstrap_check()
