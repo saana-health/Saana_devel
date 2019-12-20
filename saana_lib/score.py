@@ -147,7 +147,7 @@ class AvoidScore(RecipeScore):
         avoids = AvoidIngredients(self.patient_id).all
         #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, avoids) == True
+            if matching_ingredients(ingr_name, avoids) == True:
                 yield 1
 ##            if ingr_name in avoids:
 ##                yield 1
