@@ -87,7 +87,7 @@ class RankingToFile(RankingOut):
     def proxy(self, content):
         self.filename = "{}-{}".format(
             self.patient_id.__str__(),
-            datetime.now().strftime("%Y-%m-%d"),
+            datetime.utcnow().isoformat().strftime("%Y-%m-%d"),
         )
         if not self.headers:
             self.write_headers()
