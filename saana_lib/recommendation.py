@@ -121,9 +121,9 @@ class AllRecommendations(OutIn):
         """
         :return: the sum of the counter of the record being written
         """
-        return MinimizeRecommendation(self.patient_id).to_db() + \
+        return AvoidRecommendation(self.patient_id).to_db() + \
             PrioritizeRecommendation(self.patient_id).to_db() + \
-            AvoidRecommendation(self.patient_id).to_db()
+             MinimizeRecommendation(self.patient_id).to_db()
 
 
 """
