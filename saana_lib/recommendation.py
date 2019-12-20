@@ -44,7 +44,7 @@ class Recommendation:
     def recommendation_frame(self, ingredient_name, ingredient_quantity=0):
         return {
             'patient_id': self.patient_id,
-            'ingredient_name': self.ingredient_name,
+            'ingredient_name': ingredient_name,
             #'ingredient_id': self.get_or_create_ingredient(ingredient_name),
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
@@ -121,9 +121,9 @@ class AllRecommendations(OutIn):
         """
         :return: the sum of the counter of the record being written
         """
-        return AvoidRecommendation(self.patient_id).to_db() + \
+        return MinimizeRecommendation(self.patient_id).to_db() + \
             PrioritizeRecommendation(self.patient_id).to_db() + \
-             MinimizeRecommendation(self.patient_id).to_db()
+            AvoidRecommendation(self.patient_id).to_db()
 
 
 """
