@@ -28,9 +28,7 @@ def matching_ingredients(ingredients, obj):
             return True
     splits = ingr.split()
     for split in splits:
-        print (split)
         for item in obj_tags:
-            print (item)
             if split in item:
                 comparison = True
                 return True
