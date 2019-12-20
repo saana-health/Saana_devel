@@ -19,7 +19,7 @@ class Ranking:
         self.patient_id = patient_id
         if not isinstance(patient_id, ObjectId):
             self.patient_id = ObjectId(patient_id)
-        self.today = datetime.now()
+        self.today = datetime.utcnow()
 
     def compute(self, descending=True):
         _ranking = dict()
