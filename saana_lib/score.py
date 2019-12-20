@@ -135,7 +135,9 @@ class PrioritizedScore(RecipeScore):
     def ingredient_set(self):
         prioritized = PrioritizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if matching_ingredients(ingr_name, prioritized) != "" and int(quantity) > int(prioritized[matching_ingredients(ingr_name, prioritized)]):
+            if matching_ingredients(ingr_name, prioritized) != "":
+                #add again qauntity
+##                and int(quantity) > int(prioritized[matching_ingredients(ingr_name, prioritized)]):
                 yield 1
 ##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
 ##                yield 1
