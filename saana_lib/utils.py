@@ -4,9 +4,6 @@ import csv
 from datetime import date, timedelta
 from difflib import SequenceMatcher
 
-from saana_lib.old_code_not_used import Meal, Tag, Patient
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -94,15 +91,6 @@ def tag_dict_to_class(dict):
     new_tag.dict_to_class(dict)
     return new_tag
 
-
-def patient_dict_to_class(patient):
-    '''
-    Convert dict to Patient()
-    :param patient:
-    :return: Patient()
-    '''
-    parse_date = [int(x) for x in patient['next_order'].split('-')]
-    return Patient(name = patient['name'],_id = patient['_id'],symptoms = patient['symptoms'], comorbidities = patient['comorbidities'], disease = patient['Cancers'], next_order = date(parse_date[0],parse_date[1],parse_date[2]),plan = patient['plan'])
 
 '''
 def add_dummy_patients():
