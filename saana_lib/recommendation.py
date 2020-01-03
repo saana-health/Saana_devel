@@ -27,6 +27,9 @@ class Recommendation:
 
     def get_or_create_ingredient(self, name):
         ingredient = db.mst_food_ingredients.find_one({'name': name})
+        #need to find name that resemble not exact name
+        #need to store tag name in ingredient recommend.
+
         if ingredient:
             _id = ingredient['_id']
         else:
@@ -41,11 +44,15 @@ class Recommendation:
     def recommendation_frame(self, ingredient_name, ingredient_quantity=0):
         return {
             'patient_id': self.patient_id,
-            'ingredient_id': self.get_or_create_ingredient(ingredient_name),
+            'ingredient_name': ingredient_name,
+            #'ingredient_id': self.get_or_create_ingredient(ingredient_name),
             'type': self.recommendation_type,
             'quantity': ingredient_quantity,
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat()
+            'language': 'en',
+            'is_deleted': False,
+            #'created_at': datetime.now().isoformat(),
+            'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
+            'updated_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
         }
 
     @property
@@ -128,9 +135,8 @@ PATIENT_RECIPE_RECOMMENDATION
 patient_id: {type: MongooseSchema.ObjectId, ref: 'Patient', required: true}
 recipe_id: {type: MongooseSchema.ObjectId, ref: 'mst_recipe'}
 score: {type: Number}
-is_like: {type: Boolean, default: true}
-created_at: {type: Date}
-updated_at: {type: Date}
+is_deleted: {type: Boolean, default: false}
+
 """
 
 
@@ -182,14 +188,14 @@ class RecipeRecommendation:
 
         return val
 
-    @property
-    def db_format(self):
-        return {
-            'patient_id': self._patient_id,
-            'recipes': self.recipes_all,
-            'created_date': datetime.now().isoformat(),
-            'updated_date': datetime.now().isoformat()
-        }
+##    @property
+##    def db_format(self):
+##        return {
+##            'patient_id': self._patient_id,
+##            'recipes': self.recipes_all,
+##            'created_date': datetime.now().isoformat(),
+##            'updated_date': datetime.now().isoformat()
+##        }
 
     @property
     def recipe_format(self):

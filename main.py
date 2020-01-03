@@ -4,6 +4,7 @@ from logging import getLogger
 import conf
 from exceptions import SaanaBaseException, DatabaseConfException
 from saana_lib.ranking import RankingToDatabase
+from saana_lib.recommendation import Recommendation, AllRecommendations
 
 
 logger = getLogger(__name__)
@@ -19,7 +20,7 @@ def bootstrap_check():
             "Please set the DATABASE_PASSWORD environment variable"
         )
 
-
+#stores ingredient recommendations and then recipes recommendations with score
 def run():
     print('Start of the process')
     bootstrap_check()
@@ -27,6 +28,7 @@ def run():
     parser.add_argument('patient_id', type=str, help='Patient id')
     args = parser.parse_args()
     if args.patient_id:
+        ingredient_rec = AllRecommendations(args.patient_id).store()
         RankingToDatabase(patient_id=args.patient_id).store()
 
 

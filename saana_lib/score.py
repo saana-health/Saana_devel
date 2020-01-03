@@ -11,6 +11,32 @@ from saana_lib.recipe import Recipe
 
 logger = logging.getLogger(__name__)
 
+def matching_ingredients(ingredients, obj):
+    '''
+    find if there is match between ingredients names 
+    :param ingredients: [str] and list of ingredients 
+    return True if similar 
+    '''
+    ingr = ingredients
+    #change to ingredient short name not full name
+    obj_tags = obj
+    matched_ingr = ""
+    comparison = False
+
+    for item in obj_tags:
+        if item in ingr:
+            comparison = True
+            matched_ingr = item
+    splits = ingr.split()
+    if comparison == False:
+        for split in splits:
+            for item in obj_tags:
+                if split in item:
+                    matched_ingr = item
+                if item in split:
+                    matched_ingr = item
+    print (matched_ingr)
+    return matched_ingr
 
 class RecipeScore:
     __metaclass__ = ABCMeta
@@ -75,24 +101,32 @@ class MinimizedScore(RecipeScore):
     def ingredient_set(self):
         minimized = MinimizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in minimized:
-                quantity_ref = minimized[ingr_name]
-                yield ingr_name, quantity, quantity_ref
+              if matching_ingredients(ingr_name, minimized) != "":
+                  quantity_ref = minimized[matching_ingredients(ingr_name, minimized)]
+                  #yield ingr_name, quantity, quantity_ref
+##                # add quantity stuff
+##                #yiel quantity ref..
+                  yield 1
+##            if ingr_name in minimized:
+                
 
     @property
     def value(self):
         """"""
-        for ingr_id, quantity, ref_quantity in self.ingredient_set:
-            isc = IngredientScore(ingr_id in self.worsen_ingredients)
-            if isinstance(ref_quantity, dict):
-                self.score += isc.lower_upper_bound_score(
-                    quantity, ref_quantity
-                )
-            else:
-                self.score += isc.single_value_score(
-                    quantity, ref_quantity
-                )
-        return self.score
+        return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
+##        for ingr_id, quantity, ref_quantity in self.ingredient_set:
+            #add symptomes stuff
+            
+##            isc = IngredientScore(ingr_id in self.worsen_ingredients)
+##            if isinstance(ref_quantity, dict):
+##                self.score += isc.lower_upper_bound_score(
+##                    quantity, ref_quantity
+##                )
+##            else:
+##                self.score += isc.single_value_score(
+##                    quantity, ref_quantity
+##                )
+##        return self.score
 
 
 class PrioritizedScore(RecipeScore):
@@ -101,8 +135,12 @@ class PrioritizedScore(RecipeScore):
     def ingredient_set(self):
         prioritized = PrioritizeIngredients(self.patient_id).all
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
+            if matching_ingredients(ingr_name, prioritized) != "":
+                #add again qauntity
+##                and int(quantity) > int(prioritized[matching_ingredients(ingr_name, prioritized)]):
                 yield 1
+##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
+##                yield 1
 
     @property
     def value(self):
@@ -114,10 +152,13 @@ class AvoidScore(RecipeScore):
     @property
     def ingredient_set(self):
         avoids = AvoidIngredients(self.patient_id).all
+        #not ok because not exact same names of ingredients 
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
-            if ingr_name in avoids:
+            if matching_ingredients(ingr_name, avoids) != "":
                 yield 1
-
+##            if ingr_name in avoids:
+##                yield 1
+            
     @property
     def value(self):
         return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
@@ -178,3 +219,6 @@ class NutrientScore(RecipeScore):
         to query it.
         """
         return len(self.nutrient_set) + self.add_calories_score
+
+
+
