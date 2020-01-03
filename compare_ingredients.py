@@ -3,6 +3,9 @@ from pymongo import MongoClient
 from urllib.parse import quote_plus
 import conf
 
+###############################################################################
+## Compare ingredient from a recipe with ingredient_id's from db mst_ingredient
+
 
 client = MongoClient('mongodb://{}:{}@{}'.format(
     quote_plus(conf.DATABASE_USER),
@@ -48,14 +51,11 @@ def get_ingredient_highest(ingredients):
                
         splits = ingr.split()
         for split in splits:
-            #print split
             obj2 = ingredient_db.find({'name': {'$regex':split}})
             if obj2 is None:
                 print("FALSE")
             else:
                 for record in obj2:
-                    #print record
-                    #print record['name']
                     return_id = record['_id']
                     return_name = record['name']
                     exist_list = False 

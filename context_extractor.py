@@ -4,6 +4,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 import os
 
+## Used by push_recipe to optimize words reading & words matching
 
 try:
   import matplotlib as matplot

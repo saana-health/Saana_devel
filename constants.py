@@ -1,3 +1,5 @@
+## All constant use in score
+
 class ConstantsWrapper:
 
     ELEMENT_AVOID_KEY = 'A'
