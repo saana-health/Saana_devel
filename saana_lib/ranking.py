@@ -1,6 +1,6 @@
 from logging import getLogger
 from collections import OrderedDict
-from datetime import datetime
+import datetime
 from pymongo.collection import ObjectId
 
 from constants import constants_wrapper as constants
