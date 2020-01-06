@@ -18,7 +18,7 @@ class Ranking:
         self.patient_id = patient_id
         if not isinstance(patient_id, ObjectId):
             self.patient_id = ObjectId(patient_id)
-        self.today = datetime.date()
+        self.today = datetime.datetime.now()
 
     def compute(self, descending=True):
         _ranking = dict()
