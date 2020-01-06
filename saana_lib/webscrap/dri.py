@@ -1,8 +1,6 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
-import time
-import pdb
+
 
 def submit_form(male, age, height_ft, height_in, weight, activity, pregnancy = ''):
     '''

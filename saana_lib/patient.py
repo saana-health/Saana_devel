@@ -293,6 +293,10 @@ class IngredientFilter:
         return filtered_ingredients
 
 
+def filter(nutrients: dict):
+    return nutrients
+
+
 class NutrientFilter:
 
     """
@@ -302,11 +306,15 @@ class NutrientFilter:
     by comparing them with other-restrictions and with
     better/worsen elements
     """
-    def filter(self, nutrients: dict):
-        return nutrients
+
+    def __init__(self):
+        pass
 
 
 class PatientSubscription(Patient):
+
+    def read(self):
+        pass
 
     @property
     def subscription(self):
