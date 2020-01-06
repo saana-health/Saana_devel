@@ -6,9 +6,8 @@ from pymongo.collection import ObjectId
 from constants import constants_wrapper as constants
 from saana_lib.abstract import OutIn
 from saana_lib.connectMongo import db
-from saana_lib.recommendation import RecipeRecommendation, AllRecommendations
-from saana_lib.utils import out_to_xls
-from dateutil import parser
+from saana_lib.recommendation import RecipeRecommendation
+
 
 logger = getLogger(__name__)
 
@@ -73,27 +72,4 @@ class RankingToDatabase(RankingOut):
 
     def proxy(self, content):
         db.patient_recipe_recommendations.insert_one(content)
-    
 
-class RankingToFile(RankingOut):
-    """"""
-    headers = False
-    filename = ""
-
-    def write_headers(self):
-        headers = ["Recipe ID", "Score"]
-        out_to_xls(self.filename, headers)
-
-    def proxy(self, content):
-        self.filename = "{}-{}".format(
-            self.patient_id.__str__(),
-            datetime.now().isoformat(),
-        )
-        if not self.headers:
-            self.write_headers()
-            self.headers = True
-
-        out_to_xls(self.filename, [
-            content.get('recipe_id'),
-            "{}".format(content.get('score'))
-        ])
