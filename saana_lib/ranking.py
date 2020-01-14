@@ -58,8 +58,8 @@ class RankingOut(OutIn):
             'patient_id': self.patient_id,
             'recipe': recipes_all,
             'is_deleted': False,
-            'created_at': datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).astimezone().replace(microsecond=0).isoformat(),
-            'updated_at': datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).astimezone().replace(microsecond=0).isoformat()
+            'created_at': datetime.datetime.utcnow().isoformat(),
+            'updated_at': datetime.datetime.utcnow().isoformat()
             }
         self.proxy(patient_rec) #insert all recipes 
 
