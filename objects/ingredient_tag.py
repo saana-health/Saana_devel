@@ -1,0 +1,1 @@
+class ingredient_tag:

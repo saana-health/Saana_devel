@@ -1,0 +1,14 @@
+from djongo.models import CheckConstraint, Q
+from djongo import models
+from pymongo.read_concern import ReadConcern
+
+
+class Ingredients(models.Model):
+    _id = models.ObjectIdField()
+    name = models.CharField(max_length=255)  # original/translated field
+    name_fr = models.CharField(null=True, blank=True, max_length=255)  # default translation field
+    name_en = models.CharField(null=True, blank=True, max_length=255)
+
+    class Meta:
+        constraints = [
+        ]

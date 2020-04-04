@@ -362,10 +362,6 @@ def extract_recipe_main(url):
   #print snippets
   data_ingredients = snippets[0]['ingredients']   # was snippets['ingredients'] before
   data = snippets[0]['directions'] #was 'directions before
-  # data_title = snippets[0]['title']  ##doesn't give good things
-  #print data_ingredients
-  #print data
-  #print data_title
   img_title= get_img_title(url)
   data_img = img_title[1]
   data_title = img_title[0]
@@ -386,9 +382,10 @@ def extract_recipe_main(url):
   recipe['name'] = data_title # find title
   recipe['url'] = url
   recipe['image_url'] = data_img
+  recipe['language'] = 'en_US'
   print(recipe)
   print("inserting recipe in db")
-  recipe_db.insert_one({'name': data_title, 'food': ingredient_list, 'url': url, 'image_url': data_img})
+  recipe_db.insert_one(recipe)
   return recipe
 
 #print extract_recipe_main('http://www.marthastewart.com/344840/soft-and-chewy-chocolate-chip-cookies')

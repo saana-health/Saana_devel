@@ -17,17 +17,16 @@ def matching_ingredients(ingredients, obj):
     :param ingredients: [str] and list of ingredients 
     return True if similar 
     '''
-    ingr = ingredients
     #change to ingredient short name not full name
     obj_tags = obj
     matched_ingr = ""
     comparison = False
 
     for item in obj_tags:
-        if item in ingr:
+        if item in ingredients:
             comparison = True
             matched_ingr = item
-    splits = ingr.split()
+    splits = ingredients.split()
     if comparison == False:
         for split in splits:
             for item in obj_tags:
@@ -103,30 +102,14 @@ class MinimizedScore(RecipeScore):
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
               if matching_ingredients(ingr_name, minimized) != "":
                   quantity_ref = minimized[matching_ingredients(ingr_name, minimized)]
-                  #yield ingr_name, quantity, quantity_ref
-##                # add quantity stuff
-##                #yiel quantity ref..
                   yield 1
-##            if ingr_name in minimized:
                 
 
     @property
     def value(self):
         """"""
         return 0 - sum(self.ingredient_set) * constants.DEDUCT_AVOID
-##        for ingr_id, quantity, ref_quantity in self.ingredient_set:
-            #add symptomes stuff
-            
-##            isc = IngredientScore(ingr_id in self.worsen_ingredients)
-##            if isinstance(ref_quantity, dict):
-##                self.score += isc.lower_upper_bound_score(
-##                    quantity, ref_quantity
-##                )
-##            else:
-##                self.score += isc.single_value_score(
-##                    quantity, ref_quantity
-##                )
-##        return self.score
+
 
 
 class PrioritizedScore(RecipeScore):
@@ -139,8 +122,6 @@ class PrioritizedScore(RecipeScore):
                 #add again qauntity
 ##                and int(quantity) > int(prioritized[matching_ingredients(ingr_name, prioritized)]):
                 yield 1
-##            if ingr_name in prioritized and quantity > prioritized[ingr_name]:
-##                yield 1
 
     @property
     def value(self):
@@ -156,8 +137,6 @@ class AvoidScore(RecipeScore):
         for ingr_name, quantity in self.recipe.ingredients_name_quantity.items():
             if matching_ingredients(ingr_name, avoids) != "":
                 yield 1
-##            if ingr_name in avoids:
-##                yield 1
             
     @property
     def value(self):
@@ -207,7 +186,6 @@ class NutrientScore(RecipeScore):
     @property
     def add_calories_score(self):
     #   TODO CHECK DB
-    #   nutrient_obj_id = db.mst_nutrients.find_one({'name': 'calories'})
         if nutrient_obj_id in self.nutrient_set:
             return self.calories_score(nutrient_obj_id)
         return 0

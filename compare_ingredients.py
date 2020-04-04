@@ -15,23 +15,8 @@ client = MongoClient('mongodb://{}:{}@{}'.format(
 
 db = client.saana_db
 
-
-##client = MongoClient('mongodb://localhost:27017')
-
 ingredient_db = db.mst_food_ingredients
 recipe_db = db.mst_recipes
-##
-##ing = {'ingredient_full_name': u' quartered artichoke heart', 'measure': u'cup',
-##       'quantity': u'1', 'ingredient': u'artichoke'}
-##
-##str2Match = "banana"
-##strOptions = ["rice","brown rice long-grain","brown rice flour pasta","brown rice flour",
-##              "rice noodle", "risotto rice", "whole wheat pasta"]
-##Ratios = process.extract(str2Match,strOptions)
-##print(Ratios)
-### You can also select the string with the highest matching percentage
-##highest = process.extractOne(str2Match,strOptions)
-##print(highest)
 
 
 def get_ingredient_highest(ingredients):
@@ -45,7 +30,6 @@ def get_ingredient_highest(ingredients):
     matching_ingredients = []
     strOptions = []
     obj = ingredient_db.find_one({'name': {'$regex':ingr}})
-   # print obj
     
     if obj is None:
                
